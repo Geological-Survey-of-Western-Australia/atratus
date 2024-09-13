@@ -1,20 +1,27 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+<p style="text-align: center;font-size:2em"> GDI - GeoDigital </p>
+<p style="text-align: center;font-size:1.5em"> A Common Toolkit for Data Handling</p>
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+---
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+This library is designed to facilitate the loading of data from cygnets to the future GeoDigital database. The goal is to centralise the data handling tools across multiple cygnets which share a common task, loading datasets into a single structured database. 
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+All digital geoscience data requires extremely diverse ETL processes. While the extraction and transformation require highly bespoke solutions (cygnets). The loading of elements is highly similar and ultimately handled by this library. 
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+This system is intended purely for internal usage by GSWA personel, for loading the outputs of the various cygnets to a centralised database. 
+
+Presently it's features include:
+ - Nothing
+
+
+## Geo Digital
+- **module structure to go here**
+    - 1.py
+    - 2.py
+    - etc.py
+
+
+## Documentation
+- [Getting Started for Developers](docs/getting_started_developer.md)
+- [General Design & Flow](docs/high_level_design.md)
+- [Installation and Use](docs/cygnet_installation_and_use.md)
+- [Logging](docs/logging.md)
