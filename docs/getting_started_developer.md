@@ -16,11 +16,6 @@ Several programs and downloads are required to access and use the repository
 
 - Python, 3.11 is currently being used within the project. The 64 bit version is required for several of the used packages (Windows)
     - https://www.python.org/downloads
-- Git, required to push/pull/etc git commands
-    - https://git-scm.com/downloads
-
-### Access
-In the short term it is likely that access will remain relative to locally provideed harddrives. This is a placeholder for if we move to a live access approach.
 
 ### Clone the repository
 clone the repository locally, this can be done through devops, github desktop or vs code. 

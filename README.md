@@ -1,27 +1,24 @@
-<p style="text-align: center;font-size:2em"> GDI - GeoDigital </p>
+<p style="text-align: center;font-size:2em"> GDI - GeoDigitalToolkit </p>
 <p style="text-align: center;font-size:1.5em"> A Common Toolkit for Data Handling</p>
 
 ---
 
-This library is designed to facilitate the loading of data from cygnets to the future GeoDigital database. The goal is to centralise the data handling tools across multiple cygnets which share a common task, loading datasets into a single structured database. 
+All digital geoscience data requires extremely diverse ETL processes. While the extraction and transformation require highly bespoke solutions (cygnets). The loading of elements is often highly similar, with the goal of loggign . 
 
-All digital geoscience data requires extremely diverse ETL processes. While the extraction and transformation require highly bespoke solutions (cygnets). The loading of elements is highly similar and ultimately handled by this library. 
+This library is designed to facilitate the loading of tabular data from our various projects. The goal is to centralise the data handling tools and logging, to facilitate loading datasets into a single structured database. 
 
-This system is intended purely for internal usage by GSWA personel, for loading the outputs of the various cygnets to a centralised database. 
-
-Presently it's features include:
- - Nothing
-
+This system is intended purely for internal usage by GSWA personel, for loading the outputs of the various tabular outputs. 
 
 ## Geo Digital
-- **module structure to go here**
-    - 1.py
-    - 2.py
-    - etc.py
 
+**Feature List**
+ - Basic SQL database operations.
+ - Error Logging and Handling
+ - App Insights logging*
+ - Storage Operations (Blob/Local)*
 
 ## Documentation
 - [Getting Started for Developers](docs/getting_started_developer.md)
 - [General Design & Flow](docs/high_level_design.md)
-- [Installation and Use](docs/cygnet_installation_and_use.md)
+- [Installation and Use](docs/installation_and_use.md)
 - [Logging](docs/logging.md)
