@@ -1,24 +1,32 @@
 from pathlib import Path
 import sqlite3
-import pyodbc
-
 import geo_digital_tools.utils.exceptions as gde
+import sqlalchemy as sqla
+from typing import Literal
 
-def connect_local_database(db_path: Path) -> sqlite3.Connection:
 
-    con = sqlite3.connect(db_path)
+def local_database(db_path: Path, sql_type : Literal['sqlite','mssql'] = 'sqlite') -> sqla.Engine:
 
-    return con
+    if sql_type=='sqlite':
+        engine = sqla.create_engine(f'sqlite:///{db_path}', echo=True)
+    if sql_type=='mssql':
+        # NOTE notimplemented
+        gde.CodeError('Unimplemented Feature in Connection', should_raise= True)
+        #engine = sqla.create_engine('mysql://user:password@server')
 
-def connect_remote_wamexdev() -> pyodbc.Connection:
-    # TODO we need to pull this strings out however it's relatively low security risk
-    # to connect it leverages windows login so will only work for authed users on network
-    try:
-        con = pyodbc.connect(r'Driver=SQL Server;Server=SQLD\DEV;Database=WAMEX;Trusted_Connection=yes;')
-        return con
-    except:
-        gde.KnownException('Connection to WAMEX Failed')
-        return None    
+    meta = sqla.MetaData()
+    return engine, meta
+
+
+# def connect_remote_wamexdev() -> pyodbc.Connection:
+#     # TODO we need to pull this strings out however it's relatively low security risk
+#     # to connect it leverages windows login so will only work for authed users on network
+#     try:
+#         con = pyodbc.connect(r'Driver=SQL Server;Server=SQLD\DEV;Database=WAMEX;Trusted_Connection=yes;')
+#         return con
+#     except:
+#         gde.KnownException('Connection to WAMEX Failed')
+#         return None    
 
 def check_valid_select(query_list : list[str]) -> list[str]:
 
