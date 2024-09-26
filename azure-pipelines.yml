@@ -41,7 +41,7 @@ stages:
           displayName: 'Run Pytest Generate Coverage Report'
 
 - stage: Build
-  displayName: 'Build Package'
+  displayName: 'Build and Publish Package'
   jobs:
   - job: InstallBuildDependencies
     displayName: 'Install Dependencies'
@@ -53,16 +53,6 @@ stages:
       - script: |
           python -m build -w
         displayName: 'Python build'
-
-- stage: Publish
-  displayName: 'Publish'
-  jobs:
-  - job: PublishtoFeed
-    displayName: 'Publish to Feed'
-    steps:
-      - script: |
-          python -m pip install twine
-        displayName: 'Install Twine'
       - task: TwineAuthenticate@1
         inputs:
           artifactFeed: GSRSD/gdi_packages
