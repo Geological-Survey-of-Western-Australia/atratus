@@ -9,17 +9,14 @@ stages:
 - stage: SecurityCheck
   displayName: 'Validating Dependencies'
   jobs:
-  - job: InstallDependencies
-    displayName: 'Install Dependencies'
-    steps:
-    - script: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-      displayName: 'Pip Install'
-
   - job: SnykSecurityScan
     displayName: Snyk Scan
     steps:
+      - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        displayName: 'Pip Install'
+
       - task: SnykSecurityScan@1
         inputs:
           serviceConnectionEndpoint: 'GDI-SNYK'
@@ -48,7 +45,7 @@ stages:
         displayName: 'Run Pytest Generate Coverage Report'
 
 - stage: Build
-  displayName: 'Running Tests'
+  displayName: 'Build Package'
   jobs:
   - job: InstallBuildDependencies
     displayName: 'Install Dependencies'
