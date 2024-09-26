@@ -5,26 +5,68 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: |
-    python -m pip install --upgrade pip
-  displayName: 'Update Pip'
+stages:
+- stage: Security Check
+  displayName: 'Validating Dependencies'
+  jobs:
+  - job: SnykSecurityScan@1
+    displayName: Snyk Scan
+    steps:
+      - task: SnykSecurityScan@1
+      inputs:
+        serviceConnectionEndpoint: 'GDI-SNYK'
+        testType: 'app'
+        monitorWhen: 'always'
+      displayName : 'Snyk'
 
-- script: |
-    pip install build
-    pip install twine
-    pip install meson-python
-  displayName: 'Install build, build backend, and twine'
+- stage: Run Tests
+  displayName: 'Running Tests'
+  jobs:
+    - job: Install Dependencies
+      displayName: 'Install Dependencies'
+      steps:
+      - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        displayName: 'Pip Install'
 
-- script: |
-    python -m build -w
-  displayName: 'Python build'
+    - job: Run Tests
+      displayName: 'Run Tests'
+      steps:
+      - script: |
+          pip install pytest pytest-azurepipelines
+          pip install pytest-cov
+          pytest --cov-report xml:tests\cov.xml --cov atratus
+        displayName: 'Run Pytest Generate Coverage Report'
 
-- task: TwineAuthenticate@1
-  inputs:
-    artifactFeed: GSRSD/gdi_packages
-  displayName: 'Twine Authenticate'
+- stage: Build
+  displayName: 'Running Tests'
+  jobs:
+  - job: Install Build Dependencies
+    displayName: 'Install Dependencies'
+    steps:
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+      displayName: 'Pip Install'
 
-- script: |
-    python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
-  displayName: 'Upload to feed'
+  - job: Build
+    displayName: 'Build Package'
+    steps:
+    - script: |
+      python -m build -w
+    displayName: 'Python build'
+
+- stage: Publish
+  displayName: 'Publish'
+  jobs:
+  - job: Publish to Feed
+    displayName: 'Publish to Feed'
+    steps:
+    - task: TwineAuthenticate@1
+      inputs:
+        artifactFeed: GSRSD/gdi_packages
+      displayName: 'Twine Authenticate'
+    - script: |
+        python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+      displayName: 'Upload to feed'
