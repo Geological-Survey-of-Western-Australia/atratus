@@ -6,7 +6,7 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-- stage: Security Check
+- stage: SecurityCheck
   displayName: 'Validating Dependencies'
   jobs:
   - job: SnykSecurityScan@1
@@ -19,10 +19,10 @@ stages:
           monitorWhen: 'always'
         displayName : 'Snyk'
 
-- stage: Run Tests
+- stage: RunTests
   displayName: 'Running Tests'
   jobs:
-    - job: Install Dependencies
+    - job: InstallDependencies
       displayName: 'Install Dependencies'
       steps:
       - script: |
@@ -30,7 +30,7 @@ stages:
           pip install -r requirements.txt
         displayName: 'Pip Install'
 
-    - job: Run Tests
+    - job: RunTests
       displayName: 'Run Tests'
       steps:
       - script: |
@@ -42,7 +42,7 @@ stages:
 - stage: Build
   displayName: 'Running Tests'
   jobs:
-  - job: Install Build Dependencies
+  - job: InstallBuildDependencies
     displayName: 'Install Dependencies'
     steps:
     - script: |
@@ -60,7 +60,7 @@ stages:
 - stage: Publish
   displayName: 'Publish'
   jobs:
-  - job: Publish to Feed
+  - job: PublishtoFeed
     displayName: 'Publish to Feed'
     steps:
     - task: TwineAuthenticate@1
