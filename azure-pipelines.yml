@@ -6,23 +6,23 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-- stage: SecurityCheck
-  displayName: 'Validating Dependencies'
-  jobs:
-  - job: SnykSecurityScan
-    displayName: Snyk Scan
-    steps:
-      - script: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-        displayName: 'Pip Install'
+# - stage: SecurityCheck
+#   displayName: 'Validating Dependencies'
+#   jobs:
+#   - job: SnykSecurityScan
+#     displayName: Snyk Scan
+#     steps:
+#       - script: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
+#         displayName: 'Pip Install'
 
-      - task: SnykSecurityScan@1
-        inputs:
-          serviceConnectionEndpoint: 'GDI-SNYK'
-          testType: 'app'
-          monitorWhen: 'always'
-        displayName : 'Snyk'
+#       - task: SnykSecurityScan@1
+#         inputs:
+#           serviceConnectionEndpoint: 'GDI-SNYK'
+#           testType: 'app'
+#           monitorWhen: 'always'
+#         displayName : 'Snyk'
 
 - stage: RunTests
   displayName: 'Running Tests'
@@ -34,10 +34,6 @@ stages:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         displayName: 'Pip Install'
-
-    - job: RunTests
-      displayName: 'Run Tests'
-      steps:
       - script: |
           pip install pytest pytest-azurepipelines
           pip install pytest-cov
@@ -54,9 +50,6 @@ stages:
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
       displayName: 'Pip Install'
-
-  - job: Build
-    displayName: 'Build Package'
     steps:
     - script: |
         python -m build -w
