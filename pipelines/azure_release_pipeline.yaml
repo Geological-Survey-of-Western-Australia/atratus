@@ -1,0 +1,26 @@
+
+trigger:
+- none
+
+- script: |
+    python -m pip install --upgrade pip
+  displayName: 'Update Pip'
+
+- script: |
+    pip install build
+    pip install twine
+    pip install meson-python
+  displayName: 'Install build, build backend, and twine'
+
+- script: |
+    python -m build -w
+  displayName: 'Python build'
+
+- task: TwineAuthenticate@1
+  inputs:
+    artifactFeed: GSRSD/gdi_packages
+  displayName: 'Twine Authenticate'
+
+- script: |
+    python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+  displayName: 'Upload to feed'
