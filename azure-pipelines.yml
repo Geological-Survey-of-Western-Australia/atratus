@@ -53,8 +53,8 @@ stages:
   - job: Build
     displayName: 'Build Package'
     steps:
-    - script:
-      python -m build -w
+    - script: |
+        python -m build -w
       displayName: 'Python build'
 
 - stage: Publish
