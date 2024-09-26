@@ -9,7 +9,7 @@ stages:
 - stage: SecurityCheck
   displayName: 'Validating Dependencies'
   jobs:
-  - job: SnykSecurityScan@1
+  - job: SnykSecurityScan
     displayName: Snyk Scan
     steps:
       - task: SnykSecurityScan@1
