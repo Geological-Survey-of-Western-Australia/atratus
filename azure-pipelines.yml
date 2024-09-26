@@ -10,13 +10,13 @@ stages:
   displayName: 'Validating Dependencies'
   jobs:
   - job: InstallDependencies
-      displayName: 'Install Dependencies'
-      steps:
-      - script: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-        displayName: 'Pip Install'
-        
+    displayName: 'Install Dependencies'
+    steps:
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      displayName: 'Pip Install'
+
   - job: SnykSecurityScan
     displayName: Snyk Scan
     steps:
