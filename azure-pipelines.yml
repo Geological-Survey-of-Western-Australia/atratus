@@ -13,11 +13,11 @@ stages:
     displayName: Snyk Scan
     steps:
       - task: SnykSecurityScan@1
-      inputs:
-        serviceConnectionEndpoint: 'GDI-SNYK'
-        testType: 'app'
-        monitorWhen: 'always'
-      displayName : 'Snyk'
+        inputs:
+          serviceConnectionEndpoint: 'GDI-SNYK'
+          testType: 'app'
+          monitorWhen: 'always'
+        displayName : 'Snyk'
 
 - stage: Run Tests
   displayName: 'Running Tests'
