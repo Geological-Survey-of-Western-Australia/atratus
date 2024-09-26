@@ -53,9 +53,9 @@ stages:
   - job: Build
     displayName: 'Build Package'
     steps:
-    - script: |
+    - script:
       python -m build -w
-    displayName: 'Python build'
+      displayName: 'Python build'
 
 - stage: Publish
   displayName: 'Publish'
