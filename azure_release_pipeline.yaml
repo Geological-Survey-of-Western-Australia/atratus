@@ -1,6 +1,6 @@
 
 trigger:
-- none
+- '*'
 
 - script: |
     python -m pip install --upgrade pip
