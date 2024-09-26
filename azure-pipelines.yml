@@ -60,6 +60,9 @@ stages:
   - job: PublishtoFeed
     displayName: 'Publish to Feed'
     steps:
+      - script: |
+          python -m pip install twine
+        displayName: 'Install Twine'
       - task: TwineAuthenticate@1
         inputs:
           artifactFeed: GSRSD/gdi_packages
