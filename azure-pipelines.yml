@@ -30,15 +30,15 @@ stages:
     - job: InstallDependencies
       displayName: 'Install Dependencies'
       steps:
-      - script: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-        displayName: 'Pip Install'
-      - script: |
-          pip install pytest pytest-azurepipelines
-          pip install pytest-cov
-          pytest --cov-report xml:tests\cov.xml --cov atratus
-        displayName: 'Run Pytest Generate Coverage Report'
+        - script: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+          displayName: 'Pip Install'
+        - script: |
+            pip install pytest pytest-azurepipelines
+            pip install pytest-cov
+            pytest --cov-report xml:tests\cov.xml --cov atratus
+          displayName: 'Run Pytest Generate Coverage Report'
 
 - stage: Build
   displayName: 'Build Package'
@@ -46,14 +46,13 @@ stages:
   - job: InstallBuildDependencies
     displayName: 'Install Dependencies'
     steps:
-    - script: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-      displayName: 'Pip Install'
-    steps:
-    - script: |
-        python -m build -w
-      displayName: 'Python build'
+      - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+        displayName: 'Pip Install'
+      - script: |
+          python -m build -w
+        displayName: 'Python build'
 
 - stage: Publish
   displayName: 'Publish'
@@ -61,10 +60,10 @@ stages:
   - job: PublishtoFeed
     displayName: 'Publish to Feed'
     steps:
-    - task: TwineAuthenticate@1
-      inputs:
-        artifactFeed: GSRSD/gdi_packages
-      displayName: 'Twine Authenticate'
-    - script: |
-        python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
-      displayName: 'Upload to feed'
+      - task: TwineAuthenticate@1
+        inputs:
+          artifactFeed: GSRSD/gdi_packages
+        displayName: 'Twine Authenticate'
+      - script: |
+          python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+        displayName: 'Upload to feed'
