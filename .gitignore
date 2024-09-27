@@ -2,3 +2,7 @@
 dst/*
 *.sqlite
 *.json
+.venv/*
+dist/*
+build/*
+*egg*
