@@ -41,26 +41,25 @@ stages:
           displayName: 'Run Pytest Generate Coverage Report'
 
 - stage: Build
-  trigger: main
   displayName: 'Build and Publish Package'
   jobs:
-  - job: InstallBuildDependencies
-    displayName: 'Build and Publish Package'
-    steps:
-      - script: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-        displayName: 'Pip Install'
+    - job: InstallBuildDependencies
+      displayName: 'Build and Publish Package'
+      steps:
+        - script: |
+            python -m pip install --upgrade pip
+            pip install -r requirements-dev.txt
+          displayName: 'Pip Install'
 
-      - script: |
-          python -m build -w
-        displayName: 'Python build'
+        - script: |
+            python -m build -w
+          displayName: 'Python build'
 
-      - task: TwineAuthenticate@1
-        inputs:
-          artifactFeed: GSRSD/gdi_packages
-        displayName: 'Twine Authenticate'
-        
-      - script: |
-          python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
-        displayName: 'Upload to feed'
+        - task: TwineAuthenticate@1
+          inputs:
+            artifactFeed: GSRSD/gdi_packages
+          displayName: 'Twine Authenticate'
+          
+        - script: |
+            python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+          displayName: 'Upload to feed'
