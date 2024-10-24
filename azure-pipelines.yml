@@ -8,23 +8,25 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-# - stage: SecurityCheck
-#   displayName: 'Validating Dependencies'
-#   jobs:
-#   - job: SnykSecurityScan
-#     displayName: Snyk Scan
-#     steps:
-#       - script: |
-#           python -m pip install --upgrade pip
-#           pip install -r requirements.txt
-#         displayName: 'Pip Install'
+- stage: SecurityCheck
+  displayName: 'Validating Dependencies'
+  trigger: manual
+  isSkippable: true
+  jobs:
+  - job: SnykSecurityScan
+    displayName: Snyk Scan
+    steps:
+      - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        displayName: 'Pip Install'
 
-#       - task: SnykSecurityScan@1
-#         inputs:
-#           serviceConnectionEndpoint: 'GDI-SNYK'
-#           testType: 'app'
-#           monitorWhen: 'always'
-#         displayName : 'Snyk'
+      - task: SnykSecurityScan@1
+        inputs:
+          serviceConnectionEndpoint: 'GDI-SNYK'
+          testType: 'app'
+          monitorWhen: 'always'
+        displayName : 'Snyk'
 
 - stage: Test
   displayName: 'Running Tests'
@@ -43,26 +45,27 @@ stages:
             pytest --cov-report xml:tests\cov.xml --cov atratus
           displayName: 'Run Pytest Generate Coverage Report'
 
-# - stage: Build
-#   displayName: 'Build and Publish Package'
-#   jobs:
-#     - job: InstallBuildDependencies
-#       displayName: 'Build and Publish Package'
-#       steps:
-#         - script: |
-#             python -m pip install --upgrade pip
-#             pip install -r requirements-dev.txt
-#           displayName: 'Pip Install'
+- stage: Build
+  displayName: 'Build and Publish Package'
+  condition: and(succeeded('Test'), eq(variables.isMain, true))
+  jobs:
+    - job: InstallBuildDependencies
+      displayName: 'Build and Publish Package'
+      steps:
+        - script: |
+            python -m pip install --upgrade pip
+            pip install -r requirements-dev.txt
+          displayName: 'Pip Install'
 
-#         - script: |
-#             python -m build -w
-#           displayName: 'Python build'
+        - script: |
+            python -m build -w
+          displayName: 'Python build'
 
-#         - task: TwineAuthenticate@1
-#           inputs:
-#             artifactFeed: GSRSD/gdi_packages
-#           displayName: 'Twine Authenticate'
+        - task: TwineAuthenticate@1
+          inputs:
+            artifactFeed: GSRSD/gdi_packages
+          displayName: 'Twine Authenticate'
           
-#         - script: |
-#             python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
-#           displayName: 'Upload to feed'
+        - script: |
+            python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+          displayName: 'Upload to feed'
