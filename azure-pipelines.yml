@@ -2,7 +2,7 @@ trigger:
   batch: true
   branches:
     include:
-    - main
+    - '*'
 
 pool:
   vmImage: ubuntu-latest
@@ -15,16 +15,16 @@ stages:
 #     displayName: Snyk Scan
 #     steps:
 #       - script: |
-#         displayName: 'Pip Install'
 #           python -m pip install --upgrade pip
 #           pip install -r requirements.txt
+#         displayName: 'Pip Install'
 
 #       - task: SnykSecurityScan@1
-#         displayName : 'Snyk'
 #         inputs:
 #           serviceConnectionEndpoint: 'GDI-SNYK'
 #           testType: 'app'
 #           monitorWhen: 'always'
+#         displayName : 'Snyk'
 
 - stage: Test
   displayName: 'Running Tests'
@@ -33,38 +33,36 @@ stages:
       displayName: 'Install Dependencies'
       steps:
         - script: |
-          displayName: 'Pip Install'
             python -m pip install --upgrade pip
             pip install -r requirements.txt
-
-    - job: RunTests
-        displayName: 'Run Tests'
+          displayName: 'Pip Install'
+        
         - script: |
-          displayName: 'Run Pytest Generate Coverage Report'
             pip install pytest pytest-azurepipelines
             pip install pytest-cov
             pytest --cov-report xml:tests\cov.xml --cov atratus
+          displayName: 'Run Pytest Generate Coverage Report'
 
-- stage: Build
-  displayName: 'Build and Publish Package'
-  jobs:
-    - job: InstallBuildDependencies
-      displayName: 'Build and Publish Package'
-      steps:
-        - script: |
-          displayName: 'Pip Install'
-            python -m pip install --upgrade pip
-            pip install -r requirements-dev.txt
+# - stage: Build
+#   displayName: 'Build and Publish Package'
+#   jobs:
+#     - job: InstallBuildDependencies
+#       displayName: 'Build and Publish Package'
+#       steps:
+#         - script: |
+#             python -m pip install --upgrade pip
+#             pip install -r requirements-dev.txt
+#           displayName: 'Pip Install'
 
-        # - script: |
-        #   displayName: 'Python build'
-        #     python -m build -w
+#         - script: |
+#             python -m build -w
+#           displayName: 'Python build'
 
-        # - task: TwineAuthenticate@1
-        #   displayName: 'Twine Authenticate'
-        #   inputs:
-        #     artifactFeed: GSRSD/gdi_packages
+#         - task: TwineAuthenticate@1
+#           inputs:
+#             artifactFeed: GSRSD/gdi_packages
+#           displayName: 'Twine Authenticate'
           
-        # - script: |
-        #   displayName: 'Upload to feed'
-        #     python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+#         - script: |
+#             python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+#           displayName: 'Upload to feed'
