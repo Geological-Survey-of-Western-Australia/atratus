@@ -23,7 +23,7 @@ stages:
         - script: |
             pip install pytest pytest-azurepipelines
             pip install pytest-cov
-            pytest --cov-report xml:tests\cov.xml --cov src\geo_digital_tools
+            pytest --cov-report xml:tests\cov.xml --cov geo_digital_tools
           displayName: 'Run Pytest Generate Coverage Report'
 
 - stage: SecurityCheck
