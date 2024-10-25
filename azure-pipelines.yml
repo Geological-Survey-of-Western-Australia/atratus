@@ -18,12 +18,10 @@ stages:
         - script: |
             python -m pip install --upgrade pip
             pip install -r requirements.txt
+            pip install pytest pytest-cov pytest-azurepipelines
           displayName: 'Pip Install'
         
-        - script: |
-            pip install pytest pytest-azurepipelines
-            pip install pytest-cov
-            pytest --cov-report xml:tests\cov.xml --cov geo_digital_tools
+        - script: pytest --cov-report xml:tests\cov.xml --cov tests/
           displayName: 'Run Pytest Generate Coverage Report'
 
 - stage: SecurityCheck
