@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from opencensus.ext.azure.log_exporter import AzureLogHandler
+# from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 def setup_logger(
     name: str,
@@ -21,8 +21,8 @@ def setup_logger(
     logger.addHandler(handler)
     
     if deployed:
-        logger.addHandler(AzureLogHandler()
-                          )
+        pass
+        # logger.addHandler(AzureLogHandler())
 
     return logger
 
