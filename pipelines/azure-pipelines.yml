@@ -6,7 +6,7 @@ trigger:
 
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isRC: $[eq(variables['Build.SourceBranch'], 'refs/heads/release_candidate')]
+  isRC: $[eq(variables['Build.SourceBranch'], 'refs/heads/releases/*')]
 
 pool:
   vmImage: ubuntu-latest
