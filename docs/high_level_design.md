@@ -5,6 +5,27 @@ This section covers where the geo digital toolkit sits in the overal domain spec
 [NOTE THIS DOESN'T Render in Devops]
 ![A High level overview](.\assets\tchaikovsky.svg)
 
+## Repo Structure
+~~~
+myPackageRepoName
+├── CHANGELOG.md               ┐
+├── CODE_OF_CONDUCT.md         │
+├── CONTRIBUTING.md            │
+├── docs                       │ Package documentation
+│   └── index.md
+│   └── ...                    │
+├── LICENSE                    │
+├── README.md                  ┘
+├── pyproject.toml             ] Package metadata and build configuration
+├── src                        ┐
+│   └── myPackage              │
+│       ├── __init__.py        │ Package source code
+│       ├── moduleA.py         │
+│       └── moduleB.py         ┘
+└── tests                      ┐
+   └── ...                     ┘ Package tests
+~~~
+
 ## Architecture
 The geodigitaltoolkit is intended to have 3 core modules.
  - database

@@ -1,0 +1,74 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - '*'
+
+variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  isRC: $[eq(variables['Build.SourceBranch'], 'refs/heads/releases/*')]
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+- stage: Test
+  displayName: 'Run Tests'
+  condition: always()
+  jobs:
+    - job: InstallDependencies
+      displayName: 'Install Dependencies'
+      steps:
+        - script: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install pytest pytest-cov pytest-azurepipelines
+          displayName: 'Pip Install'
+        
+        - script: pytest --cov-report xml:tests\cov.xml --cov tests/
+          displayName: 'Run Pytest Generate Coverage Report'
+
+- stage: SecurityCheck
+  displayName: 'Check Security'
+  trigger: manual
+  isSkippable: true
+  jobs:
+  - job: SnykSecurityScan
+    displayName: Snyk Scan
+    steps:
+      - script: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        displayName: 'Pip Install'
+
+      - task: SnykSecurityScan@1
+        inputs:
+          serviceConnectionEndpoint: 'GDI-SNYK'
+          testType: 'app'
+          monitorWhen: 'always'
+        displayName : 'Snyk'
+
+- stage: Build
+  displayName: 'Build and Publish'
+  condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
+  jobs:
+    - job: InstallBuildDependencies
+      displayName: 'Build and Publish Package'
+      steps:
+        - script: |
+            python -m pip install --upgrade pip
+            pip install -r requirements-dev.txt
+          displayName: 'Pip Install'
+
+        - script: |
+            python -m build -w
+          displayName: 'Python build'
+
+        - task: TwineAuthenticate@1
+          inputs:
+            artifactFeed: GSRSD/gdi_packages
+          displayName: 'Twine Authenticate'
+          
+        - script: |
+            python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+          displayName: 'Upload to feed'

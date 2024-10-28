@@ -1,10 +1,10 @@
-SQLAlchemy==2.0.33
-pandas==2.2.2
-pyodbc==5.1.0
-opencensus-ext-azure==1.1.13
+SQLAlchemy==2.0.36
+pandas==2.2.3
+pyodbc==5.2.0
+# opencensus-ext-azure==1.1.13
 pytest==8.1.1
 pytest-cov==5.0.0
 build==1.2.2
 twine==5.1.1
-meson-python==0.16.0
+meson-python==0.17.0
 artifacts-keyring==0.3.6
