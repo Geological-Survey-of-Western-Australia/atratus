@@ -4,6 +4,10 @@ trigger:
     include:
     - '*'
 
+variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  isRC: $[eq(variables['Build.SourceBranch'], 'refs/heads/release_candidate')]
+
 pool:
   vmImage: ubuntu-latest
 
@@ -46,7 +50,7 @@ stages:
 
 - stage: Build
   displayName: 'Build and Publish'
-  condition: and(succeeded('Test'), eq(variables.isMain, true))
+  condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
   jobs:
     - job: InstallBuildDependencies
       displayName: 'Build and Publish Package'
