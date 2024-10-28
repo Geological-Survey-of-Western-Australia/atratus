@@ -1,1 +1,1 @@
-project('gdi')
+project('geo_digital_tools')
