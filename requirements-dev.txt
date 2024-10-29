@@ -6,5 +6,5 @@ pytest==8.1.1
 pytest-cov==5.0.0
 build==1.2.2
 twine==5.1.1
-meson-python==0.17.0
+meson-python==0.16.0
 artifacts-keyring==0.3.6
