@@ -2,3 +2,6 @@
 dst/*
 *.sqlite
 *.json
+.venv/*
+*egg*
+logs/*
