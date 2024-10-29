@@ -6,7 +6,7 @@ trigger:
 
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isRC: $[eq(variables['Build.SourceBranch'], 'refs/heads/releases/*')]
+  isRC: $[contains(variables['Build.SourceBranch'], 'releases/')]
 
 pool:
   vmImage: ubuntu-latest
@@ -36,6 +36,8 @@ stages:
   - job: SnykSecurityScan
     displayName: Snyk Scan
     steps:
+      - script: echo Build.SourceBranch is $(variables['Build.SourceBranch'])
+
       - script: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -50,6 +52,7 @@ stages:
 
 - stage: Build
   displayName: 'Build and Publish'
+  dependsOn: Test
   condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
   jobs:
     - job: InstallBuildDependencies
