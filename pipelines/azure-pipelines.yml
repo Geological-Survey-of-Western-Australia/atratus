@@ -42,6 +42,12 @@ stages:
   - job: SnykSecurityScan
     displayName: Snyk Scan
     steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.11'
+          addToPath: true
+          architecture: 'x64'
+
       - script: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -64,6 +70,12 @@ stages:
     - job: InstallBuildDependencies
       displayName: 'Build and Publish Package'
       steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.11'
+            addToPath: true
+            architecture: 'x64'
+
         - script: |
             python -m pip install --upgrade pip
             pip install -r requirements-dev.txt
