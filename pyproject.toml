@@ -17,7 +17,7 @@ dependencies = [
   'SQLAlchemy==2.0.33',
   'pandas==2.2.2',
   'pyodbc==5.1.0',
-  'opencensus-ext-azure==1.1.13',
+  'opentelemetry-distro==1.12',
   'pydantic==2.9.2',
 ]
 
