@@ -6,11 +6,20 @@ from geo_digital_tools.database.read import get_table_schema_as_dict, get_tables
 import geo_digital_tools.utils.exceptions as gdte
 
 
-def write_df_to_table(table_name:str, dataframe:pd.DataFrame, engine: sqla.Engine):
+def write_df_to_table(table_name: str, dataframe: pd.DataFrame, engine: sqla.Engine):
     try:
-        dataframe.to_sql(name=table_name, con=engine, if_exists = 'append', index=False, chunksize=10000)
+        dataframe.to_sql(
+            name=table_name,
+            con=engine,
+            if_exists="append",
+            index=False,
+            chunksize=10000,
+        )
     except sqla.OperationalError as e:
-        gdte.KnownException(f'GDT - encountered {e.name} writing to {table_name}, {str(e)}')
+        gdte.KnownException(
+            f"GDT - encountered {e.name} writing to {table_name}, {str(e)}"
+        )
+
 
 # def df_to_entry(pdf_match):
 #     """
