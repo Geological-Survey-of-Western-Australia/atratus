@@ -19,6 +19,12 @@ stages:
     - job: InstallDependencies
       displayName: 'Install Dependencies'
       steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.11'
+            addToPath: true
+            architecture: 'x64'
+
         - script: |
             python -m pip install --upgrade pip
             pip install -r requirements.txt
@@ -36,8 +42,6 @@ stages:
   - job: SnykSecurityScan
     displayName: Snyk Scan
     steps:
-      - script: echo Build.SourceBranch is $(variables['Build.SourceBranch'])
-
       - script: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -52,7 +56,9 @@ stages:
 
 - stage: Build
   displayName: 'Build and Publish'
-  dependsOn: Test
+  dependsOn: 
+    - Test
+    - SecurityCheck
   condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
   jobs:
     - job: InstallBuildDependencies
