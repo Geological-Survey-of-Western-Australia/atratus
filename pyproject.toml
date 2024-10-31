@@ -1,6 +1,6 @@
 # Build System
 [build-system]
-requires = ['setuptools']
+requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 #requires = ['meson-python']
 #build-backend = "mesonpy"
@@ -8,8 +8,7 @@ build-backend = "setuptools.build_meta"
 # PROJECT
 [project]
 name = 'geo_digital_tools'
-version = '0.0.1.rc0'
-# dynamic = ['version']
+dynamic = ["version"]
 description = "A package designed to abstract GSWA internal database operations."
 authors = [
   { name = "Geoscience Data Integrations Team - GSWA", email = "gdi.contact@demirs.wa.gov.au" },
@@ -44,3 +43,5 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/Geological-Survey-of-Western-Australia"
 Issues = "https://github.com/Geological-Survey-of-Western-Australia/issues"
+
+[tool.setuptools_scm]
