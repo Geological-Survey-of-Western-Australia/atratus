@@ -1,12 +1,14 @@
 # Build System
 [build-system]
-requires = ["meson-python==0.16.0"] #, "versioneer[toml]"]
-build-backend = "mesonpy"
+requires = ['setuptools']
+build-backend = "setuptools.build_meta"
+#requires = ['meson-python']
+#build-backend = "mesonpy"
 
 # PROJECT
 [project]
 name = 'geo_digital_tools'
-version = '0.0.0'
+version = '0.0.1.rc0'
 # dynamic = ['version']
 description = "A package designed to abstract GSWA internal database operations."
 authors = [
@@ -24,24 +26,21 @@ classifiers = [
 ]
 
 dependencies = [
-  'SQLAlchemy==2.0.33',
+  'SQLAlchemy==2.0.36',
   'pandas==2.2.2',
-  'pyodbc==5.1.0',
-  'opencensus-ext-azure==1.1.13',
+  'pyodbc==5.2.0',
 ]
 
 [project.optional-dependencies]
 tests = ['pytest==8.1.1', 'pytest-cov==5.0.0']
+dev = [
+  'artifacts-keyring==0.3.6',
+  'build==1.2.2',
+  'pytest==8.1.1',
+  'pytest-cov==5.0.0',
+  'twine==5.1.1',
+  ]
 
 [project.urls]
 Homepage = "https://github.com/Geological-Survey-of-Western-Australia"
 Issues = "https://github.com/Geological-Survey-of-Western-Australia/issues"
-
-# # TODO Consider a tool for Auto Incrememnting Version Tags
-# [tool.versioneer]
-# VCS = "git"
-# style = "pep440"
-# versionfile_source = "_version.py"
-# versionfile_build = "_version.py"
-# tag_prefix = "v"
-# parentdir_prefix = "geo_digital_tools-"
