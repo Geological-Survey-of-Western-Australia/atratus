@@ -27,7 +27,8 @@ stages:
 
         - script: |
             python -m pip install .[tests] pytest-azurepipelines
-          displayName: 'Install [tests]'
+            python -m pytest --cov-report xml:tests\cov.xml
+          displayName: 'Test .[tests]'
         
         - task: PublishCodeCoverageResults@2
           inputs:
