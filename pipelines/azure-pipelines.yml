@@ -90,5 +90,5 @@ stages:
           displayName: 'Twine authenticate'
           
         - script: |
-            python -m twine upload -r gdi_packages dist/*.whl
+            python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
           displayName: 'Upload to feed'
