@@ -29,8 +29,10 @@ stages:
             python -m pip install .[tests] pytest-azurepipelines
           displayName: 'Install [tests]'
         
-        - script: pytest --cov-report xml:tests\cov.xml --cov tests/
-          displayName: 'Report pytest coverage'
+        - task: PublishCodeCoverageResults@2
+          inputs:
+            summaryFileLocation: 'tests\cov.xml'
+            failIfCoverageEmpty: true
 
 - stage: SecurityCheck
   displayName: 'Check Security'
