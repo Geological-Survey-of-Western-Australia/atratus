@@ -80,7 +80,7 @@ stages:
             architecture: 'x64'
         
         - script: |
-            python -m pip install artifacts-keyring twine
+            python -m pip install twine
             python -m pip wheel --no-deps -w dist/ .
           displayName: 'Python build'
 
@@ -90,5 +90,5 @@ stages:
           displayName: 'Twine authenticate'
           
         - script: |
-            python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
+            python -m twine upload -r gdi_packages dist/*.whl
           displayName: 'Upload to feed'
