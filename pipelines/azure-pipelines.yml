@@ -31,7 +31,7 @@ stages:
         
         - task: PublishCodeCoverageResults@2
           inputs:
-            summaryFileLocation: 'tests\cov.xml'
+            summaryFileLocation: 'tests/cov.xml'
             failIfCoverageEmpty: true
 
 - stage: SecurityCheck
