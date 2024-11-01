@@ -27,12 +27,12 @@ stages:
 
         - script: |
             python -m pip install .[tests] pytest-azurepipelines
-            python -m pytest --cov-report xml:tests\cov.xml
+            python -m pytest --cov-report xml:tests/cov.xml --cov tests/
           displayName: 'Test .[tests]'
         
         - task: PublishCodeCoverageResults@2
           inputs:
-            summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/tests/cov.xml'
+            summaryFileLocation: '**/tests/cov.xml'
             failIfCoverageEmpty: true
 
 - stage: SecurityCheck
