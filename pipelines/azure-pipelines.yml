@@ -33,6 +33,7 @@ stages:
         - task: PublishCodeCoverageResults@2
           inputs:
             summaryFileLocation: '**/tests/cov.xml'
+            pathToSources: '$(System.DefaultWorkingDirectory)/src/'
             failIfCoverageEmpty: true
 
 - stage: SecurityCheck
