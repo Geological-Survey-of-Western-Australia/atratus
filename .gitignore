@@ -5,3 +5,4 @@ dst/*
 .venv/*
 *egg*
 logs/*
+.venv_test2

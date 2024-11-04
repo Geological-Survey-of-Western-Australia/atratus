@@ -13,7 +13,7 @@ class SQLAConnection(BaseModel):
     driver: Literal["pyodbc"]
     un_var: str
     pw_var: str
-    host: Literal["SQLD\DEV"]  # NOTE presently only support a single 'trusted' host
+    host: Literal["SQLD/DEV"]  # NOTE presently only support a single 'trusted' host
     port: int
     database: str  # NOTE we are likely to have a growing list of supported databse consider adding literal.
 
