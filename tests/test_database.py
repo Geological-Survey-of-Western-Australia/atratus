@@ -3,7 +3,13 @@ import json
 import sqlalchemy as sqla
 from pathlib import Path
 from geo_digital_tools.utils import exceptions as gdte
-from create import ColumnBuilder, tables_from_config, dict_raise_on_duplicates, parse_database_config  # Replace 'create' with your actual module name
+from geo_digital_tools.database.create import (
+    ColumnBuilder,
+    tables_from_config,
+    dict_raise_on_duplicates,
+    parse_database_config,
+)  # Replace 'create' with your actual module name
+
 
 class TestDatabaseFunctions(unittest.TestCase):
 
@@ -14,29 +20,27 @@ class TestDatabaseFunctions(unittest.TestCase):
 
         # Valid columns JSON structure with all supported SQLAlchemy types
         self.valid_columns_json = {
-            'big_integer_col': 'BigInteger',
-            'boolean_col': 'Boolean',
-            'datetime_col': 'DateTime',
-            'double_col': 'Double',
-            'float_col': 'Float',
-            'integer_col': 'Integer',
-            'large_binary_col': 'LargeBinary',
-            'numeric_col': 'Numeric',
-            'string_col': 'String',
-            'text_col': 'Text',
-            'uuid_col': 'Uuid',
+            "big_integer_col": "BigInteger",
+            "boolean_col": "Boolean",
+            "datetime_col": "DateTime",
+            "double_col": "Double",
+            "float_col": "Float",
+            "integer_col": "Integer",
+            "large_binary_col": "LargeBinary",
+            "numeric_col": "Numeric",
+            "string_col": "String",
+            "text_col": "Text",
+            "uuid_col": "Uuid",
         }
 
         # Invalid column JSON with unsupported types
         self.invalid_columns_json = {
-            'valid_integer_col': 'Integer',
-            'unknown_type_col': 'UnknownType',
+            "valid_integer_col": "Integer",
+            "unknown_type_col": "UnknownType",
         }
 
         # Sample valid configuration for tables
-        self.valid_config = {
-            "table1": self.valid_columns_json
-        }
+        self.valid_config = {"table1": self.valid_columns_json}
 
         # Sample configuration path (adjust as needed or mock file)
         self.config_path = Path("test_config.json")
@@ -74,7 +78,7 @@ class TestDatabaseFunctions(unittest.TestCase):
         # Test duplicate keys in configuration handling
         duplicate_config = [
             ("table1", {"col1": "String"}),
-            ("table1", {"col2": "Integer"})
+            ("table1", {"col2": "Integer"}),
         ]
         with self.assertRaises(gdte.KnownException):
             dict_raise_on_duplicates(duplicate_config)
@@ -90,7 +94,9 @@ class TestDatabaseFunctions(unittest.TestCase):
         duplicate_config_path = Path("duplicate_test_config.json")
         duplicate_config = {
             "table1": {"col1": "String"},
-            "table1": {"col1": "DateTime"}  # Duplicate table name, should raise exception
+            "table1": {
+                "col1": "DateTime"
+            },  # Duplicate table name, should raise exception
         }
         with open(duplicate_config_path, "w") as f:
             json.dump(duplicate_config, f)
@@ -101,8 +107,6 @@ class TestDatabaseFunctions(unittest.TestCase):
         if duplicate_config_path.exists():
             duplicate_config_path.unlink()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
-
-
-
