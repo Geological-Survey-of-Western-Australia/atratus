@@ -1,6 +1,66 @@
 import pandas as pd
 import sqlalchemy as sqla
+
 import geo_digital_tools.utils.exceptions as gde
+
+
+class ReadInterface:
+    """
+    This class acts as a the base class for all of the interfaces our other projects will inherit from.
+    """
+
+    def __init__(self, engine: sqla.engine):
+        # may wish to consider using pydantic to enforce strict typing
+        self.engine = engine
+        self.statement = self.select_statement()
+        # only ever set this to true by using the validate interface function
+        self.valid = False
+        self.result = []
+
+    def select_statement(self) -> sqla.Select:
+        """
+        This method should be over written by other modules.
+        """
+
+        return sqla.Select()
+
+    def validate_interface(self):
+        # check if valid statement for engine
+        select_statement = isinstance(self.statement, sqla.Select)
+        if not select_statement:
+            gde.KnownException(
+                "Interface : Statement not Select Read Interface Requires Select Statement"
+            )
+
+        # check if returns values
+        statement_returns_none = False
+        try:
+            conn = self.engine.connect()
+            get_one = self.statement.limit(1)
+            statement_returns_none = conn.execute(get_one) is None
+
+        except Exception as e:
+            gde.GeoDigitalError(f"Interface : Unhandled Excepetion {e}")
+
+        if statement_returns_none:
+            gde.KnownException("Interface : Returned no Values")
+
+        if select_statement and not statement_returns_none:
+            self.valid = True
+            self.get_interface()
+
+    def get_interface(self):
+        if self.valid:
+            # create connection
+            conn = self.engine.connect()
+            for row in conn.execute(self.statement):
+                row_as_dict = row._mapping
+                self.result.append(row_as_dict)
+            # close connection
+            conn.close()
+
+    def interface_to_df(self):
+        return pd.DataFrame(self.result)
 
 
 def get_tables_names(engine: sqla.Engine) -> list[str]:
@@ -49,38 +109,3 @@ def get_table(
 
         elif not return_schema_as_dict:
             return TargetTable
-
-
-def result_to_df(result: list[tuple], col_name_list: list[str] = []) -> pd.DataFrame:
-    """
-    utility function to quickly create pandas dataframe from result
-    """
-
-    num_fields = len(result[0])
-
-    if col_name_list == [] or len(col_name_list) != num_fields:
-        col_name_list = ["COL: " + str(i) for i in range(num_fields)]
-
-    df_dict = {}
-
-    for i in range(num_fields):
-        df_dict[col_name_list[i]] = [x[i] for x in result]
-
-    return pd.DataFrame(df_dict)
-
-
-def entry_to_df(entry_list: list[dict]) -> pd.DataFrame:
-    """
-    Some results are surved as a list of dictionaries.
-
-    This function extracts the keys from the entry list and quickly builds a df.
-    """
-    df_dict = {k: [] for k in entry_list[0].keys()}
-
-    for entry in entry_list:
-        for k, v in entry.items():
-            df_dict[k].append(v)
-
-    result = pd.DataFrame(df_dict)
-
-    return result
