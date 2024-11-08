@@ -12,7 +12,6 @@ from geo_digital_tools.database.create import (
 
 
 class TestDatabaseFunctions(unittest.TestCase):
-
     def setUp(self):
         # Setup in-memory SQLite engine for testing
         self.engine = sqla.create_engine("sqlite:///:memory:")
@@ -91,15 +90,17 @@ class TestDatabaseFunctions(unittest.TestCase):
 
     def test_parse_database_config_with_duplicates(self):
         # Test parsing with duplicate keys in the config
+        # Note that Python will silently drop duplicated key:values in a dictionary
+        # We check here if data has silently been lost
+
+        test_value = "DateTime"
+        invalid_config = (
+            '{"table1": {"col1": "String"}, "table1": {"col1": "' + test_value + '"}}'
+        )
+
         duplicate_config_path = Path("duplicate_test_config.json")
-        duplicate_config = {
-            "table1": {"col1": "String"},
-            "table1": {
-                "col1": "DateTime"
-            },  # Duplicate table name, should raise exception
-        }
         with open(duplicate_config_path, "w") as f:
-            json.dump(duplicate_config, f)
+            f.write(invalid_config)
 
         with self.assertRaises(gdte.KnownException):
             parse_database_config(duplicate_config_path)
