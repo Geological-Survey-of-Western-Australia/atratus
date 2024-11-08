@@ -29,7 +29,9 @@ def setup_logger(
     return logger
 
 
-def find_valid_logger(logger_id: str, default_logging_dir : Path = Path("logs")) -> logging.Logger:
+def find_valid_logger(
+    logger_id: str, default_logging_dir: Path = Path("logs")
+) -> logging.Logger:
     """
     In a running session searches for a specified logger.
     If none found generates a new failover logger.

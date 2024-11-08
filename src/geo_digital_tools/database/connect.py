@@ -22,8 +22,7 @@ class SQLAConnection(BaseModel):
     def database_not_blank(cls, v: str) -> str:
         condition = v != ""
         if not condition:
-            # NOTE this is currently assuming our connection
-            # gde error
+            # NOTE this is currently assuming our connection is valid
             gde.KnownException("Database Name cannot be Blank")
         if condition:
             return v
@@ -56,7 +55,7 @@ def load_db_config(config_path: Path) -> dict:
     return db_config
 
 
-def vadiate_db_config(parsed_dict) -> list:
+def validate_db_config(parsed_dict) -> list:
     """
     Ensures the loaded connections can create valid SqlAlchemy.Engines.
     This utilised pydantic to validate the keys and accepted vlaues for the connection params.
