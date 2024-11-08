@@ -56,7 +56,7 @@ def load_db_config(config_path: Path) -> dict:
     return db_config
 
 
-def vadiate_db_config(parsed_dict) -> list:
+def validate_db_config(parsed_dict) -> list:
     """
     Ensures the loaded connections can create valid SqlAlchemy.Engines.
     This utilised pydantic to validate the keys and accepted vlaues for the connection params.
