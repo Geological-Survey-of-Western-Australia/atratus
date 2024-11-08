@@ -29,7 +29,8 @@ class ReadInterface:
         select_statement = isinstance(self.statement, sqla.Select)
         if not select_statement:
             gde.KnownException(
-                "Interface : Statement not Select Read Interface Requires Select Statement"
+                "Interface : Statement not select read interface requires select statement",
+                should_raise=True,
             )
 
         # check if returns values
