@@ -98,7 +98,6 @@ class CodeError(GeoDigitalError):
         logger = find_valid_logger(logger_id)
         logger.critical(message)
 
-
         if should_raise:
             raise super
 

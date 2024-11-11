@@ -1,43 +1,112 @@
-import sqlite3
-import warnings
 import pandas as pd
+import sqlalchemy as sqla
 
-# FIXME Refactor all functions to use sqlalchemy
+import geo_digital_tools.utils.exceptions as gde
 
-def get_tables_names(connection: sqlite3.Connection) -> list[str]:
-    cursor = connection.cursor()
 
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+class ReadInterface:
+    """
+    This class acts as a the base class for all of the interfaces our other projects will inherit from.
+    """
 
-    return [s[0] for s in cursor.fetchall()]
+    def __init__(self, engine: sqla.engine):
+        # may wish to consider using pydantic to enforce strict typing
+        self.engine = engine
+        self.statement = self.select_statement()
+        # only ever set this to true by using the validate interface function
+        self.valid = False
+        self.result = []
 
-def get_table_schema_as_dict(connection : sqlite3.Connection, target_table: str):
-    tables = get_tables_names(connection)
+    def select_statement(self) -> sqla.Select:
+        """
+        This method should be over written by other modules.
+        """
+
+        return sqla.Select()
+
+    def validate_interface(self):
+        # check if valid statement for engine
+        select_statement = isinstance(self.statement, sqla.Select)
+        if not select_statement:
+            gde.KnownException(
+                "Interface : Statement not select read interface requires select statement",
+                should_raise=True,
+            )
+
+        # check if returns values
+        statement_returns_none = False
+        try:
+            conn = self.engine.connect()
+            get_one = self.statement.limit(1)
+            statement_returns_none = conn.execute(get_one) is None
+
+        except Exception as e:
+            gde.GeoDigitalError(f"Interface : Unhandled Excepetion {e}")
+
+        if statement_returns_none:
+            gde.KnownException("Interface : Returned no Values")
+
+        if select_statement and not statement_returns_none:
+            self.valid = True
+            self.get_interface()
+
+    def get_interface(self):
+        if self.valid:
+            # create connection
+            conn = self.engine.connect()
+            for row in conn.execute(self.statement):
+                row_as_dict = row._mapping
+                self.result.append(row_as_dict)
+            # close connection
+            conn.close()
+
+    def interface_to_df(self):
+        return pd.DataFrame(self.result)
+
+
+def get_tables_names(engine: sqla.Engine) -> list[str]:
+    """
+    This just loads the existing table names and runs faster than meta-data reflect.
+    It does not load schemas.
+    """
+    list_of_tables = []
+
+    try:
+        inspector = sqla.engine.reflection.Inspector.from_engine(engine)
+        list_of_tables = inspector.get_table_names()
+    except Exception as e:
+        gde.KnownException(
+            f"GDT - Found ecountered exception {e} when getting table names."
+        )
+
+    if len(list_of_tables) == 0:
+        gde.KnownException("GDT - Found no tables in engine.")
+
+    return list_of_tables
+
+
+def get_table(
+    engine: sqla.Engine, target_table: str, return_schema_as_dict=False
+) -> sqla.Table | None | dict:
+    """
+    Gets an sqla table from the engine.
+    If table name in engines tables returns table.
+    Else logs and returns None
+    NOTE should this be pulled out into two functions?
+    """
+
+    tables = get_tables_names(engine)
+
     if target_table not in tables:
-        warnings.warn(f"Table {target_table} not found in connection. Skipping.")
-        return {}
+        gde.KnownException(f"Table {target_table} not found in engine. Skipping.")
+        return None
     else:
-        cursor = connection.cursor()
-        cursor.execute(f"pragma table_info('{target_table}')")
-        schema = cursor.fetchall()
-        return {x[1]: x[2] for x in schema}
+        meta_data = sqla.MetaData()
+        TargetTable = sqla.Table(target_table, meta_data, autoload_with=engine)
 
-def result_to_df(result,col_name_list=[]):
-    num_fields = len(result[0])
-    if col_name_list==[] or len(col_name_list)!=num_fields:
-        col_name_list = ['COL: '+str(i) for i in range(num_fields)]
+        if return_schema_as_dict:
+            schema_as_dict = {k: str(v.type) for k, v in TargetTable.columns.items()}
+            return schema_as_dict
 
-    df_dict = {}
-    for i in range(num_fields):
-        df_dict[col_name_list[i]]= [x[i] for x in result]
-
-    return pd.DataFrame(df_dict)
-
-def entry_to_df(entry_list):
-    df_dict = {k: [] for k in entry_list[0].keys()}
-    for entry in entry_list:
-        for k, v in entry.items():
-            df_dict[k].append(v)
-
-    result = pd.DataFrame(df_dict)
-    return result
+        elif not return_schema_as_dict:
+            return TargetTable

@@ -1,13 +1,14 @@
 import logging
 from pathlib import Path
-# from opencensus.ext.azure.log_exporter import AzureLogHandler
+# import opentelemetry-distro
+
 
 def setup_logger(
     name: str,
     log_file: Path,
     level: int = 10,
     logging_format: str = "%(asctime)s %(levelname)s %(message)s",
-    deployed : bool = False
+    deployed: bool = False,
 ) -> logging.Logger:
     """
     Generates a logger and specifies the formatting.
@@ -19,15 +20,13 @@ def setup_logger(
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
-    
-    if deployed:
-        pass
-        # logger.addHandler(AzureLogHandler())
 
     return logger
 
 
-def find_valid_logger(logger_id: str, default_logging_dir : Path = Path("logs")) -> logging.Logger:
+def find_valid_logger(
+    logger_id: str, default_logging_dir: Path = Path("logs")
+) -> logging.Logger:
     """
     In a running session searches for a specified logger.
     If none found generates a new failover logger.
