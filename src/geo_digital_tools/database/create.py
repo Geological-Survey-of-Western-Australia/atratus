@@ -96,7 +96,8 @@ def dict_raise_on_duplicates(ordered_pairs):
     for k, v in ordered_pairs:
         if k in d:
             gdte.KnownException(
-                f"GDT - Duplicate Keys detected in Databse Config : {k}", should_raise=True,
+                f"GDT - Duplicate Keys detected in Databse Config : {k}",
+                should_raise=True,
             )
         else:
             d[k] = v

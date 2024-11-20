@@ -9,6 +9,10 @@ import geo_digital_tools.utils.exceptions as gde
 
 
 class SQLAConnection(BaseModel):
+    """
+    The function is used to validate the values of the db_connection_config.
+    """
+
     dialect: Literal["mssql"]
     driver: Literal["pyodbc"]
     un_var: str
