@@ -19,7 +19,7 @@ Several programs and downloads are required to access and use the repository
     - if you can't install this raise a service now ticket.
 
 ### Clone the repository
-clone the repository locally, this can be done through devops, github desktop or vs code. 
+Clone the repository locally, this can be done through devops, github desktop or vs code. 
 
 ### Virtual Environment Setup
 Set the execution policy to the current user and the policy to remote signed.
@@ -36,10 +36,10 @@ Activate the virtual environment by navigating to the activate file in the follo
 ```
 ./.venv/Scripts/activate
 ```
-## Setting Up an editable Install
-During the development process we want to ensure that the functionality we're prototyping works, within the module. To achieve this we use an editable install with pip. 
+## Setting up pip editable install
+During the development process we want to ensure that the functionality we're prototyping works, within the module using pip's editable install pip. 
 
-To achieve we complete three pip installs we run three commands in command promp in our git directory:
+To achieve we complete three pip installs we run three commands in command prompt in our git directory:
 ```
 # activate our envioronment
 > ./.venv/Scripts/activate # activate our venv
