@@ -44,7 +44,7 @@ class MyInterface(ReadInterface):
             view_2 = sqla.Table("TABLE2", sqla.MetaData(), autoload_with=self.engine)
             tables_valid = True
 
-        except sqla.exc.OperationalError as e:
+        except sqla.exc.NoSuchTableError as e:
 
             gde.KnownException(
                 f"My Interface : Encountered {e} - Table Does Not Exist",
