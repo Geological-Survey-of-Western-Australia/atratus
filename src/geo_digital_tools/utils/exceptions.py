@@ -53,7 +53,7 @@ class KnownException(GeoDigitalError):
             level = "critical"
 
         # check the loggers
-        logger_id = "file_issues"
+        logger_id = "known_exceptions"
         logger = find_valid_logger(logger_id)
 
         if level == "debug":
@@ -97,7 +97,6 @@ class CodeError(GeoDigitalError):
         logger_id = "code_issues"
         logger = find_valid_logger(logger_id)
         logger.critical(message)
-
 
         if should_raise:
             raise super

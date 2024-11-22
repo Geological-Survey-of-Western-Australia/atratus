@@ -5,6 +5,38 @@ This section covers where the geo digital toolkit sits in the overal domain spec
 [NOTE THIS DOESN'T Render in Devops]
 ![A High level overview](.\assets\tchaikovsky.svg)
 
+## Repo Structure
+~~~
+GDI_GEODIGITAL
+├── docs                               ┐ Package documentation
+│   └── getting_started_developer.md   |
+│   └── high_level_design.md           │
+│   └── installation_and_use.md        │
+│   └── logging.md                     │
+├── LICENSE                            │
+├── README.md                          ┘
+├── pyproject.toml                     ] Package metadata and build 
+├── src                                ┐
+│   └── geo_digital_tools              │
+│       ├── __init__.py                │ Package source code
+│       ├── database                   │
+│       |      ├── __init__.py         |
+│       |      ├── connect.py          |
+│       |      ├── create.py           |
+│       |      ├── read.py             |
+│       |      └── update.py           |     
+|       ├── utils                      |
+│       |      ├── __init__.py         |
+│       |      ├── exceptions.py       |
+│       |      └── logging.py          |
+│       └── storage*                   ┘
+└── tests                              ┐
+      ├── unit                         |
+      |     ├── test_database.py       |
+      |     └── test_exceptions.py     |
+      └── artifacts                    ┘ Package tests
+~~~
+
 ## Architecture
 The geodigitaltoolkit is intended to have 3 core modules.
  - database
@@ -17,15 +49,15 @@ The geodigitaltoolkit is intended to have 3 core modules.
     - moving files, blob storage, file streams etc
 
 ---
-## Tchaikovsky - Atratus - Cynget - GeoDigital
-
+## Related Projects
 All systems we build in this space do so with a single goal.
-Loading cleaned data to centralised 'cleaned' location.
+\
+Loading data to centralised 'cleaned' location.
 
 Systems and Tools
- - Techaikovski : Orchestration, Loadbalancing, Resource Creation
- - Atratus : File Classification (Cateloguing?)
- - Cygnet : Domain Specific Transformation and Load
+ - Techaikovski : Orchestration, Loadbalancing, Resource Creation*
+ - Atratus : File Classification
+ - Cygnets : Domain Specific Transformation and Load
  - Geo Digital Toolkit : Set of tools for loading to Geo Digital and logging
 
 Outputs

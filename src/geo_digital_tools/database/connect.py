@@ -1,62 +1,107 @@
-from pathlib import Path
-import sqlite3
-import geo_digital_tools.utils.exceptions as gde
+import json
 import sqlalchemy as sqla
+
 from typing import Literal
+from pathlib import Path
+from pydantic import BaseModel, field_validator
+
+import geo_digital_tools.utils.exceptions as gde
 
 
-def local_database(db_path: Path, sql_type : Literal['sqlite','mssql'] = 'sqlite') -> sqla.Engine:
+class SQLAConnection(BaseModel):
+    """
+    The function is used to validate the values of the db_connection_config.
+    """
 
-    if sql_type=='sqlite':
-        engine = sqla.create_engine(f'sqlite:///{db_path}', echo=True)
-    if sql_type=='mssql':
-        # NOTE notimplemented
-        gde.CodeError('Unimplemented Feature in Connection', should_raise= True)
-        #engine = sqla.create_engine('mysql://user:password@server')
+    dialect: Literal["mssql"]
+    driver: Literal["pyodbc"]
+    un_var: str
+    pw_var: str
+    host: Literal["SQLD\\DEV"]  # NOTE presently only support a single 'trusted' host
+    port: int
+    database: str  # NOTE we are likely to have a growing list of supported databse consider adding literal.
 
-    meta = sqla.MetaData()
-    return engine, meta
+    # it is possible to set up more sophisticated validation rules
+    @field_validator("database")
+    def database_not_blank(cls, v: str) -> str:
+        condition = v != ""
+        if not condition:
+            # NOTE this is currently assuming our connection is valid
+            gde.KnownException("Database Name cannot be Blank")
+        if condition:
+            return v
+
+    def build_connection_str(cls) -> str:
+        # if we need to authenticate then we'll pull them from the env variables
+        con_str = f"{cls.dialect}+{cls.driver}://@{cls.host}/{cls.database}?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server"
+        return con_str
 
 
-# def connect_remote_wamexdev() -> pyodbc.Connection:
-#     # TODO we need to pull this strings out however it's relatively low security risk
-#     # to connect it leverages windows login so will only work for authed users on network
-#     try:
-#         con = pyodbc.connect(r'Driver=SQL Server;Server=SQLD\DEV;Database=WAMEX;Trusted_Connection=yes;')
-#         return con
-#     except:
-#         gde.KnownException('Connection to WAMEX Failed')
-#         return None    
+def load_db_config(config_path: Path) -> dict:
+    """
+    This function handles the parsing of he json file into a dict.
+    Args:
+        config_path : string to dbconfig file.
 
-def check_valid_select(query_list : list[str]) -> list[str]:
+    Raises/Logs:
+        If file won't load/doesn't exist will raise a known exception.
 
-    return None
+    Returns:
+        dictionary of the form {connection name : {connection params}}
+    """
 
-def check_valid_create(query_list : list[str]) -> list[str]:
-    
-    temp_db = sqlite3.connect(":memory:")
-    
-    valid_queries = []
+    try:
+        f = open(config_path)
+        db_config = json.load(f)
+    except:
+        gde.KnownException("Error loading database config file", should_raise=True)
 
-    for query in query_list:
+    return db_config
+
+
+def validate_db_config(parsed_dict) -> list:
+    """
+    Ensures the loaded connections can create valid SqlAlchemy.Engines.
+    This utilised pydantic to validate the keys and accepted vlaues for the connection params.
+
+    Args:
+        parsed_dict : dictionary of the form {connection name : {connection params}}
+
+    Raises/Logs:
+        Logs Known Exceptions : for any value errors.
+
+    Returns:
+        dict of valid connections in the form connection_names : SQLAConnection
+    """
+
+    valid_connections = {}
+
+    for connection_name, connection_params in parsed_dict.items():
+        # check if all required connection params are present and of the right type
         try:
-            temp_db.execute(query)
-            valid_queries.append(query)
+            con_dict = SQLAConnection(**connection_params)
+            valid_connections[connection_name] = con_dict
         except Exception as e:
-            gde.KnownException(f'Invalid SQLite Query {query} - {e}')
+            gde.KnownException(f"Databse config : {connection_name} enountered {e}")
 
-    temp_db.close()
+    # validate all the keys and supported value of the config
+    return valid_connections
 
-    return valid_queries
 
-def check_valid_sqlite(query_list : list[str]) -> list[str]:
-    select_queries = [x for x in query_list if 'select' in x.lower()]
-    create_queries = [x for x in query_list if 'create' in x.lower()]
+def remote_database(valid_connections_dict: dict) -> dict:
+    """
+    Args
+        Dictionary of the form {Connectionname : SqlaConnection}
 
-    valid_select = check_valid_select(select_queries)
-    valid_create = check_valid_create(create_queries)
+    Returns
+        Dictionary of the form {Connectionname : SQLA.Engine}
+    """
 
-    # some atttempt to preserve order incase it's important
-    valid_queries = [q for q in query_list if q in valid_select or q in valid_create]
+    engine_dict = {}
+    for database_name, SqlaConnectionInstance in valid_connections_dict.items():
+        engine = sqla.create_engine(
+            SqlaConnectionInstance.build_connection_str(), pool_pre_ping=True
+        )
+        engine_dict[database_name] = engine
 
-    return valid_queries
+    return engine_dict

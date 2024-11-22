@@ -1,4 +1,4 @@
-<p style="text-align: center;font-size:2em"> Logging and Exceptions </p>
+<p style="text-align: center;font-size:2em"> Logging and Exceptions</p>
 
 ---
 
