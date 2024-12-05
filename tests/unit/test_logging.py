@@ -114,17 +114,4 @@ class TestLoggingFunctions:
             assert "Additional log message." in logs
 
 
-if __name__ == "__main__":
-    
-    """
-    Run the tests with detailed reporting and generate an HTML report.
-    Note: To generate the report, you need to install pytest-html.
-    """
-    pytest.main([
-        "-v",                    # Verbose mode: shows each test's name and status
-        "--tb=short",            # Short traceback for easier debugging
-    #    "--html=reports/test_logging_report.html",  # Generate an HTML report named 'test_logging_report.html'
-    #    "--self-contained-html",  # Embed all assets in the HTML file for standalone usage
-        __file__                 # Target the current file for testing
-    ])
     
