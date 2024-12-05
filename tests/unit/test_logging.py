@@ -51,7 +51,9 @@ class TestLoggingFunctions:
             """Test if `setup_logger` uses the specified format."""
             log_file = temp_log_dir / "formatted_logger.log"
             log_format = "%(asctime)s - %(levelname)s - %(message)s"
-            logger = setup_logger("formatted_logger", log_file, logging_format=log_format)
+            logger = setup_logger(
+                "formatted_logger", log_file, logging_format=log_format
+            )
             logger.warning("Warning message.")
             with open(log_file, "r") as f:
                 logs = f.read()
@@ -106,12 +108,11 @@ class TestLoggingFunctions:
             log_file = temp_log_dir / "existing_logger.log"
             existing_logger = setup_logger("existing_logger", log_file)
             existing_logger.info("Existing logger test.")
-            logger = find_valid_logger("existing_logger", default_logging_dir=temp_log_dir)
+            logger = find_valid_logger(
+                "existing_logger", default_logging_dir=temp_log_dir
+            )
             logger.info("Additional log message.")
             with open(log_file, "r") as f:
                 logs = f.read()
             assert "Existing logger test." in logs
             assert "Additional log message." in logs
-
-
-    
