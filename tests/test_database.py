@@ -1,77 +1,111 @@
-import unittest
 import json
-import sqlalchemy as sqla
 from pathlib import Path
-from geo_digital_tools.utils import exceptions as gdte
+
+import pytest
+import sqlalchemy as sqla
+
+from geo_digital_tools.database.connect import (
+    SQLAConnection,
+    load_db_config,
+    validate_db_config,
+    remote_database,
+)
+
 from geo_digital_tools.database.create import (
     ColumnBuilder,
-    tables_from_config,
     dict_raise_on_duplicates,
     parse_database_config,
-)  # Replace 'create' with your actual module name
+    tables_from_config,
+)
+from geo_digital_tools.utils import exceptions as gdte
 
 
-class TestDatabaseFunctions(unittest.TestCase):
-    def setUp(self):
-        # Setup in-memory SQLite engine for testing
-        self.engine = sqla.create_engine("sqlite:///:memory:")
-        self.meta = sqla.MetaData()
+valid_columns_json = {
+    "big_integer_col": "BigInteger",
+    "boolean_col": "Boolean",
+    "datetime_col": "DateTime",
+    "double_col": "Double",
+    "float_col": "Float",
+    "integer_col": "Integer",
+    "large_binary_col": "LargeBinary",
+    "numeric_col": "Numeric",
+    "string_col": "String",
+    "text_col": "Text",
+    "uuid_col": "Uuid",
+}
 
-        # Valid columns JSON structure with all supported SQLAlchemy types
-        self.valid_columns_json = {
-            "big_integer_col": "BigInteger",
-            "boolean_col": "Boolean",
-            "datetime_col": "DateTime",
-            "double_col": "Double",
-            "float_col": "Float",
-            "integer_col": "Integer",
-            "large_binary_col": "LargeBinary",
-            "numeric_col": "Numeric",
-            "string_col": "String",
-            "text_col": "Text",
-            "uuid_col": "Uuid",
-        }
+# Invalid column JSON with unsupported types
+invalid_columns_json = {
+    "valid_integer_col": "Integer",
+    "unknown_type_col": "UnknownType",
+}
 
-        # Invalid column JSON with unsupported types
-        self.invalid_columns_json = {
-            "valid_integer_col": "Integer",
-            "unknown_type_col": "UnknownType",
-        }
 
-        # Sample valid configuration for tables
-        self.valid_config = {"table1": self.valid_columns_json}
+@pytest.fixture()
+def create_cfg(tmp_path):
+    # Valid columns JSON structure with all supported SQLAlchemy types
 
-        # Sample configuration path (adjust as needed or mock file)
-        self.config_path = Path("test_config.json")
-        with open(self.config_path, "w") as f:
-            json.dump(self.valid_config, f)
+    # Sample valid configuration for tables
+    valid_config = {"table1": valid_columns_json}
 
-    def tearDown(self):
-        # Clean up created files after tests
-        if self.config_path.exists():
-            self.config_path.unlink()
+    # Sample configuration path (adjust as needed or mock file)
+    cfg_path = tmp_path / "test_config.json"
+    with open(cfg_path, "w") as f:
+        json.dump(valid_config, f)
 
+    yield cfg_path, valid_config
+
+    cfg_path.unlink()
+
+
+@pytest.fixture()
+def create_db():
+    # Setup in-memory SQLite engine for testing
+    engine = sqla.create_engine("sqlite:///:memory:")
+    meta = sqla.MetaData()
+
+    yield engine, meta
+    # TODO check if we need to shutdown the engine.
+
+
+@pytest.mark.skip(reason="Not implemented")
+class TestConnect:
+    def test_SQLAConnection(self):
+        assert False
+
+    def test_load_db_config(self):
+        assert False
+
+    def test_validate_db_config(self):
+        assert False
+
+    def test_remote_database(self):
+        assert False
+
+
+class TestCreate:
     def test_valid_column_builder(self):
         # Test ColumnBuilder with valid columns JSON
-        builder = ColumnBuilder(columns_json=self.valid_columns_json)
+        builder = ColumnBuilder(columns_json=valid_columns_json)
         columns = builder.columns
-        self.assertEqual(len(columns), len(self.valid_columns_json))
+        assert len(columns) == len(valid_columns_json)
         for column in columns:
             col_name = column.name
             col_type = column.type.__class__.__name__
-            expected_type = self.valid_columns_json[col_name]
-            self.assertEqual(col_type, expected_type)
+            expected_type = valid_columns_json[col_name]
+            assert col_type is expected_type
 
     def test_invalid_column_type(self):
         # Test ColumnBuilder with unsupported column types
-        with self.assertRaises(gdte.KnownException):
-            ColumnBuilder(columns_json=self.invalid_columns_json)
+        with pytest.raises(gdte.KnownException):
+            ColumnBuilder(columns_json=invalid_columns_json)
 
-    def test_tables_from_config(self):
+    def test_tables_from_config(self, create_cfg, create_db):
         # Test table creation from valid configuration
-        tables_from_config(self.valid_config, self.engine, self.meta)
-        table_names = self.meta.tables.keys()
-        self.assertIn("table1", table_names)
+        engine, meta = create_db
+        tables_from_config(create_cfg[1], engine, meta)
+        table_names = meta.tables.keys()
+        assert "table1" in table_names
 
     def test_dict_raise_on_duplicates(self):
         # Test duplicate keys in configuration handling
@@ -79,14 +113,14 @@ class TestDatabaseFunctions(unittest.TestCase):
             ("table1", {"col1": "String"}),
             ("table1", {"col2": "Integer"}),
         ]
-        with self.assertRaises(gdte.KnownException):
+        with pytest.raises(gdte.KnownException):
             dict_raise_on_duplicates(duplicate_config)
 
-    def test_parse_database_config(self):
+    def test_parse_database_config(self, create_cfg):
         # Test loading and parsing configuration file without duplicates
-        config = parse_database_config(self.config_path)
-        self.assertIn("table1", config)
-        self.assertEqual(config["table1"], self.valid_columns_json)
+        config = parse_database_config(create_cfg[0])
+        assert "table1" in config
+        assert config["table1"] == valid_columns_json
 
     def test_parse_database_config_with_duplicates(self):
         # Test parsing with duplicate keys in the config
@@ -102,12 +136,26 @@ class TestDatabaseFunctions(unittest.TestCase):
         with open(duplicate_config_path, "w") as f:
             f.write(invalid_config)
 
-        with self.assertRaises(gdte.KnownException):
+        with pytest.raises(gdte.KnownException):
             parse_database_config(duplicate_config_path)
 
         if duplicate_config_path.exists():
             duplicate_config_path.unlink()
 
 
-if __name__ == "__main__":
-    unittest.main()
+@pytest.mark.skip(reason="Not implemented")
+class TestRead:
+    def test_x(self):
+        assert 0
+
+
+@pytest.mark.skip(reason="Not implemented")
+class TestUpdate:
+    def test_x(self):
+        assert 0
+
+
+@pytest.mark.skip(reason="Not implemented")
+class TestWrite:
+    def test_x(self):
+        assert 0
