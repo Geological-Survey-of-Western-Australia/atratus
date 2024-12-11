@@ -9,13 +9,13 @@ class ReadInterface:
     This class acts as a the base class for all of the interfaces our other projects will inherit from.
     """
 
-    def __init__(self, engine: sqla.engine):
+    def __init__(self, engine: sqla.Engine):
         # may wish to consider using pydantic to enforce strict typing
         self.engine = engine
         self.statement = self.select_statement()
         # only ever set this to true by using the validate interface function
         self.valid = False
-        self.result = []
+        self.result: list = []
 
     def select_statement(self) -> sqla.Select:
         """
@@ -110,3 +110,8 @@ def get_table(
 
         elif not return_schema_as_dict:
             return TargetTable
+
+        else:
+            # TODO Define expected behaviour.
+            gde.KnownException("Reaching this state was unexpected.", should_raise=True)
+            return None

@@ -3,7 +3,7 @@ from pathlib import Path
 import sqlalchemy as sqla
 
 from geo_digital_tools.database import connect
-import geo_digital_tools.utils.exceptions as gdte
+import geo_digital_tools.utils.exceptions as gde
 
 
 class ColumnBuilder:
@@ -14,7 +14,7 @@ class ColumnBuilder:
     Down the line if we opt to support other SQL tyes (such as ARRAY).
     We will need to consider a method for each flavour of SQL.
 
-    I've selectively removed some supported camelcase types typically to reduce complext.
+    I've selectively removed some supported camelcase types typically to reduce complexity.
     Consider the case of date, SqlAlchemy supportes, Date, Time, and DateTime.
     My preference is to force a full date time wherever possible (even if we end up with a number of entries at midnight ;).
 
@@ -48,13 +48,13 @@ class ColumnBuilder:
         column_names = self.columns_json.keys()
         # duplicate keys detected
         if len(column_names) != len(set(column_names)):
-            gdte.KnownException(
+            gde.KnownException(
                 f"Column Builder - Unsupported Type : Column - {column_name} Type {column_var}"
             )
         # column unsupported vartype
         for column_name, column_var in self.columns_json.items():
             if column_var not in list(self.supported_types.keys()):
-                gdte.KnownException(
+                gde.KnownException(
                     f"Column Builder - Unsupported Type : Column - {column_name} Type {column_var}",
                     should_raise=True,
                 )
@@ -64,7 +64,7 @@ class ColumnBuilder:
         cols = []
         for column_name, column_var in self.columns_json.items():
             if column_var not in list(self.supported_types.keys()):
-                gdte.KnownException(
+                gde.KnownException(
                     f"Column Builder - Unsupported Type : Column - {column_name} Type {column_var}"
                 )
             else:
@@ -74,7 +74,7 @@ class ColumnBuilder:
 
 
 def tables_from_config(config: dict, engine: sqla.Engine, meta: sqla.MetaData):
-
+    """Generate SQL tables based on structure defined in config"""
     for table_name, columns_json in config.items():
         columns = ColumnBuilder(columns_json=columns_json).columns
         table = sqla.Table(table_name, meta, *columns)
@@ -87,7 +87,7 @@ def dict_raise_on_duplicates(ordered_pairs):
     """Reject duplicate keys, this should be modified to reflect nested json objects
     FIXME
     example_config = {
-        table1 : {col1:str,col2:int,col1:datetime} <- second col1 overwritest the first
+        table1 : {col1:str,col2:int,col1:datetime} <- second col1 overwrites the first
         table1 : {col_1:datetime,col_2:int,col_1:str} <- would overwrite the first table
     }
 
@@ -95,7 +95,7 @@ def dict_raise_on_duplicates(ordered_pairs):
     d = {}
     for k, v in ordered_pairs:
         if k in d:
-            gdte.KnownException(
+            gde.KnownException(
                 f"GDT - Duplicate Keys detected in Databse Config : {k}",
                 should_raise=True,
             )
@@ -105,9 +105,8 @@ def dict_raise_on_duplicates(ordered_pairs):
 
 
 def parse_database_config(config_path: Path):
-
+    """Load JSON config while screening for duplicate table names"""
     with open(config_path) as f:
-        # NOTE here we're screening for duplicate table names
         config = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
 
     return config
