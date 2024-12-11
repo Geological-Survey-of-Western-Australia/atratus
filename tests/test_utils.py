@@ -34,18 +34,30 @@ def temp_logs(tmp_path):
     tmp_path.rmdir()
 
 
-@pytest.mark.skip(reason="Not yet written")
 class TestExceptions:
     """Group for exceptions-related test cases."""
 
-    def test_KnownException(self):
-        assert pytest.raises(CodeError)
+    @exception_handler(should_raise=True)
+    def unknown_failing_code(self):
+        return 0 / 0
 
-    def test_CodeError(self):
-        assert pytest.raises(KnownException)
+    def test_unkown_exception_handler(self):
+        with pytest.raises(CodeError):
+            self.unknown_failing_code()
 
-    def test_exception_handler(self):
-        exception_handler()
+    @exception_handler(
+        CustomException=KnownException(
+            "We have purposely trained him wrong, as a joke."
+            "... This can be fixed by confirming the configuration file is valid."
+        ),
+        should_raise=True,
+    )
+    def known_failing_code(self):
+        return 0 / 0
+
+    def test_know_exception_handler(self):
+        with pytest.raises(KnownException):
+            self.known_failing_code()
 
 
 class TestLogging:

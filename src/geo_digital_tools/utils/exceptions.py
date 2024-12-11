@@ -1,8 +1,12 @@
+"""Exceptions specific to geo digital tools"""
+
+import functools
 from typing import Callable
+
 from geo_digital_tools.utils.logging import find_valid_logger
 
 
-class GeoDigitalError(BaseException):
+class GeoDigitalError(Exception):
     """
     These errors are exception classes that log errors instead of breaking the flow of code.
 
@@ -42,7 +46,7 @@ class KnownException(GeoDigitalError):
                 if the error should break the flow of code
 
         """
-        # TODO only differnece between these two classes is the destination logger.
+        # TODO only difference between these two classes is the destination logger.
         # I can probably refactor these down considerably.
 
         valid_levels = ["debug", "info", "warning", "error", "critical"]
@@ -67,7 +71,7 @@ class KnownException(GeoDigitalError):
         if level == "critical":
             logger.critical(message)
         if warn_flag:
-            logger.critical("Invalid logging level specified defaulting to CRITICAL")
+            logger.critical("Invalid logging level specified, defaulting to CRITICAL")
             logger.critical(message)
         if should_raise:
             raise super
@@ -76,22 +80,23 @@ class KnownException(GeoDigitalError):
 class CodeError(GeoDigitalError):
     def __init__(super, message, should_raise=False):
         """
-        A class to represent CodeError, capturing and logging to a seperate file.
-        These are primarily going to be uncaught exceptions raised via exception_handler decorator.
-        However they may also be specific expected failures during development etc.
+        A class to represent errors intrinsic to the Python code, capturing and logging
+        to a seperate file.
+        These are primarily going to be uncaught exceptions raised via the
+        exception_handler decorator. However they may also be specific expected
+        failures during development etc.
 
         ...
 
         Parameters
         ----------
             message : str
-                a message capturing the error.
+                A message capturing the error.
             level : str
-                level to log the error message.
+                Level to log the error message.
                 ["debug", "info", "warning", "error", "critical"]
             should_raise : bool
-                if the error should break the flow of code
-
+                If the error should break the flow of code
         """
         # check the loggers
         logger_id = "code_issues"
@@ -102,15 +107,23 @@ class CodeError(GeoDigitalError):
             raise super
 
 
-def exception_handler(should_raise=False):
+def exception_handler(
+    CustomException: Exception | None = None,
+    should_raise: bool = False,
+):
     """
-    This function is a pseudo-decorator, for catching and logging unexpected code errors.
+    This function is expected to be used as a decorator,
+    for catching and logging:
+        - Errors that are "known", and described in the custom exception,
+        - and unexpected code errors.
     ...
 
     Parameters
     ----------
+        CustomException: Exception
+            If the issue triggers a KnownException and can be explained
         should_raise : bool
-            if true raises the 'uncaught' exception
+            if true raises the 'uncaught issue' CodeError exception
 
     Examples
     ----------
@@ -137,17 +150,19 @@ def exception_handler(should_raise=False):
 
     """
 
-    def wrapper(func: Callable):  # handles the usage of the decorator inputs
-        def wrapper_func(*args, **kwargs):  # captures and returns the
+    def wrapper(func: Callable):
+        @functools.wraps(func)
+        def wrapper_func(*args, **kwargs):
             try:
-                value = func(*args, **kwargs)
-                return value
+                return func(*args, **kwargs)
+            except Exception as super_exc:
+                if CustomException is not None:
+                    exc = CustomException
+                else:
+                    exc = CodeError(f"{func.__name__} encountered {str(super_exc)}.")
 
-            except Exception as e:
-                CodeError(
-                    f"{func.__name__} has encountered uncaught exception {type(e).__name__} with message {str(e)}",
-                    should_raise=should_raise,
-                )
+                if should_raise:
+                    raise exc from super_exc
 
         return wrapper_func
 
