@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+
 # import opentelemetry-distro
 
 
@@ -31,7 +32,6 @@ def find_valid_logger(
     In a running session searches for a specified logger.
     If none found generates a new failover logger.
     """
-    Path(default_logging_dir).mkdir(parents=True, exist_ok=True)
     fail_name = f"Fail_Over - {logger_id}"
     desired_loggers = [logger_id, fail_name]
     active_loggers = list(logging.Logger.manager.loggerDict.keys())
@@ -39,6 +39,7 @@ def find_valid_logger(
 
     if len(check_result) == 0:
         # if none of the loggers exist
+        Path(default_logging_dir).mkdir(parents=True, exist_ok=True)
         logger = setup_logger(fail_name, default_logging_dir / f"{fail_name}.log")
     else:
         # if they do exist get the first one
