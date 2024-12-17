@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+import pandas as pd
 import sqlalchemy as sqla
 
 import geo_digital_tools
@@ -11,9 +12,18 @@ from geo_digital_tools.utils.exceptions import KnownException, exception_handler
 METADATA = sqla.MetaData()
 
 
-def save_to_disk(self, output_path: str | Path = "fallback.db"):
-    Path(output_path)
-    # pandas df from db? sql db?
+def interface_to_csv(interface, output_path: str | Path = ""):
+    """Save tables from interface to local file"""
+    df = pd.DataFrame(interface.result)
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(exist_ok=True, parents=True)
+
+    if output_path.suffix == "csv":
+        df.to_csv(output_path / f"{interface}.csv")
+    else:
+        raise NotImplementedError("Must specify a csv target file")
+
     return output_path
 
 
@@ -72,6 +82,11 @@ def get_tables_names(engine: sqla.Engine) -> list[str]:
         KnownException("GDT - Found no tables in engine.")
 
     return list_of_tables
+
+
+def get_metadata(engine: sqla.Engine):
+    """Load all database metadata, slower than get_table_names."""
+    METADATA.reflect(bind=engine)
 
 
 def get_table(
