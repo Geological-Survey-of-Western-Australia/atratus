@@ -56,5 +56,16 @@ class ReadInterface:
         else:
             KnownException("Read statement is not valid", should_raise=True)
 
-    def interface_to_df(self):
+    def query_to_df(self):
+        """Create a dataframe from a prepared query result"""
         return pd.DataFrame(self.result)
+
+    def df_from_interface(self):
+        """Create a dataframe directly from an executed query statement"""
+        if self._valid:
+            with self.engine.begin() as conn:
+                result = conn.execute(self.statement)
+                df = pd.DataFrame(result.all(), columns=result.keys())
+            return df
+        else:
+            KnownException("Read statement is not valid", should_raise=True)
