@@ -1,7 +1,7 @@
 import pandas as pd
 import sqlalchemy as sqla
 
-import geo_digital_tools.utils.exceptions as gde
+from geo_digital_tools.utils.exceptions import GeoDigitalError, KnownException
 
 
 class ReadInterface:
@@ -14,7 +14,7 @@ class ReadInterface:
         self.engine = engine
         self.statement = self.select_statement()
         # only ever set this to true by using the validate interface function
-        self.valid = False
+        self._valid = False
         self.result: list = []
 
     def select_statement(self) -> sqla.Select:
@@ -25,40 +25,36 @@ class ReadInterface:
         return sqla.Select()
 
     def validate_interface(self):
-        # check if valid statement for engine
-        select_statement = isinstance(self.statement, sqla.Select)
-        if not select_statement:
-            gde.KnownException(
-                "Interface : Statement not select read interface requires select statement",
+        """Apply a series of checks to the Read statement"""
+        if not isinstance(self.statement, sqla.Select):
+            KnownException(
+                "Interface : Statement is not a Select; ReadInterface requires a select statement",
                 should_raise=True,
             )
 
-        # check if returns values
-        statement_returns_none = False
+        # check statement returns values from engine
         try:
-            conn = self.engine.connect()
-            get_one = self.statement.limit(1)
-            statement_returns_none = conn.execute(get_one) is None
+            with self.engine.begin() as conn:
+                get_one = self.statement.limit(1)
+                check_result = conn.execute(get_one)
+        except Exception as exc:
+            GeoDigitalError(f"Interface : Unhandled Exception {exc}")
 
-        except Exception as e:
-            gde.GeoDigitalError(f"Interface : Unhandled Excepetion {e}")
+        if check_result is not None:
+            self._valid = True
+            # self.get_interface()
+        else:
+            KnownException("Interface : Returned no values")
 
-        if statement_returns_none:
-            gde.KnownException("Interface : Returned no Values")
-
-        if select_statement and not statement_returns_none:
-            self.valid = True
-            self.get_interface()
-
-    def get_interface(self):
-        if self.valid:
+    def query_interface(self):
+        if self._valid:
             # create connection
-            conn = self.engine.connect()
-            for row in conn.execute(self.statement):
-                row_as_dict = row._mapping
-                self.result.append(row_as_dict)
-            # close connection
-            conn.close()
+            with self.engine.begin() as conn:
+                for row in conn.execute(self.statement):
+                    row_as_dict = row._mapping
+                    self.result.append(row_as_dict)
+        else:
+            KnownException("Read statement is not valid", should_raise=True)
 
     def interface_to_df(self):
         return pd.DataFrame(self.result)
