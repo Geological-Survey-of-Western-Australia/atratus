@@ -41,38 +41,65 @@ valid_columns_json = {
     "uuid_col": "Uuid",
 }
 
-# Invalid column JSON with unsupported types
-invalid_columns_json = {
-    "valid_integer_col": "Integer",
-    "unknown_type_col": "UnknownType",
-}
+
+@pytest.fixture(autouse=True)
+def clear_metadata():
+    """Clear metadata between tests."""
+    METADATA.clear()
 
 
 @pytest.fixture()
-def create_cfg(tmp_path):
-    # Valid columns JSON structure with all supported SQLAlchemy types
-
-    # Sample valid configuration for tables
-    valid_config = {"table1": valid_columns_json}
-
-    # Sample configuration path (adjust as needed or mock file)
+def valid_cfg(tmp_path):
+    """Valid columns JSON structure with all supported SQLAlchemy types"""
+    valid_config = {
+        "sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"},
+        "tables": {"table1": {"col1": "String", "col2": "Integer"}},
+    }
     cfg_path = tmp_path / "test_config.json"
     with open(cfg_path, "w") as f:
         json.dump(valid_config, f)
 
     yield cfg_path, valid_config
 
-    cfg_path.unlink()
+
+@pytest.fixture()
+def invalid_cfg(tmp_path):
+    """Config from a text file that contains duplicated tables.
+    These may be lost when converted to a python dict.
+    """
+    invalid_config_text = (
+        '{"sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"},'
+        '"tables": {"table1": {"col1": "String"}, "table1": {"col1": "DateTime"}}'
+    )
+    cfg_path = tmp_path / "test_config.json"
+    cfg_path.write_text(invalid_config_text)
+
+    yield (cfg_path,)
 
 
 @pytest.fixture()
-def create_db():
-    # Setup in-memory SQLite engine for testing
-    engine = sqla.create_engine("sqlite:///:memory:")
-    meta = sqla.MetaData()
+def create_engine(valid_cfg):
+    """Setup in-memory SQLite engine"""
+    cfg = valid_cfg[1].pop("sqlalchemy")
+    engine = sqla.engine_from_config(cfg)
+    yield engine
 
-    yield engine, meta
-    # TODO check if we need to shutdown the engine.
+
+@pytest.fixture()
+def create_db(create_engine: sqla.Engine, valid_cfg: dict):
+    """A DB with table 'table1', column 'col1', as degined in valid_cfg,
+    with inserted 'check_value'
+    """
+    engine = create_engine
+    tables_from_config(valid_cfg[1])
+    METADATA.create_all(engine)
+    stmt = sqla.insert(sqla.Table("table1", METADATA)).values(col1="check_value")
+    stmt.compile()
+    with engine.connect() as conn:
+        conn.execute(stmt)
+        conn.commit()
+
+    yield engine
 
 
 @pytest.mark.skip(reason="Not implemented")
@@ -105,14 +132,12 @@ class TestCreate:
     def test_invalid_column_type(self):
         # Test ColumnBuilder with unsupported column types
         with pytest.raises(gdte.KnownException):
-            ColumnBuilder(columns_json=invalid_columns_json)
-
-    def test_tables_from_config(self, create_cfg, create_db):
-        # Test table creation from valid configuration
-        engine, meta = create_db
-        tables_from_config(create_cfg[1], engine, meta)
-        table_names = meta.tables.keys()
-        assert "table1" in table_names
+            ColumnBuilder(
+                columns_json={
+                    "valid_integer_col": "Integer",
+                    "unknown_type_col": "UnknownType",
+                }
+            )
 
     def test_dict_raise_on_duplicates(self):
         # Test duplicate keys in configuration handling
@@ -123,37 +148,49 @@ class TestCreate:
         with pytest.raises(gdte.KnownException):
             dict_raise_on_duplicates(duplicate_config)
 
-    def test_parse_database_config(self, create_cfg):
-        # Test loading and parsing configuration file without duplicates
-        config = parse_database_config(create_cfg[0])
-        assert "table1" in config
-        assert config["table1"] == valid_columns_json
+    def test_parse_database_config_dict(self, valid_cfg):
+        """Test loading and parsing configuration file without duplicates"""
+        config = parse_database_config(valid_cfg[0])
+        assert "table1" in config["tables"]
 
-    def test_parse_database_config_with_duplicates(self):
-        # Test parsing with duplicate keys in the config
-        # Note that Python will silently drop duplicated key:values in a dictionary
-        # We check here if data has silently been lost
+    def test_tables_from_config_file(self, valid_cfg):
+        """Test table creation from valid configuration dict"""
+        tables_from_config(valid_cfg[1])
+        table_names = METADATA.tables.keys()
+        assert "table1" in table_names
 
-        test_value = "DateTime"
-        invalid_config = (
-            '{"table1": {"col1": "String"}, "table1": {"col1": "' + test_value + '"}}'
-        )
+    def test_parse_database_config_with_duplicates(self, invalid_cfg):
+        """Test parsing with duplicate keys in the config
 
-        duplicate_config_path = Path("duplicate_test_config.json")
-        with open(duplicate_config_path, "w") as f:
-            f.write(invalid_config)
-
+        Note that Python will silently drop duplicated key:values in a dictionary
+        We check here if data will be silently been lost
+        """
         with pytest.raises(gdte.KnownException):
-            parse_database_config(duplicate_config_path)
+            parse_database_config(invalid_cfg[0])
 
-        if duplicate_config_path.exists():
-            duplicate_config_path.unlink()
+    def test_createinterface_from_config(self, valid_cfg):
+        t_if = CreateInterface(cfg_path=valid_cfg[0])
+        t_if.create_metadata()
+        assert "table1" in sqla.inspect(t_if.engine).get_table_names()
 
 
-@pytest.mark.skip(reason="Not implemented")
 class TestRead:
-    def test_x(self):
-        assert 0
+    def test_read_interface(self, create_db):
+        """Create a Mock ReadInterface and ensure the contained value can be read"""
+
+        class MockReadInterface(ReadInterface):
+            def __init__(self, engine):
+                super().__init__(engine)
+
+            def select_statement(self):
+                tbl = sqla.Table("table1", METADATA)
+                stmt = sqla.select(tbl.c.col1)
+                return stmt
+
+        t_ri = MockReadInterface(create_db)
+        t_ri.validate_interface()
+        df = t_ri.df_from_interface()
+        assert "check_value" in df["col1"][0]
 
 
 @pytest.mark.skip(reason="Not implemented")
