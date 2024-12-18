@@ -49,8 +49,46 @@ def tables_from_config(configuration: dict) -> None:
         sqla.Table(table_name, METADATA, *columns)
 
 
+def check_valid_select(query_list: list[str]) -> list[str]:
+    raise DeprecationWarning("Deprecated by ReadInterface.validate_interface")
+    valid_queries = []
+    for query in query_list:
+        sql_result = sqlvalidator.parse(query)
+        sql_result.is_valid()
+
+        if sql_result.is_valid():
+            valid_queries.append(query)
+        elif not sql_result.is_valid():
+            KnownException(f"Invalid SQL Select Statement Query {query}")
+
+    return valid_queries
+
+
+def check_valid_create(query_list: list[str]) -> list[str]:
+    raise DeprecationWarning(
+        "Deprecated by WriteInterface.validate_interface"
+        "... But not the testing on a test db part"
+    )
+
+    temp_db = sqlite3.connect(":memory:")
+
+    valid_queries = []
+
+    for query in query_list:
+        try:
+            temp_db.execute(query)
+            valid_queries.append(query)
+        except Exception as e:
+            KnownException(f"Invalid SQLite Query {query} - {e}")
+
+    temp_db.close()
+
+    return valid_queries
+
+
 def check_valid_sqlite(query_list: list[str]) -> list[str]:
     """Temp location of useful SQL comment checking"""
+    raise DeprecationWarning("Deprecated by in-Interface checks")
     select_queries = []
     create_queries = []
     for query in query_list:

@@ -18,3 +18,13 @@ class WriteInterface:
         raise NotImplementedError(
             "This method should be overwritten for your application"
         )
+
+    def validate_interface(self):
+        """Apply a series of checks to the Write statement"""
+        if not isinstance(self.statement, sqla.Insert):
+            KnownException(
+                "Interface : Statement is not a Insert; WriteInterface requires an insert statement",
+                should_raise=True,
+            )
+
+        # TODO: Validate statement is writable to test engine? That seems tricky.
