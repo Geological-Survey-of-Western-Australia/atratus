@@ -10,7 +10,8 @@ class WriteInterface:
         self.engine = engine
 
     def __str__(self):
-        return f"Write interface to {self.engine.url}"
+        """Useful for printing diagnostic information about an interface"""
+        return f"{type(self).__name__}, {self.engine.url}"
 
     def write(self):
         """Overridable method to define how to write to a database"""

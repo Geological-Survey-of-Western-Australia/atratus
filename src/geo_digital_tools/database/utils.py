@@ -78,7 +78,7 @@ def get_metadata(engine: sqla.Engine) -> None:
 
 def get_tables_names(engine: sqla.Engine) -> list[str]:
     """
-    This just loads the existing table names and runs faster than meta-data reflect.
+    Loads the existing table names, faster than meta-data reflect.
     It does not load schemas.
     """
     list_of_tables = []
@@ -167,7 +167,7 @@ class ColumnBuilder:
         return tuple(cols)
 
 
-def dict_raise_on_duplicates(ordered_pairs):
+def dict_raise_on_duplicates(ordered_pairs) -> dict:
     """Reject duplicate keys, this should be modified to reflect nested json objects
     FIXME
     example_config = {

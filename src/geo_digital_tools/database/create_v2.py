@@ -26,7 +26,7 @@ class CreateInterface:
             self._fallback = True
             self.engine = sqla.create_engine(
                 url="sqlite+pysqlite:///:memory:",
-                echo="debug",
+                echo=True,  # | "debug"
             )
 
     @exception_handler(should_raise=True)
@@ -53,12 +53,10 @@ class CreateInterface:
 
         with open(cfg_path) as f:
             db_config = json.load(f)
-
         sqla_cfg = db_config.pop("sqlalchemy")
-
         self.engine = sqla.engine_from_config(configuration=sqla_cfg)
 
-        tables_from_config(db_config)
+        tables_from_config(db_config)  # Adds to METADATA
 
     def define_db(self):
         """Overridable method in which a database is defined"""
@@ -66,9 +64,6 @@ class CreateInterface:
             "This method should be overwritten for your application"
         )
 
-    def validate(self):
-        pass
-
-    def create_metadata(self):
+    def create_metadata(self) -> None:
         """Create objects in module level metadata store"""
         METADATA.create_all(self.engine)
