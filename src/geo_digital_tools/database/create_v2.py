@@ -3,7 +3,8 @@ from pathlib import Path
 
 import sqlalchemy as sqla
 
-from geo_digital_tools.database import METADATA, SUPPORTED_TYPES, tables_from_config
+from geo_digital_tools.database import METADATA, SUPPORTED_TYPES
+from geo_digital_tools.database.utils import tables_from_config
 from geo_digital_tools.utils.exceptions import KnownException, exception_handler
 
 

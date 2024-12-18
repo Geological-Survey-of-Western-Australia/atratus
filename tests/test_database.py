@@ -4,21 +4,28 @@ from pathlib import Path
 import pytest
 import sqlalchemy as sqla
 
+from geo_digital_tools.database import METADATA  # This will be cleared for each test
 from geo_digital_tools.database.connect import (
     SQLAConnection,
     load_db_config,
-    validate_db_config,
     remote_database,
+    validate_db_config,
 )
-
-from geo_digital_tools.database.create import (
+from geo_digital_tools.database.create_v2 import CreateInterface
+from geo_digital_tools.database.read import ReadInterface
+from geo_digital_tools.database.utils import (
     ColumnBuilder,
+    check_valid_sqlite,
     dict_raise_on_duplicates,
+    get_metadata,
+    get_table,
+    get_tables_names,
+    interface_to_csv,
     parse_database_config,
     tables_from_config,
 )
+from geo_digital_tools.database.write import WriteInterface
 from geo_digital_tools.utils import exceptions as gdte
-
 
 valid_columns_json = {
     "big_integer_col": "BigInteger",

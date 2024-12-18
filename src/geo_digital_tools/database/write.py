@@ -1,6 +1,6 @@
 import sqlalchemy as sqla
 
-# from geo_digital_tools.database.create import ColumnBuilder
+from geo_digital_tools.utils.exceptions import KnownException, GeoDigitalError
 
 
 class WriteInterface:

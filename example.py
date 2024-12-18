@@ -1,6 +1,7 @@
 import sqlalchemy as sqla
+
 import geo_digital_tools as gdt
-import pandas as pd
+from geo_digital_tools.database import METADATA
 
 
 class AtratusLocalInterface(gdt.CreateInterface):

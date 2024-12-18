@@ -13,11 +13,16 @@ except PackageNotFoundError:
 
 
 from geo_digital_tools import database, utils
+from geo_digital_tools.database.create_v2 import CreateInterface
 from geo_digital_tools.database.read import ReadInterface
 from geo_digital_tools.database.write import WriteInterface
-from geo_digital_tools.database.create_v2 import CreateInterface
+# from geo_digital_tools.database.connect import ConnectInterface
 
-from geo_digital_tools.utils.exceptions import KnownException, CodeError
+from geo_digital_tools.utils.exceptions import (
+    CodeError,
+    KnownException,
+    exception_handler,
+)
 
 __all__ = [
     "database",
@@ -27,4 +32,5 @@ __all__ = [
     "CreateInterface",
     "KnownException",
     "CodeError",
+    "exception_handler",
 ]

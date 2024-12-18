@@ -27,11 +27,19 @@ def interface_to_csv(interface, output_path: str | Path = ""):
     return output_path
 
 
-def tables_from_config(configuration: dict):
+def parse_database_config(config_path: Path) -> dict:
+    """Load JSON config while screening for duplicate table names"""
+    with open(config_path) as f:
+        config = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
+
+    return config
+
+
+def tables_from_config(configuration: dict) -> None:
     """Generate SQL table schema based on structure defined in config.
     Table schema is stored in the sessions metadata.
 
-    configuration: A dictionary (typically produced from a config file,
+    configuration: A dictionary (typically produced from a config file)
 
     """
     tables = configuration.pop("tables")
@@ -63,6 +71,11 @@ def check_valid_sqlite(query_list: list[str]) -> list[str]:
     return valid_queries
 
 
+def get_metadata(engine: sqla.Engine) -> None:
+    """Load all database metadata, slower than get_table_names."""
+    METADATA.reflect(bind=engine)
+
+
 def get_tables_names(engine: sqla.Engine) -> list[str]:
     """
     This just loads the existing table names and runs faster than meta-data reflect.
@@ -82,11 +95,6 @@ def get_tables_names(engine: sqla.Engine) -> list[str]:
         KnownException("GDT - Found no tables in engine.")
 
     return list_of_tables
-
-
-def get_metadata(engine: sqla.Engine):
-    """Load all database metadata, slower than get_table_names."""
-    METADATA.reflect(bind=engine)
 
 
 def get_table(
@@ -178,11 +186,3 @@ def dict_raise_on_duplicates(ordered_pairs):
         else:
             d[k] = v
     return d
-
-
-def parse_database_config(config_path: Path):
-    """Load JSON config while screening for duplicate table names"""
-    with open(config_path) as f:
-        config = json.load(f, object_pairs_hook=dict_raise_on_duplicates)
-
-    return config
