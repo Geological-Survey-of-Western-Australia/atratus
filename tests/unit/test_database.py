@@ -195,11 +195,12 @@ class TestRead:
 
 @pytest.mark.skip(reason="Not implemented")
 class TestUpdate:
-    def test_x(self):
-        assert 0
+    def test_update(self):
+        assert False
 
 
-@pytest.mark.skip(reason="Not implemented")
 class TestWrite:
-    def test_x(self):
-        assert 0
+    """Group of functionality from write.py"""
+
+    def test_WriteInterface(create_db):
+        t_wi = WriteInterface(create_db)
