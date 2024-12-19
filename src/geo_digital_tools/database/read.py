@@ -1,7 +1,7 @@
 import pandas as pd
 import sqlalchemy as sqla
 
-from geo_digital_tools.utils.exceptions import GeoDigitalError, KnownException
+from geo_digital_tools.utils.exceptions import CodeError, KnownException
 
 
 class ReadInterface:
@@ -43,7 +43,7 @@ class ReadInterface:
                 get_one = self.statement.limit(1)
                 check_result = conn.execute(get_one)
         except Exception as exc:
-            GeoDigitalError(f"{type(self).__name__}) : Unhandled Exception {exc}")
+            CodeError(f"{type(self).__name__}) : Unhandled Exception {exc}")
 
         if check_result is not None:
             self._valid = True
