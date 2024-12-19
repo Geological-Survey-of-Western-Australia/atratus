@@ -1,0 +1,15 @@
+{
+    "sqlalchemy": {
+        "sqlalchemy.url": "sqlite+pysqlite:///:memory:",
+        "sqlalchemy.echo": "True"
+    },
+    "tables": {
+        "table1": {
+            "col1": "String",
+            "col2": "Integer"
+        },
+        "table2": {
+            "col1": "Text"
+        }
+    }
+}
