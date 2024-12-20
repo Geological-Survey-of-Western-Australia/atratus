@@ -9,7 +9,7 @@ from geo_digital_tools.utils.exceptions import KnownException, exception_handler
 
 
 class CreateInterface:
-    """Helper class to create a database"""
+    """The base class for creating interfaces which other projects inherit from."""
 
     def __init__(
         self,
@@ -29,22 +29,19 @@ class CreateInterface:
                 echo=True,  # | "debug"
             )
 
-    @exception_handler(should_raise=True)
-    def from_config(self, cfg_path: str | Path):
-        """Define an engine and database schema using config file
+    def __str__(self):
+        """Useful for printing diagnostic information about an interface."""
+        return f"{type(self).__name__}, {self.engine.url}"
 
-        Template for config.json:
+    @exception_handler(should_raise=True)
+    def from_config(self, cfg_path: str | Path) -> None:
+        """Define an engine and database schema using config file.
+
+        e.g. configs/config.json:
         {
             "sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"},
-            "tables": {
-                "table1": {
-                    "col1": "String",
-                    "col2": "String"
-                },
-                "table2": {
-                    "col1": "String"
-                }
-            }
+            "tables": { "table1": {"col1": "String", "col2": "String"},
+                        "table2": {"col1": "String"} }
         }
         """
         cfg_path = Path(cfg_path)
@@ -58,12 +55,20 @@ class CreateInterface:
 
         tables_from_config(db_config)  # Adds to METADATA
 
-    def define_db(self):
-        """Overridable method in which a database is defined"""
+    def define_db(self) -> None:
+        """Replace with an sqlalchemy schema bespoke to your database.
+
+        Only required if not using a config file.
+        SQLA stores the definition in the instantiated sqla.MetaData() object.
+        e.g.
+            Table("table1", METADATA, Column("col1", String), Column("col2", Integer))
+            Table("table2", METADATA, Column("col1", Text))
+        """
+
         raise NotImplementedError(
-            "This method should be overwritten for your application"
+            "This method should be overwritten for your application."
         )
 
     def create_metadata(self) -> None:
-        """Create objects in module level metadata store"""
+        """Create objects in module level metadata store."""
         METADATA.create_all(self.engine)

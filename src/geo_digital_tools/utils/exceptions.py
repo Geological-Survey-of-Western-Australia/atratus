@@ -78,7 +78,7 @@ class KnownException(GeoDigitalError):
 
 
 class CodeError(GeoDigitalError):
-    def __init__(super, message, should_raise=False):
+    def __init__(super, message):
         """
         A class to represent errors intrinsic to the Python code, capturing and logging
         to a seperate file.
@@ -102,9 +102,6 @@ class CodeError(GeoDigitalError):
         logger_id = "code_issues"
         logger = find_valid_logger(logger_id)
         logger.critical(message)
-
-        if should_raise:
-            raise super
 
 
 def exception_handler(

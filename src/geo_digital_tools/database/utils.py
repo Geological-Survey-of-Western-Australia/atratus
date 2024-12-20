@@ -115,8 +115,8 @@ def get_metadata(engine: sqla.Engine) -> None:
 
 
 def get_tables_names(engine: sqla.Engine) -> list[str]:
-    """
-    Loads the existing table names, faster than meta-data reflect.
+    """Loads the existing table names, faster than meta-data reflect.
+
     It does not load schemas.
     """
     list_of_tables = []
@@ -142,6 +142,7 @@ def get_table(
 ) -> sqla.Table | None | dict:
     """
     Gets an sqla table from the engine.
+
     If table name in engines tables returns table.
     Else logs and returns None
     NOTE should this be pulled out into two functions?
@@ -165,7 +166,7 @@ def get_table(
 
 class ColumnBuilder:
     """
-    Construct tables of specific types from configuration file
+    Construct tables of specific types from configuration file.
     #TODO should work out what to do if the config fails for a given column, do we skip it and the related load? or fail build?
     """
 
@@ -181,7 +182,7 @@ class ColumnBuilder:
         column_names = self.columns_json.keys()
         # duplicate keys detected
         if len(column_names) != len(set(column_names)):
-            KnownException("Column Builder - Duplicate column names detected")
+            KnownException("Column Builder - Duplicate column names detected.")
 
         # column unsupported vartype
         for column_name, column_var in self.columns_json.items():
@@ -197,7 +198,7 @@ class ColumnBuilder:
         for column_name, column_var in self.columns_json.items():
             if column_var not in list(self.supported_types.keys()):
                 KnownException(
-                    f"Column Builder - Unsupported Type : Column - {column_name} Type {column_var}"
+                    f"Column Builder - Unsupported Type : Column - {column_name} Type {column_var}."
                 )
             else:
                 cols.append(sqla.Column(column_name, self.supported_types[column_var]))
@@ -206,7 +207,7 @@ class ColumnBuilder:
 
 
 def dict_raise_on_duplicates(ordered_pairs) -> dict:
-    """Reject duplicate keys, this should be modified to reflect nested json objects
+    """Reject duplicate keys, this should be modified to reflect nested json objects.
     FIXME
     example_config = {
         table1 : {col1:str,col2:int,col1:datetime} <- second col1 overwrites the first
@@ -218,7 +219,7 @@ def dict_raise_on_duplicates(ordered_pairs) -> dict:
     for k, v in ordered_pairs:
         if k in d:
             KnownException(
-                f"GDT - Duplicate Keys detected in Databse Config : {k}",
+                f"GDT - Duplicate Keys detected in Databse Config : {k}.",
                 should_raise=True,
             )
         else:
