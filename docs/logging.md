@@ -31,13 +31,13 @@ def my_bad_unimportant_function():
 > my_other_function() --> this will run
 
 # case 2
-@exception_handler(should_break=True)
+@exception_handler(should_raise=True)
 def my_bad_super_critical_function():
     silly = {}
     print(silly['Billy']) --> this will raise a KeyError
 
 # execution
-> my_bad_super_critical_function() --> logs and slams on the breaks
+> my_bad_super_critical_function() --> logs and slams on the brakes
 > my_other_function() --> this will NOT run
 ```
 

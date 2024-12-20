@@ -17,69 +17,7 @@ For the geodigital tool kit there are presently two main use cases:
    - read or write
 - Logging and capturing errors as part of developmenet or data issues.
 
-Both of these use cases have an example below.
-
-**Interface Definition**
-```python 
-from sqlalchemy.sql.expression import Select as Select
-import sqlalchemy as sqla
-from pathlib import Path
-
-import geo_digital_tools.utils.exceptions as gde
-import geo_digital_tools.database.connect as connect
-from geo_digital_tools.database.read import ReadInterface
-
-# here we define one interface our project uses however there could be many
-class MyInterface(ReadInterface):
-    def __init__(self, engine):
-        super().__init__(engine)
-
-    def select_statement(self):
-        # we overwrite the base class selction function
-        stmt = sqla.Select()
-
-        tables_valid = False
-        try:
-            view_1 = sqla.Table("TABLE1", sqla.MetaData(), autoload_with=self.engine)
-            view_2 = sqla.Table("TABLE2", sqla.MetaData(), autoload_with=self.engine)
-            tables_valid = True
-
-        except sqla.exc.NoSuchTableError as e:
-
-            gde.KnownException(
-                f"My Interface : Encountered {e} - Table Does Not Exist",
-                should_raise=True,
-            )
-
-        if tables_valid:
-            # make our statement note Id and Name are columns in those tables
-            try:
-                stmt = sqla.select(view_1.c.Id, view_1.c.Name, view_2.c.Name).join(
-                    view_2, view_1.c.Id == view_2.c.Id
-                )
-            except AttributeError as e:
-                gde.KnownException(
-                    f"My Interface : Encountered {e} - Column Not Present in Table"
-                )
-
-        return stmt
-
-
-if __name__ == "__main__":
-
-    config_con_path = Path("db_connection_config.json")
-
-    # load connections for your project
-    config_json = connect.load_db_config(config_con_path)
-    config_valid = connect.validate_db_config(config_json)
-    config_cons = connect.remote_database(config_valid)
-
-    # Create and retrieve your interface
-    example = MyInterface(engine=config_cons["config_key"])
-    example.validate_interface()
-    example.get_interface()
-    print(example.interface_to_df())
-
+Both of these use cases are demonstrated in the example script `example.py`.
 
 ```
 
@@ -91,15 +29,14 @@ To streamline how these exceptions are encountered, handled, and logged, we use 
 -  The exception_handler decorator 
 -  Calling the gde.KnownException function.
 
-The convienience here is that these two ways of invoking: effectively log the errors into one of two log files to streamline debugging.
+The convenience here is that these two ways of invoking effectively log the errors into one of two log files to streamline debugging.
 
 Lets consider a scenario where we're loading and processing a thousand files. We write a function to load the file processing_step_1() and a function that does some task with the loaded file processing_step_2().
 
 
 
 ```python
-from geo_digital_toolkit.utils.exceptions import exception_handler
-import geo_digital_toolkit.utils.exceptions as gde
+from geo_digital_tools import exception_handler, KnownException
 
 @exception_handler()
 def processing_step_1(file):
@@ -109,9 +46,9 @@ def processing_step_1(file):
 
     # handling known issues
     if issue_1:
-        gde.KnownException(f'This file fails {file} - issue_1')
+        KnownException(f'This file fails {file} - issue_1')
     if issue_2:
-        gde.KnownException(f'This file fails {file} - issue_2')
+        KnownException(f'This file fails {file} - issue_2')
 
     return(file_object)
 
