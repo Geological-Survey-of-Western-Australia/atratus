@@ -1,112 +1,73 @@
 import pandas as pd
 import sqlalchemy as sqla
 
-import geo_digital_tools.utils.exceptions as gde
+from geo_digital_tools.utils.exceptions import CodeError, KnownException
 
 
 class ReadInterface:
-    """
-    This class acts as a the base class for all of the interfaces our other projects will inherit from.
-    """
+    """The base class for all Read interfaces other projects inherit from."""
 
-    def __init__(self, engine: sqla.engine):
+    def __init__(self, engine: sqla.Engine):
         # may wish to consider using pydantic to enforce strict typing
         self.engine = engine
         self.statement = self.select_statement()
         # only ever set this to true by using the validate interface function
-        self.valid = False
-        self.result = []
+        self._valid = False
+        self.result: list = []
+
+    def __str__(self):
+        """Useful for printing diagnostic information about an interface."""
+        return f"{type(self).__name__}, {self.engine.url}"
 
     def select_statement(self) -> sqla.Select:
+        """Replace with an sqlalchemy.Select() statement bespoke to your database.
+        https://docs.sqlalchemy.org/en/20/tutorial/data_select.html#using-select-statements
         """
-        This method should be over written by other modules.
-        """
-
-        return sqla.Select()
+        raise NotImplementedError(
+            "This method should be overwritten for your application."
+        )
 
     def validate_interface(self):
-        # check if valid statement for engine
-        select_statement = isinstance(self.statement, sqla.Select)
-        if not select_statement:
-            gde.KnownException(
-                "Interface : Statement not select read interface requires select statement",
+        """Apply a series of checks to the Read statement."""
+        if not isinstance(self.statement, sqla.Select):
+            KnownException(
+                f"{type(self).__name__}) : A ReadInterface requires a sqla.Select statement.",
                 should_raise=True,
             )
 
-        # check if returns values
-        statement_returns_none = False
+        # check statement returns values from engine
         try:
-            conn = self.engine.connect()
-            get_one = self.statement.limit(1)
-            statement_returns_none = conn.execute(get_one) is None
+            with self.engine.begin() as conn:
+                get_one = self.statement.limit(1)
+                check_result = conn.execute(get_one)
+        except Exception as exc:
+            CodeError(f"{type(self).__name__}) : Unhandled Exception {exc}")
 
-        except Exception as e:
-            gde.GeoDigitalError(f"Interface : Unhandled Excepetion {e}")
+        if check_result is not None:
+            self._valid = True
+        else:
+            KnownException(f"{type(self).__name__}) : Returned no values.")
 
-        if statement_returns_none:
-            gde.KnownException("Interface : Returned no Values")
+    def query_interface(self):
+        if self._valid:
+            with self.engine.begin() as conn:
+                for row in conn.execute(self.statement):
+                    row_as_dict = row._mapping
+                    self.result.append(row_as_dict)
+        else:
+            KnownException("Read statement is not valid.", should_raise=True)
 
-        if select_statement and not statement_returns_none:
-            self.valid = True
-            self.get_interface()
-
-    def get_interface(self):
-        if self.valid:
-            # create connection
-            conn = self.engine.connect()
-            for row in conn.execute(self.statement):
-                row_as_dict = row._mapping
-                self.result.append(row_as_dict)
-            # close connection
-            conn.close()
-
-    def interface_to_df(self):
+    def query_to_df(self) -> pd.DataFrame:
+        """Create a dataframe from a prepared query_interface result."""
         return pd.DataFrame(self.result)
 
+    def df_from_interface(self) -> pd.DataFrame:
+        """Create a dataframe directly by executing the ReadInterface statement"""
+        if self._valid:
+            with self.engine.begin() as conn:
+                result = conn.execute(self.statement)
+            df = pd.DataFrame(result.all(), columns=result.keys())
+        else:
+            KnownException("Read statement has not been validated.", should_raise=True)
 
-def get_tables_names(engine: sqla.Engine) -> list[str]:
-    """
-    This just loads the existing table names and runs faster than meta-data reflect.
-    It does not load schemas.
-    """
-    list_of_tables = []
-
-    try:
-        inspector = sqla.engine.reflection.Inspector.from_engine(engine)
-        list_of_tables = inspector.get_table_names()
-    except Exception as e:
-        gde.KnownException(
-            f"GDT - Found ecountered exception {e} when getting table names."
-        )
-
-    if len(list_of_tables) == 0:
-        gde.KnownException("GDT - Found no tables in engine.")
-
-    return list_of_tables
-
-
-def get_table(
-    engine: sqla.Engine, target_table: str, return_schema_as_dict=False
-) -> sqla.Table | None | dict:
-    """
-    Gets an sqla table from the engine.
-    If table name in engines tables returns table.
-    Else logs and returns None
-    NOTE should this be pulled out into two functions?
-    """
-
-    tables = get_tables_names(engine)
-
-    if target_table not in tables:
-        gde.KnownException(f"Table {target_table} not found in engine. Skipping.")
-        return None
-    else:
-        meta_data = sqla.MetaData()
-        TargetTable = sqla.Table(target_table, meta_data, autoload_with=engine)
-
-        if return_schema_as_dict:
-            schema_as_dict = {k: str(v.type) for k, v in TargetTable.columns.items()}
-            return schema_as_dict
-
-        elif not return_schema_as_dict:
-            return TargetTable
+        return df
