@@ -7,6 +7,17 @@ import geo_digital_tools as gdt
 
 
 @pytest.fixture
+def mocked_populated_db(
+    mocked_connect, dummy_data
+) -> tuple[sqla.Engine, sqla.MetaData]:
+    engine = mocked_connect[0]
+    metadata = mocked_connect[1]
+    data_df = dummy_data[1]
+    gdt.create_from_data(engine, metadata, data_df, "test_select")
+    return (engine, metadata, data_df)
+
+
+@pytest.fixture
 def dummy_data(tmp_path) -> tuple[str | Path, pd.DataFrame]:
 
     test_data = {}
@@ -151,15 +162,6 @@ class TestCreate:
 
 
 class TestSelect:
-    @pytest.fixture
-    def mocked_populated_db(
-        self, mocked_connect, dummy_data
-    ) -> tuple[sqla.Engine, sqla.MetaData]:
-        engine = mocked_connect[0]
-        metadata = mocked_connect[1]
-        data_df = dummy_data[1]
-        gdt.create_from_data(engine, metadata, data_df, "test_select")
-        return (engine, metadata, data_df)
 
     def test_select(self, mocked_populated_db):
 
