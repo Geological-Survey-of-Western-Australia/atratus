@@ -2,7 +2,7 @@
 
 import functools
 from typing import Callable
-
+import inspect
 from geo_digital_tools.utils.logging import find_valid_logger
 
 
@@ -59,7 +59,8 @@ class KnownException(GeoDigitalError):
         # check the loggers
         logger_id = "known_exceptions"
         logger = find_valid_logger(logger_id)
-
+        stack = inspect.stack()
+        message = f"{stack[1].function} - {message}"
         if level == "debug":
             logger.debug(message)
         if level == "info":
