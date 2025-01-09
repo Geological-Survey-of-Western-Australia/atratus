@@ -80,27 +80,6 @@ class TestConnect:
 
 
 class TestCreate:
-    @pytest.fixture
-    def mocked_connect(self) -> tuple[sqla.Engine, sqla.MetaData]:
-
-        memory_engine = sqla.engine.engine_from_config(
-            {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
-        )
-        return memory_engine, sqla.MetaData()
-
-    @pytest.fixture
-    def dummy_data(self, tmp_path) -> tuple[str | Path, pd.DataFrame]:
-
-        test_data = {}
-        test_data["col_1"] = [1, 1, 1, 1, 1]
-        test_data["col_2"] = ["two", "two", "two", "two", "two"]
-        test_data["col_3"] = [3.0, 3.0, 3.0, 3.0, 3.0]
-
-        data_path = tmp_path / "test_data.csv"
-        data_load = pd.DataFrame(test_data)
-        data_load.to_csv(data_path)
-
-        return data_path, data_load
 
     def test_create_from_data_path(self, mocked_connect, dummy_data):
 
