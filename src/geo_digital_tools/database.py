@@ -61,8 +61,8 @@ def select(engine: sqla.Engine, statement) -> pd.DataFrame:
     """Execute a select statement against a specific engine, returning a Dataframe."""
     try:
         with engine.begin() as conn:
-            result = conn.execute(statement)
-        df = pd.DataFrame(result.all(), columns=result.keys())
+            result = conn.execute(statement).all()
+        df = pd.DataFrame(result)
     except Exception as exc:
         pass
 
@@ -72,6 +72,9 @@ def select(engine: sqla.Engine, statement) -> pd.DataFrame:
 def insert(engine: sqla.Engine, table_name: str, dataframe: pd.DataFrame) -> None:
     """Execute an insert statement against a specific engine."""
     try:
-        dataframe.to_sql(table_name, engine, if_exists="fail", method="multi")
+        with engine.begin() as connection:
+            dataframe.to_sql(
+                table_name, connection, if_exists="fail", method="multi", index=False
+            )
     except Exception as exc:
         pass

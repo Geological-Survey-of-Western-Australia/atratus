@@ -43,11 +43,12 @@ def statement_builder(metadata, engine, columns_dict, join_list):
     for table, column_list in columns_dict.items():
         for col in column_list:
             try:
-                c = tables_dict[table].c[col]
+                t = tables_dict[table]
+                c = t.c[col]
                 columns_list.append(c)
-            except sqlae.NoSuchColumnError:
+            except KeyError or sqlae.NoSuchColumnError:
                 gdt.KnownException(
-                    f"Column [{col}] specified in config, does not exist in table [{table}].",
+                    f"Column [{col}] specified in config, does not exist in table [{table}] contains columns [{t.c.keys()}].",
                     should_raise=True,
                 )
     statement = sqla.select(*columns_list)
