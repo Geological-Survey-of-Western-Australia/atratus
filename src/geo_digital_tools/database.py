@@ -18,8 +18,9 @@ def connect(cfg_path: str | Path) -> sqla.Engine:
     with open(cfg_path) as f:
         db_config = json.load(f)
     sqla_cfg = db_config.pop("sqlalchemy")
-
-    return sqla.engine_from_config(configuration=sqla_cfg)
+    engine = sqla.engine_from_config(configuration=sqla_cfg)
+    meta_data = sqla.MetaData()
+    return (engine, meta_data)
 
 
 def create_from_sqla(metadata):

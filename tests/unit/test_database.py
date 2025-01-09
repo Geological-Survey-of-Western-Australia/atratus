@@ -1,120 +1,58 @@
 import json
 from pathlib import Path
-
-import pytest
+import pandas as pd
 import sqlalchemy as sqla
-
-from geo_digital_tools.database import METADATA  # This will be cleared for each test
-from geo_digital_tools.database.connect import (
-    SQLAConnection,
-    load_db_config,
-    remote_database,
-    validate_db_config,
-)
-from geo_digital_tools.database.create_v2 import CreateInterface
-from geo_digital_tools.database.read import ReadInterface
-from geo_digital_tools.database.utils import (
-    ColumnBuilder,
-    check_valid_sqlite,
-    dict_raise_on_duplicates,
-    get_metadata,
-    get_table,
-    get_tables_names,
-    interface_to_csv,
-    parse_database_config,
-    tables_from_config,
-)
-from geo_digital_tools.database.write import WriteInterface
-from geo_digital_tools.utils import exceptions as gdte
-
-valid_columns_json = {
-    "big_integer_col": "BigInteger",
-    "boolean_col": "Boolean",
-    "datetime_col": "DateTime",
-    "double_col": "Double",
-    "float_col": "Float",
-    "integer_col": "Integer",
-    "large_binary_col": "LargeBinary",
-    "numeric_col": "Numeric",
-    "string_col": "String",
-    "text_col": "Text",
-    "uuid_col": "Uuid",
-}
+import pytest
+import geo_digital_tools as gdt
 
 
-@pytest.fixture(autouse=True)
-def clear_metadata():
-    """Clear metadata between tests."""
-    METADATA.clear()
-
-
-@pytest.fixture()
-def valid_cfg(tmp_path):
-    """Valid columns JSON structure with all supported SQLAlchemy types"""
-    valid_config = {
-        "sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"},
-        "tables": {"table1": {"col1": "String", "col2": "Integer"}},
-    }
-    cfg_path = tmp_path / "test_config.json"
-    with open(cfg_path, "w") as f:
-        json.dump(valid_config, f)
-
-    yield cfg_path, valid_config
-
-
-@pytest.fixture()
-def invalid_cfg(tmp_path):
-    """Config from a text file that contains duplicated tables.
-    These may be lost when converted to a python dict.
-    """
-    invalid_config_text = (
-        '{"sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"},'
-        '"tables": {"table1": {"col1": "String"}, "table1": {"col1": "DateTime"}}'
-    )
-    cfg_path = tmp_path / "test_config.json"
-    cfg_path.write_text(invalid_config_text)
-
-    yield (cfg_path,)
-
-
-@pytest.fixture()
-def create_engine(valid_cfg):
-    """Setup in-memory SQLite engine"""
-    cfg = valid_cfg[1].pop("sqlalchemy")
-    engine = sqla.engine_from_config(cfg)
-    yield engine
-
-
-@pytest.fixture()
-def create_db(create_engine: sqla.Engine, valid_cfg: dict):
-    """A DB with table 'table1', column 'col1', as degined in valid_cfg,
-    with inserted 'check_value'
-    """
-    engine = create_engine
-    tables_from_config(valid_cfg[1])
-    METADATA.create_all(engine)
-    stmt = sqla.insert(sqla.Table("table1", METADATA)).values(col1="check_value")
-    stmt.compile()
-    with engine.connect() as conn:
-        conn.execute(stmt)
-        conn.commit()
-
-    yield engine
-
-
-@pytest.mark.skip(reason="Not implemented")
 class TestConnect:
-    def test_SQLAConnection(self):
-        assert False
+    @pytest.fixture
+    def valid_cfg(self, tmp_path) -> tuple[Path, dict]:
+        """Valid columns JSON structure with all supported SQLAlchemy types"""
+        valid_config = {"sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}}
+        cfg_path = tmp_path / "test_config.json"
+        with open(cfg_path, "w") as f:
+            json.dump(valid_config, f)
+        return cfg_path, valid_config
 
-    def test_load_db_config(self):
-        assert False
+    @pytest.fixture
+    def missing_key_cfg(self, tmp_path) -> tuple[Path, dict]:
+        """Valid columns JSON structure with all supported SQLAlchemy types"""
+        valid_config = {"foo": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}}
+        cfg_path = tmp_path / "test_config.json"
+        with open(cfg_path, "w") as f:
+            json.dump(valid_config, f)
+        return cfg_path, valid_config
 
-    def test_validate_db_config(self):
-        assert False
+    @pytest.fixture
+    def bad_url_cfg(self, tmp_path) -> tuple[Path, dict]:
+        """Valid columns JSON structure with all supported SQLAlchemy types"""
+        valid_config = {"sqlalchemy": {"sqlalchemy.url": "bar"}}
+        cfg_path = tmp_path / "test_config.json"
+        with open(cfg_path, "w") as f:
+            json.dump(valid_config, f)
+        return cfg_path, valid_config
 
-    def test_remote_database(self):
-        assert False
+    def test_returns_engine_metadata(self, valid_cfg):
+        engine, metadata = gdt.connect(cfg_path=valid_cfg[0])
+        assert isinstance(engine, sqla.Engine) and isinstance(metadata, sqla.MetaData)
+
+    def test_connect_config_missing(self):
+        with pytest.raises(FileNotFoundError):
+            result = gdt.connect(cfg_path=Path("C:silly_path.json"))
+
+    def test_connect_missing_key(self, missing_key_cfg):
+        # NOTE given that this is something missing from a 'gdt' file perhaps it should also
+        # raise a gdt.KnownException to warn the user of a bad config?
+        # might be worth adding caplog to ensure certain messages are raised
+        with pytest.raises(KeyError):
+            result = gdt.connect(cfg_path=missing_key_cfg[0])
+
+    def test_connect_bad_url(self, bad_url_cfg):
+        # NOTE might be worth adding caplog to ensure certain messages are raised
+        with pytest.raises(gdt.KnownException):
+            result = gdt.connect(cfg_path=bad_url_cfg[0])
 
 
 class TestCreate:
