@@ -150,6 +150,33 @@ class TestCreate:
         )
 
 
+class TestSelect:
+    @pytest.fixture
+    def mocked_populated_db(
+        self, mocked_connect, dummy_data
+    ) -> tuple[sqla.Engine, sqla.MetaData]:
+        engine = mocked_connect[0]
+        metadata = mocked_connect[1]
+        data_df = dummy_data[1]
+        gdt.create_from_data(engine, metadata, data_df, "test_select")
+        return (engine, metadata, data_df)
+
+    def test_select(self, mocked_populated_db):
+
+        engine = mocked_populated_db[0]
+        metadata = mocked_populated_db[1]
+        source_df = mocked_populated_db[2]
+
+        # generate a select statement for the dummy data
+        metadata.reflect(engine)
+        test_select = metadata.tables["test_select"]
+        statement = sqla.select(test_select)
+
+        result_df = gdt.select(engine=engine, statement=statement)
+
+        assert result_df.equals(source_df)
+
+
 # # @pytest.fixture(autouse=True)
 # # def clear_metadata():
 # #     """Clear metadata between tests."""
