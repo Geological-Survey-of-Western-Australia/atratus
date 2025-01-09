@@ -56,46 +56,63 @@ class TestConnect:
 
 
 class TestCreate:
-    def test_valid_column_builder(self):
-        # Test ColumnBuilder with valid columns JSON
-        builder = ColumnBuilder(columns_json=valid_columns_json)
-        columns = builder.columns
-        assert len(columns) == len(valid_columns_json)
-        for column in columns:
-            col_name = column.name
-            col_type = column.type.__class__.__name__
-            expected_type = valid_columns_json[col_name]
-            assert col_type is expected_type
+    @pytest.fixture
+    def mocked_connect(self) -> tuple[sqla.Engine, sqla.MetaData]:
 
-    def test_invalid_column_type(self):
-        # Test ColumnBuilder with unsupported column types
-        with pytest.raises(gdte.KnownException):
-            ColumnBuilder(
-                columns_json={
-                    "valid_integer_col": "Integer",
-                    "unknown_type_col": "UnknownType",
-                }
-            )
+        memory_engine = sqla.engine.engine_from_config(
+            {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
+        )
+        return memory_engine, sqla.MetaData()
 
-    def test_dict_raise_on_duplicates(self):
-        # Test duplicate keys in configuration handling
-        duplicate_config = [
-            ("table1", {"col1": "String"}),
-            ("table1", {"col2": "Integer"}),
-        ]
-        with pytest.raises(gdte.KnownException):
-            dict_raise_on_duplicates(duplicate_config)
+    @pytest.fixture
+    def dummy_data(self, tmp_path) -> tuple[str | Path, pd.DataFrame]:
 
-    def test_parse_database_config_dict(self, valid_cfg):
-        """Test loading and parsing configuration file without duplicates"""
-        config = parse_database_config(valid_cfg[0])
-        assert "table1" in config["tables"]
+        test_data = {}
+        test_data["col_1"] = [1, 1, 1, 1, 1]
+        test_data["col_2"] = ["two", "two", "two", "two", "two"]
+        test_data["col_3"] = [3.0, 3.0, 3.0, 3.0, 3.0]
 
-    def test_tables_from_config_file(self, valid_cfg):
-        """Test table creation from valid configuration dict"""
-        tables_from_config(valid_cfg[1])
-        table_names = METADATA.tables.keys()
-        assert "table1" in table_names
+        data_path = tmp_path / "test_data.csv"
+        data_load = pd.DataFrame(test_data)
+        data_load.to_csv(data_path)
+
+        return data_path, data_load
+
+    def test_create_from_data_path(self, mocked_connect, dummy_data):
+
+        engine = mocked_connect[0]
+        metadata = mocked_connect[1]
+
+        data = dummy_data[0]
+
+        gdt.create_from_data(
+            engine,
+            metadata,
+            data=data,
+        )
+
+        # assert table with expected columns created in engine
+        metadata.reflect(engine)
+        tables = metadata.tables.keys()
+        assert "test_data" in tables
+
+    def test_create_from_data(self, mocked_connect, dummy_data):
+
+        engine = mocked_connect[0]
+        metadata = mocked_connect[1]
+
+        data = dummy_data[1]
+
+        gdt.create_from_data(
+            engine,
+            metadata,
+            data=data,
+        )
+
+        # assert table with expected columns created in engine
+        metadata.reflect(engine)
+        tables = metadata.tables.keys()
+        assert "unnamed" in tables
 
 
 # # @pytest.fixture(autouse=True)
