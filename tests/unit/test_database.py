@@ -114,6 +114,38 @@ class TestCreate:
         tables = metadata.tables.keys()
         assert "unnamed" in tables
 
+    def test_create_data_name(self, mocked_connect, dummy_data):
+
+        engine = mocked_connect[0]
+        metadata = mocked_connect[1]
+
+        data_path = dummy_data[0]
+        data = dummy_data[1]
+
+        gdt.create_from_data(
+            engine,
+            metadata,
+            table_name="my_table_from_df",
+            data=data,
+        )
+
+        gdt.create_from_data(
+            engine,
+            metadata,
+            table_name="my_table_from_path",
+            data=data_path,
+        )
+
+        # assert table with expected columns created in engine
+        metadata.reflect(engine)
+        tables = metadata.tables.keys()
+        assert all(
+            [
+                True if tn in tables else False
+                for tn in ["my_table_from_df", "my_table_from_path"]
+            ]
+        )
+
 
 # # @pytest.fixture(autouse=True)
 # # def clear_metadata():
