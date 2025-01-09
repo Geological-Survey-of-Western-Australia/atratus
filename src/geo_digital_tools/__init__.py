@@ -13,6 +13,7 @@ except PackageNotFoundError:
 
 
 from geo_digital_tools import utils
+from geo_digital_tools.utils.statements import load_statement_config, statement_builder
 from geo_digital_tools.database import (
     connect,
     create_from_data,
@@ -28,6 +29,8 @@ from geo_digital_tools.utils.exceptions import (
 )
 
 __all__ = [
+    "load_statement_config",
+    "statement_builder",
     "utils",
     "connect",
     "create_from_data",
