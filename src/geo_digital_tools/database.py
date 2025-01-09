@@ -29,19 +29,32 @@ def create_from_sqla(metadata):
 
 
 def create_from_data(
-    engine: sqla.Engine, metadata: sqla.MetaData, data_path: str | Path
+    engine: sqla.Engine,
+    metadata: sqla.MetaData,
+    data: str | Path | pd.DataFrame,
+    table_name: str | None = None,
+    schema_name: str | None = None,
 ) -> None:
     """Create tables and columns in a database.
     Table definition can be inferred from example data
     """
-    try:
-        data_path = Path(data_path)
-        data = pd.read_csv(data_path, header="infer")
-        data.to_sql(name=data_path.name, con=engine)
 
+    if isinstance(data, pd.DataFrame):
+        name = table_name if isinstance(table_name, str) else "unnamed"
+    if isinstance(data, (str, Path)):
+        data_path = Path(data)
+        name = table_name if isinstance(table_name, str) else data_path.stem
+        data = pd.read_csv(data_path, header="infer")
+    # NOTE we might want the schema to be linked to cygnet name eg geodigitaldatabase.skippy.table1
+    # schema_name = ''
+    try:
+        with engine.begin() as connection:
+            data.to_sql(name=name, con=connection, index=False)  # schema=schema_name
+    # TODO we'll be populating this area will all the possible gdt.KnownExceptions
     except Exception as exc:
         pass
-    metadata.create_all()
+
+    metadata.create_all(bind=engine)
 
 
 def select(engine: sqla.Engine, statement) -> pd.DataFrame:
