@@ -6,6 +6,30 @@ import pytest
 import geo_digital_tools as gdt
 
 
+@pytest.fixture
+def dummy_data(tmp_path) -> tuple[str | Path, pd.DataFrame]:
+
+    test_data = {}
+    test_data["col_1"] = [1, 1, 1, 1, 1]
+    test_data["col_2"] = ["two", "two", "two", "two", "two"]
+    test_data["col_3"] = [3.0, 3.0, 3.0, 3.0, 3.0]
+
+    data_path = tmp_path / "test_data.csv"
+    data_load = pd.DataFrame(test_data)
+    data_load.to_csv(data_path)
+
+    return data_path, data_load
+
+
+@pytest.fixture
+def mocked_connect() -> tuple[sqla.Engine, sqla.MetaData]:
+
+    memory_engine = sqla.engine.engine_from_config(
+        {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
+    )
+    return memory_engine, sqla.MetaData()
+
+
 class TestConnect:
     @pytest.fixture
     def valid_cfg(self, tmp_path) -> tuple[Path, dict]:
