@@ -114,7 +114,7 @@ class TestCreate:
         tables = metadata.tables.keys()
         assert "unnamed" in tables
 
-    def test_create_data_name(self, mocked_connect, dummy_data):
+    def test_create_name_table(self, mocked_connect, dummy_data):
 
         engine = mocked_connect[0]
         metadata = mocked_connect[1]
