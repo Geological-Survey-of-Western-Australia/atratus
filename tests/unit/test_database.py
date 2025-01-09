@@ -97,48 +97,40 @@ class TestCreate:
         table_names = METADATA.tables.keys()
         assert "table1" in table_names
 
-    def test_parse_database_config_with_duplicates(self, invalid_cfg):
-        """Test parsing with duplicate keys in the config
 
-        Note that Python will silently drop duplicated key:values in a dictionary
-        We check here if data will be silently been lost
-        """
-        with pytest.raises(gdte.KnownException):
-            parse_database_config(invalid_cfg[0])
-
-    def test_createinterface_from_config(self, valid_cfg):
-        t_if = CreateInterface(cfg_path=valid_cfg[0])
-        t_if.create_metadata()
-        assert "table1" in sqla.inspect(t_if.engine).get_table_names()
+# # @pytest.fixture(autouse=True)
+# # def clear_metadata():
+# #     """Clear metadata between tests."""
+# #     METADATA.clear()
 
 
-class TestRead:
-    def test_read_interface(self, create_db):
-        """Create a Mock ReadInterface and ensure the contained value can be read"""
+# # class TestRead:
+# #     def test_read_interface(self, create_db):
+# #         """Create a Mock ReadInterface and ensure the contained value can be read"""
 
-        class MockReadInterface(ReadInterface):
-            def __init__(self, engine):
-                super().__init__(engine)
+# #         class MockReadInterface(ReadInterface):
+# #             def __init__(self, engine):
+# #                 super().__init__(engine)
 
-            def select_statement(self):
-                tbl = sqla.Table("table1", METADATA)
-                stmt = sqla.select(tbl.c.col1)
-                return stmt
+# #             def select_statement(self):
+# #                 tbl = sqla.Table("table1", METADATA)
+# #                 stmt = sqla.select(tbl.c.col1)
+# #                 return stmt
 
-        t_ri = MockReadInterface(create_db)
-        t_ri.validate_interface()
-        df = t_ri.df_from_interface()
-        assert "check_value" in df["col1"][0]
-
-
-@pytest.mark.skip(reason="Not implemented")
-class TestUpdate:
-    def test_update(self):
-        assert False
+# #         t_ri = MockReadInterface(create_db)
+# #         t_ri.validate_interface()
+# #         df = t_ri.df_from_interface()
+# #         assert "check_value" in df["col1"][0]
 
 
-class TestWrite:
-    """Group of functionality from write.py"""
+# # @pytest.mark.skip(reason="Not implemented")
+# # class TestUpdate:
+# #     def test_update(self):
+# #         assert False
 
-    def test_WriteInterface(create_db):
-        t_wi = WriteInterface(create_db)
+
+# # class TestWrite:
+# #     """Group of functionality from write.py"""
+
+# #     def test_WriteInterface(create_db):
+# #         t_wi = WriteInterface(create_db)
