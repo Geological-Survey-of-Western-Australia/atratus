@@ -3,13 +3,30 @@
         "sqlalchemy.url": "sqlite+pysqlite:///:memory:",
         "sqlalchemy.echo": "True"
     },
-    "tables": {
-        "table1": {
-            "col1": "String",
-            "col2": "Integer"
+    "statement_configs": {
+        "selection": {
+            "table_1": [
+                "table_1_col_1",
+                "table_1_col_2"
+            ],
+            "table_2": [
+                "table_2_col1",
+                "table_2_col2"
+            ]
         },
-        "table2": {
-            "col1": "Text"
-        }
+        "joins": [
+            {
+                "table_2": [
+                    [
+                        "table_2",
+                        "table_2_col_1"
+                    ],
+                    [
+                        "table_1",
+                        "table_1_col_1"
+                    ]
+                ]
+            }
+        ]
     }
 }
