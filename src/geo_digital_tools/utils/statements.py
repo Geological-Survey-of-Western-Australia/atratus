@@ -1,4 +1,5 @@
 import sqlalchemy as sqla
+from sqlalchemy.orm import aliased
 from sqlalchemy import exc as sqlae
 from pathlib import Path
 import json
@@ -12,6 +13,7 @@ def load_statement_config(cfg_path: Path | str) -> dict:
         stmt_cfg = db_config.pop("statement_configs")
         selection = stmt_cfg["selection"]
         joins = stmt_cfg["joins"]
+        alias = stmt_cfg["aliases"]
 
     except Exception as e:
         gdt.KnownException(
@@ -19,20 +21,31 @@ def load_statement_config(cfg_path: Path | str) -> dict:
             should_raise=True,
         )
 
-    return selection, joins
+    return selection, joins, alias
 
 
-def statement_builder(metadata, engine, columns_dict, join_list):
+def statement_builder(
+    engine: sqla.Engine,
+    metadata: sqla.MetaData,
+    columns_dict: dict,
+    join_list: list[dict],
+    alias: dict,
+):
     """
     colummns : dict {table_name : [col1, col2]}
     """
     statement = None
-
+    tables_to_alias = list(alias.keys())
     # retrieve tables
     tables_dict = {}
     for t in list(columns_dict.keys()):
         try:
-            tables_dict[t] = sqla.Table(t, metadata, autoload_with=engine)
+            table_i = sqla.Table(t, metadata, autoload_with=engine)
+            if t in tables_to_alias:
+                tables_dict[alias[t]] = aliased(table_i, name=alias[t])
+            if t not in tables_to_alias:
+                tables_dict[t] = table_i
+
         except sqlae.NoSuchTableError:
             gdt.KnownException(
                 f"Table [{t}] specified in config, does not exist in engine.",
@@ -44,7 +57,10 @@ def statement_builder(metadata, engine, columns_dict, join_list):
     for table, column_list in columns_dict.items():
         for col in column_list:
             try:
-                t = tables_dict[table]
+                if table in tables_to_alias:
+                    t = tables_dict[alias[table]]
+                if table not in tables_to_alias:
+                    t = tables_dict[table]
                 c = t.c[col]
                 columns_list.append(c)
             except KeyError or sqlae.NoSuchColumnError:
@@ -57,13 +73,34 @@ def statement_builder(metadata, engine, columns_dict, join_list):
     # add joins
     for j in join_list:
 
-        target_str = list(j.keys())[0]
-        mapping_list = j[target_str]
+        table_str = list(j.keys())[0]
 
-        target = tables_dict[target_str]
-        left_col = tables_dict[mapping_list[0][0]].c[mapping_list[0][1]]
-        right_col = tables_dict[mapping_list[1][0]].c[mapping_list[1][1]]
+        # extract_all strings
+        mapping_list = j[table_str]
+        left_table_str = mapping_list[0][0]
+        right_table_str = mapping_list[1][0]
+        left_col_str = mapping_list[0][1]
+        right_col_str = mapping_list[1][1]
 
-        statement = statement.join(target, left_col == right_col)
+        t = (
+            tables_dict[alias[table_str]]
+            if table_str in tables_to_alias
+            else tables_dict[table_str]
+        )
+        t_l = (
+            tables_dict[alias[left_table_str]]
+            if left_table_str in tables_to_alias
+            else tables_dict[left_table_str]
+        )
+        t_r = (
+            tables_dict[alias[right_table_str]]
+            if right_table_str in tables_to_alias
+            else tables_dict[right_table_str]
+        )
+
+        left_col = t_l.c[left_col_str]
+        right_col = t_r.c[right_col_str]
+
+        statement = statement.join(t, left_col == right_col)
 
     return statement

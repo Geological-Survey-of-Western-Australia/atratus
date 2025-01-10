@@ -10,8 +10,8 @@
                 "table_1_col_2"
             ],
             "table_2": [
-                "table_2_col1",
-                "table_2_col2"
+                "table_2_col_1",
+                "table_2_col_2"
             ]
         },
         "joins": [
@@ -27,6 +27,10 @@
                     ]
                 ]
             }
-        ]
+        ],
+        "aliases": {
+            "table_2": "table_2_label",
+            "table_1": "table_1_label"
+        }
     }
 }

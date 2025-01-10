@@ -74,7 +74,8 @@ class TestStatement:
                         ]
                     }
                 ],
-            },
+                "aliases": {"table_2": "table_2_label", "table_1": "table_1_label"},
+            }
         }
         return valid_config
 
@@ -93,7 +94,7 @@ class TestStatement:
         return cfg_path
 
     def test_load_valid_statement_config(self, valid_cfg_disk):
-        selection, joins = gdt.load_statement_config(cfg_path=valid_cfg_disk)
+        selection, joins, alias = gdt.load_statement_config(cfg_path=valid_cfg_disk)
         for k, v in selection.items():
             assert isinstance(k, str)
             assert isinstance(v, list)
@@ -120,14 +121,19 @@ class TestStatement:
 
         tables_dict = valid_cfg_memory["statement_configs"]["selection"]
         joins = valid_cfg_memory["statement_configs"]["joins"]
+        aliases = valid_cfg_memory["statement_configs"]["aliases"]
 
         statement = gdt.statement_builder(
-            metadata=metadata, engine=engine, columns_dict=tables_dict, join_list=joins
+            metadata=metadata,
+            engine=engine,
+            columns_dict=tables_dict,
+            join_list=joins,
+            alias=aliases,
         )
-
+        x = str(statement)
         assert (
             str(statement).replace("\n", "")
-            == "SELECT table_1.table_1_col_1, table_1.table_1_col_2, table_2.table_2_col_1, table_2.table_2_col_2 FROM table_1 JOIN table_2 ON table_2.table_2_col_1 = table_1.table_1_col_1"
+            == "SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 FROM table_1 AS table_1_label JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1"
         )
 
     def test_statement_builder_missingtable(
@@ -138,6 +144,7 @@ class TestStatement:
 
         tables_dict = valid_cfg_memory["statement_configs"]["selection"]
         joins = valid_cfg_memory["statement_configs"]["joins"]
+        aliases = valid_cfg_memory["statement_configs"]["aliases"]
 
         with pytest.raises(gdt.KnownException) as excinfo:
             statement = gdt.statement_builder(
@@ -145,6 +152,7 @@ class TestStatement:
                 engine=engine,
                 columns_dict=tables_dict,
                 join_list=joins,
+                alias=aliases,
             )
 
         assert "specified in config, does not exist in engine." in str(excinfo.value)
@@ -157,6 +165,7 @@ class TestStatement:
 
         tables_dict = valid_cfg_memory["statement_configs"]["selection"]
         joins = valid_cfg_memory["statement_configs"]["joins"]
+        aliases = valid_cfg_memory["statement_configs"]["aliases"]
 
         with pytest.raises(gdt.KnownException) as excinfo:
             statement = gdt.statement_builder(
@@ -164,6 +173,7 @@ class TestStatement:
                 engine=engine,
                 columns_dict=tables_dict,
                 join_list=joins,
+                alias=aliases,
             )
 
         assert "specified in config, does not exist in table" in str(excinfo.value)
