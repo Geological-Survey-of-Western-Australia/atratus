@@ -39,13 +39,6 @@ def create_from_sqla(
     )
 
 
-def default_load_csv(data_path: str | Path) -> tuple[str, pd.DataFrame]:
-    data_path = Path(data_path)
-    table_name = data_path.stem
-    dataframe = pd.read_csv(data_path, header="infer")
-    return table_name, dataframe
-
-
 def create_from_dataframe(
     engine: sqla.Engine,
     metadata: sqla.MetaData,
