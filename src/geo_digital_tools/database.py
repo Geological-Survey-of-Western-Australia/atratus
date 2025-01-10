@@ -74,7 +74,11 @@ def insert(engine: sqla.Engine, table_name: str, dataframe: pd.DataFrame) -> Non
     try:
         with engine.begin() as connection:
             dataframe.to_sql(
-                table_name, connection, if_exists="fail", method="multi", index=False
+                name=table_name,
+                con=connection,
+                if_exists="fail",
+                method="multi",
+                index=False,
             )
     except Exception as exc:
         pass

@@ -179,6 +179,32 @@ class TestSelect:
         assert result_df.equals(source_df)
 
 
+class TestInsert:
+
+    def test_insert(self, mocked_populated_db):
+
+        engine = mocked_populated_db[0]
+        metadata = mocked_populated_db[1]
+        source_df = mocked_populated_db[2]
+
+        # generate a select statement for the dummy data
+        metadata.reflect(engine)
+        test_select = metadata.tables["test_select"]
+        statement = sqla.select(test_select)
+        result_of_select_df = gdt.select(engine=engine, statement=statement)
+
+        # insert a copy of it into a new table
+        gdt.insert(engine, "my_test_table", source_df)
+
+        # retrieve it
+        metadata.reflect(engine)
+        test_insert = metadata.tables["my_test_table"]
+        select_inserted = sqla.select(test_insert)
+        result_of_insert_df = gdt.select(engine, select_inserted)
+
+        assert result_of_insert_df.equals(result_of_select_df)
+
+
 # # @pytest.fixture(autouse=True)
 # # def clear_metadata():
 # #     """Clear metadata between tests."""
