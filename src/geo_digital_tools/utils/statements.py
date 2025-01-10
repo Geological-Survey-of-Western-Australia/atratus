@@ -1,11 +1,14 @@
+import json
+from pathlib import Path
+
 import sqlalchemy as sqla
 from sqlalchemy import exc as sqlae
-from pathlib import Path
-import json
+
 import geo_digital_tools as gdt
 
 
-def load_statement_config(cfg_path: Path | str) -> dict:
+def load_statement_config(cfg_path: Path | str) -> tuple[dict, dict]:
+    """Load a geo digital tools config defining your SQL statement."""
     try:
         with open(cfg_path) as f:
             db_config = json.load(f)
@@ -13,7 +16,7 @@ def load_statement_config(cfg_path: Path | str) -> dict:
         selection = stmt_cfg["selection"]
         joins = stmt_cfg["joins"]
 
-    except Exception as e:
+    except Exception as exc:
         gdt.KnownException(
             f"Config file {cfg_path} is malformed or missing : Should contain statement_configs, selection, and joins.",
             should_raise=True,
@@ -24,6 +27,7 @@ def load_statement_config(cfg_path: Path | str) -> dict:
 
 def statement_builder(metadata, engine, columns_dict, join_list):
     """
+    Build an SQLAlchemy statement from a geo digital tools config.
     colummns : dict {table_name : [col1, col2]}
     """
     statement = None
@@ -48,6 +52,7 @@ def statement_builder(metadata, engine, columns_dict, join_list):
                 c = t.c[col]
                 columns_list.append(c)
             except KeyError or sqlae.NoSuchColumnError:
+                # TODO: Consider if an Exception group is appropriate here.
                 gdt.KnownException(
                     f"Column [{col}] specified in config, does not exist in table [{table}] contains columns [{t.c.keys()}].",
                     should_raise=True,
@@ -56,7 +61,6 @@ def statement_builder(metadata, engine, columns_dict, join_list):
 
     # add joins
     for j in join_list:
-
         target_str = list(j.keys())[0]
         mapping_list = j[target_str]
 

@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
 
-import sqlalchemy as sqla
 import pandas as pd
+import sqlalchemy as sqla
 
 
-def connect(cfg_path: str | Path) -> sqla.Engine:
+def connect(cfg_path: str | Path) -> tuple[sqla.Engine, sqla.MetaData]:
     """Connect to an engine from a config file.
 
     e.g. configs/config.json:
@@ -52,7 +52,7 @@ def create_from_data(
             data.to_sql(name=name, con=connection, index=False)  # schema=schema_name
     # TODO we'll be populating this area will all the possible gdt.KnownExceptions
     except Exception as exc:
-        pass
+        raise exc
 
     metadata.create_all(bind=engine)
 
@@ -64,7 +64,7 @@ def select(engine: sqla.Engine, statement) -> pd.DataFrame:
             result = conn.execute(statement).all()
         df = pd.DataFrame(result)
     except Exception as exc:
-        pass
+        raise exc
 
     return df
 
@@ -81,4 +81,4 @@ def insert(engine: sqla.Engine, table_name: str, dataframe: pd.DataFrame) -> Non
                 index=False,
             )
     except Exception as exc:
-        pass
+        raise exc

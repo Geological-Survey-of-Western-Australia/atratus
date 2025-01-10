@@ -1,8 +1,10 @@
 import json
 from pathlib import Path
+
 import pandas as pd
-import sqlalchemy as sqla
 import pytest
+import sqlalchemy as sqla
+
 import geo_digital_tools as gdt
 
 
@@ -19,7 +21,6 @@ def mocked_populated_db(
 
 @pytest.fixture
 def dummy_data(tmp_path) -> tuple[str | Path, pd.DataFrame]:
-
     test_data = {}
     test_data["col_1"] = [1, 1, 1, 1, 1]
     test_data["col_2"] = ["two", "two", "two", "two", "two"]
@@ -34,7 +35,6 @@ def dummy_data(tmp_path) -> tuple[str | Path, pd.DataFrame]:
 
 @pytest.fixture
 def mocked_connect() -> tuple[sqla.Engine, sqla.MetaData]:
-
     memory_engine = sqla.engine.engine_from_config(
         {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
     )
@@ -91,9 +91,7 @@ class TestConnect:
 
 
 class TestCreate:
-
     def test_create_from_data_path(self, mocked_connect, dummy_data):
-
         engine = mocked_connect[0]
         metadata = mocked_connect[1]
 
@@ -111,7 +109,6 @@ class TestCreate:
         assert "test_data" in tables
 
     def test_create_from_data(self, mocked_connect, dummy_data):
-
         engine = mocked_connect[0]
         metadata = mocked_connect[1]
 
@@ -129,7 +126,6 @@ class TestCreate:
         assert "unnamed" in tables
 
     def test_create_name_table(self, mocked_connect, dummy_data):
-
         engine = mocked_connect[0]
         metadata = mocked_connect[1]
 
@@ -162,9 +158,7 @@ class TestCreate:
 
 
 class TestSelect:
-
     def test_select(self, mocked_populated_db):
-
         engine = mocked_populated_db[0]
         metadata = mocked_populated_db[1]
         source_df = mocked_populated_db[2]
@@ -180,9 +174,7 @@ class TestSelect:
 
 
 class TestInsert:
-
     def test_insert(self, mocked_populated_db):
-
         engine = mocked_populated_db[0]
         metadata = mocked_populated_db[1]
         source_df = mocked_populated_db[2]
