@@ -15,7 +15,8 @@ def load_statement_config(cfg_path: Path | str) -> dict:
 
     except Exception as e:
         gdt.KnownException(
-            f"Config file {cfg_path} is malformed : Should contain statement_configs, selection, and joins."
+            f"Config file {cfg_path} is malformed or missing : Should contain statement_configs, selection, and joins.",
+            should_raise=True,
         )
 
     return selection, joins
