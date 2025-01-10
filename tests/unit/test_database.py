@@ -15,7 +15,7 @@ def mocked_populated_db(
     engine = mocked_connect[0]
     metadata = mocked_connect[1]
     data_df = dummy_data[1]
-    gdt.create_from_data(engine, metadata, data_df, "test_select")
+    gdt.create_from_dataframe(engine, metadata, data_df, "test_select")
     return (engine, metadata, data_df)
 
 
@@ -91,70 +91,37 @@ class TestConnect:
 
 
 class TestCreate:
-    def test_create_from_data_path(self, mocked_connect, dummy_data):
-        engine = mocked_connect[0]
-        metadata = mocked_connect[1]
 
-        data = dummy_data[0]
-
-        gdt.create_from_data(
-            engine,
-            metadata,
-            data=data,
-        )
-
-        # assert table with expected columns created in engine
-        metadata.reflect(engine)
-        tables = metadata.tables.keys()
-        assert "test_data" in tables
-
-    def test_create_from_data(self, mocked_connect, dummy_data):
+    def test_create_from_dataframe(self, mocked_connect, dummy_data):
         engine = mocked_connect[0]
         metadata = mocked_connect[1]
 
         data = dummy_data[1]
 
-        gdt.create_from_data(
-            engine,
-            metadata,
-            data=data,
-        )
+        gdt.create_from_dataframe(engine, metadata, dataframe=data)
 
         # assert table with expected columns created in engine
         metadata.reflect(engine)
         tables = metadata.tables.keys()
-        assert "unnamed" in tables
+        assert "unnamed_table" in tables
 
     def test_create_name_table(self, mocked_connect, dummy_data):
         engine = mocked_connect[0]
         metadata = mocked_connect[1]
 
-        data_path = dummy_data[0]
         data = dummy_data[1]
 
-        gdt.create_from_data(
+        gdt.create_from_dataframe(
             engine,
             metadata,
             table_name="my_table_from_df",
-            data=data,
-        )
-
-        gdt.create_from_data(
-            engine,
-            metadata,
-            table_name="my_table_from_path",
-            data=data_path,
+            dataframe=data,
         )
 
         # assert table with expected columns created in engine
         metadata.reflect(engine)
         tables = metadata.tables.keys()
-        assert all(
-            [
-                True if tn in tables else False
-                for tn in ["my_table_from_df", "my_table_from_path"]
-            ]
-        )
+        assert all([True if tn in tables else False for tn in ["my_table_from_df"]])
 
 
 class TestSelect:
