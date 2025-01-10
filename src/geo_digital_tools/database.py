@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
 
-import sqlalchemy as sqla
 import pandas as pd
+import sqlalchemy as sqla
 
 
-def connect(cfg_path: str | Path) -> sqla.Engine:
+def connect(cfg_path: str | Path) -> tuple[sqla.Engine, sqla.MetaData]:
     """Connect to an engine from a config file.
 
     e.g. configs/config.json:
@@ -23,36 +23,46 @@ def connect(cfg_path: str | Path) -> sqla.Engine:
     return (engine, meta_data)
 
 
-def create_from_sqla(metadata):
-    """"""
-    sqla.Table("table_name", metadata, sqla.Column("column_name", sqla.String))
-
-
-def create_from_data(
+def create_from_sqla(
     engine: sqla.Engine,
     metadata: sqla.MetaData,
-    data: str | Path | pd.DataFrame,
-    table_name: str | None = None,
+    table_name: str,
+    column_name: str,
+    sqla_dtype: sqla.types.TypeDecorator,
+) -> None:
+    """An example function to define Tables and Columns from sqlalchemy function calls."""
+    sqla.Table(
+        table_name,
+        metadata,
+        sqla.Column(column_name, sqla_dtype),
+        autoload_with=engine,
+    )
+
+
+def default_load_csv(data_path: str | Path) -> tuple[str, pd.DataFrame]:
+    data_path = Path(data_path)
+    table_name = data_path.stem
+    dataframe = pd.read_csv(data_path, header="infer")
+    return table_name, dataframe
+
+
+def create_from_dataframe(
+    engine: sqla.Engine,
+    metadata: sqla.MetaData,
+    dataframe: pd.DataFrame,
+    table_name: str = "unnamed_table",
     schema_name: str | None = None,
 ) -> None:
-    """Create tables and columns in a database.
-    Table definition can be inferred from example data
-    """
-
-    if isinstance(data, pd.DataFrame):
-        name = table_name if isinstance(table_name, str) else "unnamed"
-    if isinstance(data, (str, Path)):
-        data_path = Path(data)
-        name = table_name if isinstance(table_name, str) else data_path.stem
-        data = pd.read_csv(data_path, header="infer")
+    """Create tables and columns in a database inferred an example DataFrame."""
     # NOTE we might want the schema to be linked to cygnet name eg geodigitaldatabase.skippy.table1
     # schema_name = ''
     try:
         with engine.begin() as connection:
-            data.to_sql(name=name, con=connection, index=False)  # schema=schema_name
+            dataframe.to_sql(name=table_name, con=connection, index=False)
+            # schema=schema_name
     # TODO we'll be populating this area will all the possible gdt.KnownExceptions
     except Exception as exc:
-        pass
+        raise exc
 
     metadata.create_all(bind=engine)
 
@@ -64,7 +74,7 @@ def select(engine: sqla.Engine, statement) -> pd.DataFrame:
             result = conn.execute(statement).all()
         df = pd.DataFrame(result)
     except Exception as exc:
-        pass
+        raise exc
 
     return df
 
@@ -81,4 +91,4 @@ def insert(engine: sqla.Engine, table_name: str, dataframe: pd.DataFrame) -> Non
                 index=False,
             )
     except Exception as exc:
-        pass
+        raise exc
