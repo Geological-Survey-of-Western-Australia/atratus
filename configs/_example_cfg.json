@@ -26,6 +26,18 @@
                         "table_1_col_1"
                     ]
                 ]
+            },
+            {
+                "table_2": [
+                    [
+                        "table_2",
+                        "table_2_col_1"
+                    ],
+                    [
+                        "table_1",
+                        "table_1_col_1"
+                    ]
+                ]
             }
         ],
         "aliases": {

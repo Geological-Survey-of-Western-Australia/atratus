@@ -74,7 +74,13 @@ class TestStatement:
                             ["table_2", "table_2_col_1"],
                             ["table_1", "table_1_col_1"],
                         ]
-                    }
+                    },
+                    {
+                        "table_2": [
+                            ["table_2", "table_2_col_1"],
+                            ["table_1", "table_1_col_1"],
+                        ]
+                    },
                 ],
                 "aliases": {"table_2": "table_2_label", "table_1": "table_1_label"},
             }
@@ -118,13 +124,12 @@ class TestStatement:
         assert "malformed or missing : Should" in str(excinfo.value)
 
     def test_statement_builder(self, mocked_db_valid, valid_cfg_memory):
-
         engine, metadata = mocked_db_valid
 
         tables_dict = valid_cfg_memory["statement_configs"]["selection"]
         joins = valid_cfg_memory["statement_configs"]["joins"]
         aliases = valid_cfg_memory["statement_configs"]["aliases"]
-
+        assert True
         statement = gdt.statement_builder(
             metadata=metadata,
             engine=engine,
@@ -132,11 +137,10 @@ class TestStatement:
             join_list=joins,
             alias=aliases,
         )
-        x = str(statement)
-        assert (
-            str(statement).replace("\n", "")
-            == "SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 FROM table_1 AS table_1_label JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1"
-        )
+        statement_str = str(statement)
+        assert statement_str =='SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 \nFROM table_1 AS table_1_label JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1 JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1'
+
+
 
     def test_statement_builder_missingtable(
         self, mocked_db_missing_table, valid_cfg_memory
