@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-
+import geo_digital_tools as gdt
 import pandas as pd
 import sqlalchemy as sqla
 
@@ -18,7 +18,13 @@ def connect(cfg_path: str | Path) -> tuple[sqla.Engine, sqla.MetaData]:
     with open(cfg_path) as f:
         db_config = json.load(f)
     sqla_cfg = db_config.pop("sqlalchemy")
-    engine = sqla.engine_from_config(configuration=sqla_cfg)
+    try:
+        engine = sqla.engine_from_config(configuration=sqla_cfg)
+    except sqla.exc.ArgumentError as e:
+        gdt.KnownException(
+            f"Malform Config File: while parsing {sqla_cfg} encountered {e}",
+            should_raise=True,
+        )
     meta_data = sqla.MetaData()
     return (engine, meta_data)
 

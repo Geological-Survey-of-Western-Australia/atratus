@@ -94,27 +94,8 @@ class TestConnect:
     def test_connect_bad_url(self, bad_url_cfg):
         """Test that gdt.connect raises the appropriate exception for a malformed URL."""
         # NOTE might be worth adding caplog to ensure certain messages are raised
-        with pytest.raises((gdt.KnownException, sqla.exc.ArgumentError)) as excinfo:
-            # Attempt to connect using a bad URL from the config
-            gdt.connect(cfg_path=bad_url_cfg[0])
-
-        # Get the exception message
-        error_message = str(excinfo.value)
-
-        # Assert exception message matches the expected
-        if isinstance(excinfo.value, gdt.KnownException):
-            assert (
-                "Invalid SQLAlchemy configuration" in error_message
-            ), f"Unexpected KnownException message: {error_message}"
-        elif isinstance(excinfo.value, sqla.exc.ArgumentError):
-            assert (
-                "Could not parse SQLAlchemy URL from string 'bar'" in error_message
-            ), f"Unexpected ArgumentError message: {error_message}"
-        else:
-            # Explicitly fail if an unexpected exception type was raised
-            pytest.fail(
-                f"Unexpected exception type: {type(excinfo.value).__name__} with message: {error_message}"
-            )
+        with pytest.raises(gdt.KnownException):
+            result = gdt.connect(cfg_path=bad_url_cfg[0])
 
 
 class TestCreate:
