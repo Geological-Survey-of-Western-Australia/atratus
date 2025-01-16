@@ -16,7 +16,6 @@ from geo_digital_tools import utils
 from geo_digital_tools.utils.statements import load_statement_config, statement_builder
 from geo_digital_tools.database import (
     connect,
-    create_from_sqla,
     select,
     insert,
     create_from_dataframe,
@@ -28,13 +27,15 @@ from geo_digital_tools.utils.exceptions import (
     exception_handler,
 )
 
+from geo_digital_tools.utils.logging import setup_logger
+
 __all__ = [
     "load_statement_config",
+    "setup_logger",
     "statement_builder",
     "utils",
     "connect",
     "create_from_dataframe",
-    "create_from_sqla",
     "select",
     "insert",
     "KnownException",
