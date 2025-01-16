@@ -12,6 +12,7 @@ import geo_digital_tools as gdt
 def mocked_populated_db(
     mocked_connect, dummy_data
 ) -> tuple[sqla.Engine, sqla.MetaData]:
+    """Create a mocked database with dummy data."""
     engine = mocked_connect[0]
     metadata = mocked_connect[1]
     data_df = dummy_data[1]
@@ -21,6 +22,7 @@ def mocked_populated_db(
 
 @pytest.fixture
 def dummy_data(tmp_path) -> tuple[str | Path, pd.DataFrame]:
+    """Create dummy data as a DataFrame and save it as a CSV file."""
     test_data = {}
     test_data["col_1"] = [1, 1, 1, 1, 1]
     test_data["col_2"] = ["two", "two", "two", "two", "two"]
@@ -35,12 +37,14 @@ def dummy_data(tmp_path) -> tuple[str | Path, pd.DataFrame]:
 
 @pytest.fixture
 def mocked_connect() -> tuple[sqla.Engine, sqla.MetaData]:
+    """Create a mock in-memory SQLite database."""
     memory_engine = sqla.engine.engine_from_config(
         {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
     )
     return memory_engine, sqla.MetaData()
 
 
+# Test class for database connection functionalities
 class TestConnect:
     @pytest.fixture
     def valid_cfg(self, tmp_path) -> tuple[Path, dict]:
@@ -62,7 +66,7 @@ class TestConnect:
 
     @pytest.fixture
     def bad_url_cfg(self, tmp_path) -> tuple[Path, dict]:
-        """Valid columns JSON structure with all supported SQLAlchemy types"""
+        """Invalid JSON config file with a malformed URL."""
         valid_config = {"sqlalchemy": {"sqlalchemy.url": "bar"}}
         cfg_path = tmp_path / "test_config.json"
         with open(cfg_path, "w") as f:
@@ -70,14 +74,17 @@ class TestConnect:
         return cfg_path, valid_config
 
     def test_returns_engine_metadata(self, valid_cfg):
+        """Test if a valid config file returns a SQLAlchemy engine and metadata."""
         engine, metadata = gdt.connect(cfg_path=valid_cfg[0])
         assert isinstance(engine, sqla.Engine) and isinstance(metadata, sqla.MetaData)
 
     def test_connect_config_missing(self):
+        """Test if a missing config file raises FileNotFoundError."""
         with pytest.raises(FileNotFoundError):
             result = gdt.connect(cfg_path=Path("C:silly_path.json"))
 
     def test_connect_missing_key(self, missing_key_cfg):
+        """Test if a config file with a missing key raises KeyError."""
         # NOTE given that this is something missing from a 'gdt' file perhaps it should also
         # raise a gdt.KnownException to warn the user of a bad config?
         # might be worth adding caplog to ensure certain messages are raised
@@ -85,14 +92,15 @@ class TestConnect:
             result = gdt.connect(cfg_path=missing_key_cfg[0])
 
     def test_connect_bad_url(self, bad_url_cfg):
+        """Test that gdt.connect raises the appropriate exception for a malformed URL."""
         # NOTE might be worth adding caplog to ensure certain messages are raised
         with pytest.raises(gdt.KnownException):
             result = gdt.connect(cfg_path=bad_url_cfg[0])
 
 
 class TestCreate:
-
     def test_create_from_dataframe(self, mocked_connect, dummy_data):
+        """Test if a table can be created from a DataFrame."""
         engine = mocked_connect[0]
         metadata = mocked_connect[1]
 
@@ -106,6 +114,7 @@ class TestCreate:
         assert "unnamed_table" in tables
 
     def test_create_name_table(self, mocked_connect, dummy_data):
+        """Test if a named table can be created from a DataFrame."""
         engine = mocked_connect[0]
         metadata = mocked_connect[1]
 
@@ -126,6 +135,7 @@ class TestCreate:
 
 class TestSelect:
     def test_select(self, mocked_populated_db):
+        """Test if data can be selected from a table and matches the source DataFrame."""
         engine = mocked_populated_db[0]
         metadata = mocked_populated_db[1]
         source_df = mocked_populated_db[2]
@@ -142,6 +152,7 @@ class TestSelect:
 
 class TestInsert:
     def test_insert(self, mocked_populated_db):
+        """Test if data can be inserted into a new table and matches the original data."""
         engine = mocked_populated_db[0]
         metadata = mocked_populated_db[1]
         source_df = mocked_populated_db[2]
