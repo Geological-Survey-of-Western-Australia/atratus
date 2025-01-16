@@ -8,7 +8,7 @@ from sqlalchemy import exc as sqlae
 import geo_digital_tools as gdt
 
 
-def load_statement_config(cfg_path: Path | str) -> tuple[dict, dict]:
+def load_statement_config(cfg_path: Path | str) -> tuple[dict, dict, dict]:
     """Load a geo digital tools config defining your SQL statement."""
     try:
         with open(cfg_path) as f:
