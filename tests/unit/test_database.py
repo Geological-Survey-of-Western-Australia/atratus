@@ -1,113 +1,175 @@
-import unittest
 import json
-import sqlalchemy as sqla
 from pathlib import Path
-from geo_digital_tools.utils import exceptions as gdte
-from geo_digital_tools.database.create import (
-    ColumnBuilder,
-    tables_from_config,
-    dict_raise_on_duplicates,
-    parse_database_config,
-)  # Replace 'create' with your actual module name
+
+import pandas as pd
+import pytest
+import sqlalchemy as sqla
+
+import geo_digital_tools as gdt
 
 
-class TestDatabaseFunctions(unittest.TestCase):
-    def setUp(self):
-        # Setup in-memory SQLite engine for testing
-        self.engine = sqla.create_engine("sqlite:///:memory:")
-        self.meta = sqla.MetaData()
+@pytest.fixture
+def mocked_populated_db(
+    mocked_connect, dummy_data
+) -> tuple[sqla.Engine, sqla.MetaData]:
+    """Create a mocked database with dummy data."""
+    engine = mocked_connect[0]
+    metadata = mocked_connect[1]
+    data_df = dummy_data[1]
+    gdt.create_from_dataframe(engine, metadata, data_df, "test_select")
+    return (engine, metadata, data_df)
 
-        # Valid columns JSON structure with all supported SQLAlchemy types
-        self.valid_columns_json = {
-            "big_integer_col": "BigInteger",
-            "boolean_col": "Boolean",
-            "datetime_col": "DateTime",
-            "double_col": "Double",
-            "float_col": "Float",
-            "integer_col": "Integer",
-            "large_binary_col": "LargeBinary",
-            "numeric_col": "Numeric",
-            "string_col": "String",
-            "text_col": "Text",
-            "uuid_col": "Uuid",
-        }
 
-        # Invalid column JSON with unsupported types
-        self.invalid_columns_json = {
-            "valid_integer_col": "Integer",
-            "unknown_type_col": "UnknownType",
-        }
+@pytest.fixture
+def dummy_data(tmp_path) -> tuple[str | Path, pd.DataFrame]:
+    """Create dummy data as a DataFrame and save it as a CSV file."""
+    test_data = {}
+    test_data["col_1"] = [1, 1, 1, 1, 1]
+    test_data["col_2"] = ["two", "two", "two", "two", "two"]
+    test_data["col_3"] = [3.0, 3.0, 3.0, 3.0, 3.0]
 
-        # Sample valid configuration for tables
-        self.valid_config = {"table1": self.valid_columns_json}
+    data_path = tmp_path / "test_data.csv"
+    data_load = pd.DataFrame(test_data)
+    data_load.to_csv(data_path)
 
-        # Sample configuration path (adjust as needed or mock file)
-        self.config_path = Path("test_config.json")
-        with open(self.config_path, "w") as f:
-            json.dump(self.valid_config, f)
+    return data_path, data_load
 
-    def tearDown(self):
-        # Clean up created files after tests
-        if self.config_path.exists():
-            self.config_path.unlink()
 
-    def test_valid_column_builder(self):
-        # Test ColumnBuilder with valid columns JSON
-        builder = ColumnBuilder(columns_json=self.valid_columns_json)
-        columns = builder.columns
-        self.assertEqual(len(columns), len(self.valid_columns_json))
-        for column in columns:
-            col_name = column.name
-            col_type = column.type.__class__.__name__
-            expected_type = self.valid_columns_json[col_name]
-            self.assertEqual(col_type, expected_type)
+@pytest.fixture
+def mocked_connect() -> tuple[sqla.Engine, sqla.MetaData]:
+    """Create a mock in-memory SQLite database."""
+    memory_engine = sqla.engine.engine_from_config(
+        {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
+    )
+    return memory_engine, sqla.MetaData()
 
-    def test_invalid_column_type(self):
-        # Test ColumnBuilder with unsupported column types
-        with self.assertRaises(gdte.KnownException):
-            ColumnBuilder(columns_json=self.invalid_columns_json)
 
-    def test_tables_from_config(self):
-        # Test table creation from valid configuration
-        tables_from_config(self.valid_config, self.engine, self.meta)
-        table_names = self.meta.tables.keys()
-        self.assertIn("table1", table_names)
+# Test class for database connection functionalities
+class TestConnect:
+    @pytest.fixture
+    def valid_cfg(self, tmp_path) -> tuple[Path, dict]:
+        """Valid columns JSON structure with all supported SQLAlchemy types"""
+        valid_config = {"sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}}
+        cfg_path = tmp_path / "test_config.json"
+        with open(cfg_path, "w") as f:
+            json.dump(valid_config, f)
+        return cfg_path, valid_config
 
-    def test_dict_raise_on_duplicates(self):
-        # Test duplicate keys in configuration handling
-        duplicate_config = [
-            ("table1", {"col1": "String"}),
-            ("table1", {"col2": "Integer"}),
-        ]
-        with self.assertRaises(gdte.KnownException):
-            dict_raise_on_duplicates(duplicate_config)
+    @pytest.fixture
+    def missing_key_cfg(self, tmp_path) -> tuple[Path, dict]:
+        """Valid columns JSON structure with all supported SQLAlchemy types"""
+        valid_config = {"foo": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}}
+        cfg_path = tmp_path / "test_config.json"
+        with open(cfg_path, "w") as f:
+            json.dump(valid_config, f)
+        return cfg_path, valid_config
 
-    def test_parse_database_config(self):
-        # Test loading and parsing configuration file without duplicates
-        config = parse_database_config(self.config_path)
-        self.assertIn("table1", config)
-        self.assertEqual(config["table1"], self.valid_columns_json)
+    @pytest.fixture
+    def bad_url_cfg(self, tmp_path) -> tuple[Path, dict]:
+        """Invalid JSON config file with a malformed URL."""
+        valid_config = {"sqlalchemy": {"sqlalchemy.url": "bar"}}
+        cfg_path = tmp_path / "test_config.json"
+        with open(cfg_path, "w") as f:
+            json.dump(valid_config, f)
+        return cfg_path, valid_config
 
-    def test_parse_database_config_with_duplicates(self):
-        # Test parsing with duplicate keys in the config
-        # Note that Python will silently drop duplicated key:values in a dictionary
-        # We check here if data has silently been lost
+    def test_returns_engine_metadata(self, valid_cfg):
+        """Test if a valid config file returns a SQLAlchemy engine and metadata."""
+        engine, metadata = gdt.connect(cfg_path=valid_cfg[0])
+        assert isinstance(engine, sqla.Engine) and isinstance(metadata, sqla.MetaData)
 
-        test_value = "DateTime"
-        invalid_config = (
-            '{"table1": {"col1": "String"}, "table1": {"col1": "' + test_value + '"}}'
+    def test_connect_config_missing(self):
+        """Test if a missing config file raises FileNotFoundError."""
+        with pytest.raises(FileNotFoundError):
+            result = gdt.connect(cfg_path=Path("C:silly_path.json"))
+
+    def test_connect_missing_key(self, missing_key_cfg):
+        """Test if a config file with a missing key raises KeyError."""
+        # NOTE given that this is something missing from a 'gdt' file perhaps it should also
+        # raise a gdt.KnownException to warn the user of a bad config?
+        # might be worth adding caplog to ensure certain messages are raised
+        with pytest.raises(KeyError):
+            result = gdt.connect(cfg_path=missing_key_cfg[0])
+
+    def test_connect_bad_url(self, bad_url_cfg):
+        """Test that gdt.connect raises the appropriate exception for a malformed URL."""
+        # NOTE might be worth adding caplog to ensure certain messages are raised
+        with pytest.raises(gdt.KnownException):
+            result = gdt.connect(cfg_path=bad_url_cfg[0])
+
+
+class TestCreate:
+    def test_create_from_dataframe(self, mocked_connect, dummy_data):
+        """Test if a table can be created from a DataFrame."""
+        engine = mocked_connect[0]
+        metadata = mocked_connect[1]
+
+        data = dummy_data[1]
+
+        gdt.create_from_dataframe(engine, metadata, dataframe=data)
+
+        # assert table with expected columns created in engine
+        metadata.reflect(engine)
+        tables = metadata.tables.keys()
+        assert "unnamed_table" in tables
+
+    def test_create_name_table(self, mocked_connect, dummy_data):
+        """Test if a named table can be created from a DataFrame."""
+        engine = mocked_connect[0]
+        metadata = mocked_connect[1]
+
+        data = dummy_data[1]
+
+        gdt.create_from_dataframe(
+            engine,
+            metadata,
+            table_name="my_table_from_df",
+            dataframe=data,
         )
 
-        duplicate_config_path = Path("duplicate_test_config.json")
-        with open(duplicate_config_path, "w") as f:
-            f.write(invalid_config)
-
-        with self.assertRaises(gdte.KnownException):
-            parse_database_config(duplicate_config_path)
-
-        if duplicate_config_path.exists():
-            duplicate_config_path.unlink()
+        # assert table with expected columns created in engine
+        metadata.reflect(engine)
+        tables = metadata.tables.keys()
+        assert all([True if tn in tables else False for tn in ["my_table_from_df"]])
 
 
-if __name__ == "__main__":
-    unittest.main()
+class TestSelect:
+    def test_select(self, mocked_populated_db):
+        """Test if data can be selected from a table and matches the source DataFrame."""
+        engine = mocked_populated_db[0]
+        metadata = mocked_populated_db[1]
+        source_df = mocked_populated_db[2]
+
+        # generate a select statement for the dummy data
+        metadata.reflect(engine)
+        test_select = metadata.tables["test_select"]
+        statement = sqla.select(test_select)
+
+        result_df = gdt.select(engine=engine, statement=statement)
+
+        assert result_df.equals(source_df)
+
+
+class TestInsert:
+    def test_insert(self, mocked_populated_db):
+        """Test if data can be inserted into a new table and matches the original data."""
+        engine = mocked_populated_db[0]
+        metadata = mocked_populated_db[1]
+        source_df = mocked_populated_db[2]
+
+        # generate a select statement for the dummy data
+        metadata.reflect(engine)
+        test_select = metadata.tables["test_select"]
+        statement = sqla.select(test_select)
+        result_of_select_df = gdt.select(engine=engine, statement=statement)
+
+        # insert a copy of it into a new table
+        gdt.insert(engine, "my_test_table", source_df)
+
+        # retrieve it
+        metadata.reflect(engine)
+        test_insert = metadata.tables["my_test_table"]
+        select_inserted = sqla.select(test_insert)
+        result_of_insert_df = gdt.select(engine, select_inserted)
+
+        assert result_of_insert_df.equals(result_of_select_df)

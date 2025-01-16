@@ -8,6 +8,7 @@ This section covers where the geo digital toolkit sits in the overal domain spec
 ## Repo Structure
 ~~~
 GDI_GEODIGITAL
+├── configs                            ] Example configuration files to define a database connection and its schema
 ├── docs                               ┐ Package documentation
 │   └── getting_started_developer.md   |
 │   └── high_level_design.md           │
@@ -15,26 +16,25 @@ GDI_GEODIGITAL
 │   └── logging.md                     │
 ├── LICENSE                            │
 ├── README.md                          ┘
-├── pyproject.toml                     ] Package metadata and build 
+├── pyproject.toml                     ┐ Package metadata and build 
+├── .gitignore                         |
+├── pipelines/                         ┘
 ├── src                                ┐
 │   └── geo_digital_tools              │
 │       ├── __init__.py                │ Package source code
-│       ├── database                   │
-│       |      ├── __init__.py         |
-│       |      ├── connect.py          |
-│       |      ├── create.py           |
-│       |      ├── read.py             |
-│       |      └── update.py           |     
+│       ├── database.py                │
 |       ├── utils                      |
 │       |      ├── __init__.py         |
 │       |      ├── exceptions.py       |
+│       |      ├── statements.py       |
 │       |      └── logging.py          |
 │       └── storage*                   ┘
 └── tests                              ┐
-      ├── unit                         |
-      |     ├── test_database.py       |
-      |     └── test_exceptions.py     |
-      └── artifacts                    ┘ Package tests
+      └── unit                         |
+            ├── test_database.py       | Package tests
+            ├── test_statement.py      |
+            └── test_utils.py          ┘
+                  
 ~~~
 
 ## Architecture
@@ -55,10 +55,9 @@ All systems we build in this space do so with a single goal.
 Loading data to centralised 'cleaned' location.
 
 Systems and Tools
- - Techaikovski : Orchestration, Loadbalancing, Resource Creation*
+ - Tchaikovsky : Orchestration, Loadbalancing, Resource Creation*
  - Atratus : File Classification
  - Cygnets : Domain Specific Transformation and Load
- - Geo Digital Toolkit : Set of tools for loading to Geo Digital and logging
 
 Outputs
  - Geo Digital : Centralised Respository for all Data

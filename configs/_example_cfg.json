@@ -1,0 +1,48 @@
+{
+    "sqlalchemy": {
+        "sqlalchemy.url": "sqlite+pysqlite:///:memory:",
+        "sqlalchemy.echo": "True"
+    },
+    "statement_configs": {
+        "selection": {
+            "table_1": [
+                "table_1_col_1",
+                "table_1_col_2"
+            ],
+            "table_2": [
+                "table_2_col_1",
+                "table_2_col_2"
+            ]
+        },
+        "joins": [
+            {
+                "table_2": [
+                    [
+                        "table_2",
+                        "table_2_col_1"
+                    ],
+                    [
+                        "table_1",
+                        "table_1_col_1"
+                    ]
+                ]
+            },
+            {
+                "table_2": [
+                    [
+                        "table_2",
+                        "table_2_col_1"
+                    ],
+                    [
+                        "table_1",
+                        "table_1_col_1"
+                    ]
+                ]
+            }
+        ],
+        "aliases": {
+            "table_2": "table_2_label",
+            "table_1": "table_1_label"
+        }
+    }
+}
