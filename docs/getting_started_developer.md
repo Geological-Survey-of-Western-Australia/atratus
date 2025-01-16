@@ -44,10 +44,7 @@ To achieve we complete three pip installs we run three commands in command promp
 # activate our envioronment
 > ./.venv/Scripts/activate # activate our venv
 
-# install our requirements + any new dependencies we might be testing
-> pip install -r requirements.txt
-
-# perform an editable install, which tells our venv to track chaned models.
+# perform an editable install, which tells our venv to track chaned models, it also installs all package dependencies.
 > pip install -e .
 ```
 **NOTE - If you use jupyter notebooks in the development process you may need to routinely restart the kernel so any edits can be loaded into the kernel session.**
@@ -65,7 +62,7 @@ When used well test coverage can be highly useful in developing good meaningful 
 While it is tempting to aim for high coverage, what is more important is the development of robust tests that ensure functionality and facilitate the reliability of the code.
 
 ```
-pytest --cov-report xml:tests\cov.xml --cov atratus
+pytest --cov-report xml:tests\coverage.xml --cov src\geo_digital_tools
 ```
 
 

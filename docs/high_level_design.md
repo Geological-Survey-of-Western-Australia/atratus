@@ -22,24 +22,19 @@ GDI_GEODIGITAL
 ├── src                                ┐
 │   └── geo_digital_tools              │
 │       ├── __init__.py                │ Package source code
-│       ├── database                   │
-│       |      ├── __init__.py         |
-│       |      ├── connect.py          |
-│       |      ├── create/create_v2.py |
-│       |      ├── read.py             |
-│       |      ├── update.py           |     
-│       |      ├── write.py            |     
-│       |      └── utils.py            | Database/Interface specific utility functions  
+│       ├── database.py                │
 |       ├── utils                      |
 │       |      ├── __init__.py         |
 │       |      ├── exceptions.py       |
+│       |      ├── statements.py       |
 │       |      └── logging.py          |
 │       └── storage*                   ┘
 └── tests                              ┐
-      ├── unit                         |
-      |     ├── test_database.py       |
-      |     └── test_exceptions.py     |
-      └── artifacts                    ┘ Package tests
+      └── unit                         |
+            ├── test_database.py       | Package tests
+            ├── test_statement.py      |
+            └── test_utils.py          ┘
+                  
 ~~~
 
 ## Architecture
@@ -63,7 +58,6 @@ Systems and Tools
  - Tchaikovsky : Orchestration, Loadbalancing, Resource Creation*
  - Atratus : File Classification
  - Cygnets : Domain Specific Transformation and Load
- - Geo Digital Toolkit : Set of tools for loading to Geo Digital and logging
 
 Outputs
  - Geo Digital : Centralised Respository for all Data
