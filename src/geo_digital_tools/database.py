@@ -22,7 +22,7 @@ def connect(cfg_path: str | Path) -> tuple[sqla.Engine, sqla.MetaData]:
         engine = sqla.engine_from_config(configuration=sqla_cfg)
     except sqla.exc.ArgumentError as e:
         gdt.KnownException(
-            f"Malform Config File: while parsing {sqla_cfg} encountered {e}",
+            f"Malformed config file: While parsing {sqla_cfg} encountered {e}",
             should_raise=True,
         )
     meta_data = sqla.MetaData()

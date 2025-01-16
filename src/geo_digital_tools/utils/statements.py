@@ -33,7 +33,7 @@ def statement_builder(
     columns_dict: dict,
     join_list: list[dict],
     alias: dict,
-):
+) -> sqla.Select:
     """
     Build an SQLAlchemy statement from a geo digital tools config.
     colummns : dict {table_name : [col1, col2]}
