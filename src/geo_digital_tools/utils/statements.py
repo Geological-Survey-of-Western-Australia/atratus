@@ -8,7 +8,9 @@ from sqlalchemy import exc as sqlae
 import geo_digital_tools as gdt
 
 
-def load_statement_config(cfg_path: Path | str) -> tuple[dict, dict, dict]:
+def load_statement(
+    cfg_path: Path | str, engine: sqla.Engine, metadata: sqla.MetaData
+) -> sqla.Select:
     """Load a geo digital tools config defining your SQL statement."""
     try:
         with open(cfg_path) as f:
@@ -24,25 +26,25 @@ def load_statement_config(cfg_path: Path | str) -> tuple[dict, dict, dict]:
             should_raise=True,
         )
 
-    return selection, joins, alias
+    statement = statement_builder(engine, metadata, selection, joins, alias)
+    return statement
 
 
 def statement_builder(
     engine: sqla.Engine,
     metadata: sqla.MetaData,
-    columns_dict: dict,
-    join_list: list[dict],
+    selection: dict,
+    joins: list[dict],
     alias: dict,
 ) -> sqla.Select:
     """
     Build an SQLAlchemy statement from a geo digital tools config.
-    colummns : dict {table_name : [col1, col2]}
     """
     statement = None
     tables_to_alias = list(alias.keys())
     # retrieve tables
     tables_dict = {}
-    for t in list(columns_dict.keys()):
+    for t in list(selection.keys()):
         try:
             table_i = sqla.Table(t, metadata, autoload_with=engine)
             if t in tables_to_alias:
@@ -58,7 +60,7 @@ def statement_builder(
 
     # retrieve columns
     columns_list = []
-    for table, column_list in columns_dict.items():
+    for table, column_list in selection.items():
         for col in column_list:
             try:
                 if table in tables_to_alias:
@@ -76,7 +78,7 @@ def statement_builder(
     statement = sqla.select(*columns_list)
 
     # add joins
-    for j in join_list:
+    for j in joins:
 
         table_str = list(j.keys())[0]
 
