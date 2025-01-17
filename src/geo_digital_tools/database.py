@@ -83,7 +83,7 @@ def insert(
     engine: sqla.Engine,
     table_name: str,
     dataframe: pd.DataFrame,
-    if_exists=Literal["replace", "fail", "append"],
+    if_exists: Literal["replace", "fail", "append"] = "replace",
 ) -> None:
     """Execute an insert statement against a specific engine."""
     try:
