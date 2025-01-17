@@ -3,6 +3,7 @@ from pathlib import Path
 import geo_digital_tools as gdt
 import pandas as pd
 import sqlalchemy as sqla
+from typing import Literal
 
 
 def connect(cfg_path: str | Path) -> tuple[sqla.Engine, sqla.MetaData]:
@@ -78,15 +79,20 @@ def select(engine: sqla.Engine, statement) -> pd.DataFrame:
     return df
 
 
-def insert(engine: sqla.Engine, table_name: str, dataframe: pd.DataFrame) -> None:
+def insert(
+    engine: sqla.Engine,
+    table_name: str,
+    dataframe: pd.DataFrame,
+    if_exists=Literal["replace", "fail", "append"],
+) -> None:
     """Execute an insert statement against a specific engine."""
     try:
         with engine.begin() as connection:
             dataframe.to_sql(
                 name=table_name,
                 con=connection,
-                if_exists="fail",
-                method="multi",
+                if_exists=if_exists,
+                method=None,
                 index=False,
             )
     except Exception as exc:
