@@ -101,46 +101,48 @@ class TestStatement:
             json.dump({"foo": "bar"}, f)
         return cfg_path
 
-    def test_load_valid_statement_config(self, valid_cfg_disk):
-        selection, joins, alias = gdt.load_statement_config(cfg_path=valid_cfg_disk)
-        for k, v in selection.items():
-            assert isinstance(k, str)
-            assert isinstance(v, list)
-            for i in v:
-                assert isinstance(i, str)
+    def test_valid_load_statement(self, mocked_db_valid, valid_cfg_disk):
+        engine, meta_data = mocked_db_valid
+        statement = gdt.load_statement(
+            cfg_path=valid_cfg_disk,
+            engine=engine,
+            metadata=meta_data,
+        )
+        statement_str = str(statement)
+        assert (
+            statement_str
+            == "SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 \nFROM table_1 AS table_1_label JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1 JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1"
+        )
 
-        for j in joins:
-            for k, v in j.items():
-                assert isinstance(k, str)
-                assert isinstance(v, list)
-                for i in v:
-                    assert isinstance(i, list)
-                    for ii in i:
-                        assert isinstance(ii, str)
-
-    def test_bad_config(self, invalid_cfg_disk):
+    def test_bad_config(self, mocked_db_valid, invalid_cfg_disk):
+        engine, meta_data = mocked_db_valid
         with pytest.raises(gdt.KnownException) as excinfo:
-            selection, joins = gdt.load_statement_config(cfg_path=invalid_cfg_disk)
+            selection, joins = gdt.load_statement(
+                cfg_path=invalid_cfg_disk,
+                engine=engine,
+                metadata=meta_data,
+            )
         assert "malformed or missing : Should" in str(excinfo.value)
 
     def test_statement_builder(self, mocked_db_valid, valid_cfg_memory):
         engine, metadata = mocked_db_valid
 
-        tables_dict = valid_cfg_memory["statement_configs"]["selection"]
+        selection = valid_cfg_memory["statement_configs"]["selection"]
         joins = valid_cfg_memory["statement_configs"]["joins"]
         aliases = valid_cfg_memory["statement_configs"]["aliases"]
         assert True
-        statement = gdt.statement_builder(
+        statement = gdt.utils.statement_builder(
             metadata=metadata,
             engine=engine,
-            columns_dict=tables_dict,
-            join_list=joins,
+            selection=selection,
+            joins=joins,
             alias=aliases,
         )
         statement_str = str(statement)
-        assert statement_str =='SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 \nFROM table_1 AS table_1_label JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1 JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1'
-
-
+        assert (
+            statement_str
+            == "SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 \nFROM table_1 AS table_1_label JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1 JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1"
+        )
 
     def test_statement_builder_missingtable(
         self, mocked_db_missing_table, valid_cfg_memory
@@ -148,16 +150,16 @@ class TestStatement:
 
         engine, metadata = mocked_db_missing_table
 
-        tables_dict = valid_cfg_memory["statement_configs"]["selection"]
+        selection = valid_cfg_memory["statement_configs"]["selection"]
         joins = valid_cfg_memory["statement_configs"]["joins"]
         aliases = valid_cfg_memory["statement_configs"]["aliases"]
 
         with pytest.raises(gdt.KnownException) as excinfo:
-            statement = gdt.statement_builder(
+            statement = gdt.utils.statement_builder(
                 metadata=metadata,
                 engine=engine,
-                columns_dict=tables_dict,
-                join_list=joins,
+                selection=selection,
+                joins=joins,
                 alias=aliases,
             )
 
@@ -169,16 +171,16 @@ class TestStatement:
 
         engine, metadata = mocked_db_missingcol
 
-        tables_dict = valid_cfg_memory["statement_configs"]["selection"]
+        selection = valid_cfg_memory["statement_configs"]["selection"]
         joins = valid_cfg_memory["statement_configs"]["joins"]
         aliases = valid_cfg_memory["statement_configs"]["aliases"]
 
         with pytest.raises(gdt.KnownException) as excinfo:
-            statement = gdt.statement_builder(
+            statement = gdt.utils.statement_builder(
                 metadata=metadata,
                 engine=engine,
-                columns_dict=tables_dict,
-                join_list=joins,
+                selection=selection,
+                joins=joins,
                 alias=aliases,
             )
 
