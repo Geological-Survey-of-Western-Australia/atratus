@@ -6,11 +6,15 @@ import sqlalchemy as sqla
 from typing import Literal
 
 
-def connect(cfg_path: str | Path) -> tuple[sqla.Engine, sqla.MetaData]:
+def connect(cfg_path: str | Path, local_db_path=None) -> tuple[sqla.Engine, sqla.MetaData]:
     """Connect to an engine from a config file.
 
     e.g. configs/config.json:
     {"sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}}
+
+    Args:
+        cfg_path: Path to config file.
+        local_db_path: Overwrite the SQLAlchemy URL in config with new path to local file.
     """
     cfg_path = Path(cfg_path)
     if not cfg_path.exists():
@@ -19,6 +23,8 @@ def connect(cfg_path: str | Path) -> tuple[sqla.Engine, sqla.MetaData]:
     with open(cfg_path) as f:
         db_config = json.load(f)
     sqla_cfg = db_config.pop("sqlalchemy")
+    if local_db_path:
+        sqla_cfg["sqlalchemy.url"] = f"sqlite:///{local_db_path}\\atratus_WAMEX.db"
     try:
         engine = sqla.engine_from_config(configuration=sqla_cfg)
     except sqla.exc.ArgumentError as e:
