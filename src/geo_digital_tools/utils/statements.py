@@ -51,10 +51,16 @@ def statement_builder(
                 tables_dict[alias[t]] = aliased(table_i, name=alias[t])
             if t not in tables_to_alias:
                 tables_dict[t] = table_i
-
-        except sqlae.NoSuchTableError:
+        except sqlae.InterfaceError as exc:
+            raise gdt.KnownException(
+                "There are several possible reasons for this error."
+                " One possibility is that the ODBC driver specified"
+                " in the config is not configured on your system."
+                f" {exc}"
+            )
+        except sqlae.NoSuchTableError as exc:
             gdt.KnownException(
-                f"Table [{t}] specified in config, does not exist in engine.",
+                f"Table [{t}] specified in config, does not exist in engine, {exc}",
                 should_raise=True,
             )
 
@@ -79,7 +85,6 @@ def statement_builder(
 
     # add joins
     for j in joins:
-
         table_str = list(j.keys())[0]
 
         # extract_all strings
