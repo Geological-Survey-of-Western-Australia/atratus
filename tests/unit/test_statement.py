@@ -10,7 +10,6 @@ import geo_digital_tools as gdt
 
 @pytest.fixture
 def mocked_db_valid() -> tuple[sqla.Engine, sqla.MetaData]:
-
     memory_engine = sqla.engine.engine_from_config(
         {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
     )
@@ -26,7 +25,6 @@ def mocked_db_valid() -> tuple[sqla.Engine, sqla.MetaData]:
 
 @pytest.fixture
 def mocked_db_missing_table() -> tuple[sqla.Engine, sqla.MetaData]:
-
     memory_engine = sqla.engine.engine_from_config(
         {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
     )
@@ -42,7 +40,6 @@ def mocked_db_missing_table() -> tuple[sqla.Engine, sqla.MetaData]:
 
 @pytest.fixture
 def mocked_db_missingcol() -> tuple[sqla.Engine, sqla.MetaData]:
-
     memory_engine = sqla.engine.engine_from_config(
         {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}
     )
@@ -147,7 +144,6 @@ class TestStatement:
     def test_statement_builder_missingtable(
         self, mocked_db_missing_table, valid_cfg_memory
     ):
-
         engine, metadata = mocked_db_missing_table
 
         selection = valid_cfg_memory["statement_configs"]["selection"]
@@ -163,12 +159,11 @@ class TestStatement:
                 alias=aliases,
             )
 
-        assert "specified in config, does not exist in engine." in str(excinfo.value)
+        assert "specified in config, does not exist in engine" in str(excinfo.value)
 
     def test_statement_builder_missingcolumn(
         self, mocked_db_missingcol, valid_cfg_memory
     ):
-
         engine, metadata = mocked_db_missingcol
 
         selection = valid_cfg_memory["statement_configs"]["selection"]
