@@ -49,20 +49,23 @@ def statement_builder(
             table_i = sqla.Table(t, metadata, autoload_with=engine)
             if t in tables_to_alias:
                 tables_dict[alias[t]] = aliased(table_i, name=alias[t])
-            if t not in tables_to_alias:
+            else:
                 tables_dict[t] = table_i
         except sqlae.InterfaceError as exc:
             raise gdt.KnownException(
                 "There are several possible reasons for this error."
                 " One possibility is that the ODBC driver specified"
-                " in the config is not configured on your system."
-                f" {exc}"
-            )
+                " in the config is not installed on your system."
+            ) from exc
         except sqlae.NoSuchTableError as exc:
-            gdt.KnownException(
-                f"Table [{t}] specified in config, does not exist in engine, {exc}",
-                should_raise=True,
-            )
+            raise gdt.KnownException(
+                f"Table [{t}] specified in config, does not exist in engine."
+            ) from exc
+        except sqlae.OperationalError as exc:
+            raise gdt.KnownException(
+                f"Network connection to configured URL [{engine.url}] is not available."
+                " Check network status or VPN."
+            ) from exc
 
     # retrieve columns
     columns_list = []
@@ -71,16 +74,15 @@ def statement_builder(
             try:
                 if table in tables_to_alias:
                     t = tables_dict[alias[table]]
-                if table not in tables_to_alias:
+                else:
                     t = tables_dict[table]
                 c = t.c[col]
                 columns_list.append(c)
-            except KeyError or sqlae.NoSuchColumnError:
-                # TODO: Consider if an Exception group is appropriate here.
-                gdt.KnownException(
-                    f"Column [{col}] specified in config, does not exist in table [{table}] contains columns [{t.c.keys()}].",
-                    should_raise=True,
-                )
+            except (KeyError, sqlae.NoSuchColumnError) as exc:
+                raise gdt.KnownException(
+                    f"Column [{col}] specified in config, does not exist in table."
+                    f" [{table}] contains columns [{t.c.keys()}].",
+                ) from exc
     statement = sqla.select(*columns_list)
 
     # add joins
