@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 
 import sqlalchemy as sqla
-from sqlalchemy.orm import aliased
 from sqlalchemy import exc as sqlae
+from sqlalchemy.orm import aliased
 
 import geo_digital_tools as gdt
 
@@ -37,8 +37,20 @@ def statement_builder(
     joins: list[dict],
     alias: dict,
 ) -> sqla.Select:
-    """
-    Build an SQLAlchemy statement from a geo digital tools config.
+    """Build an SQLAlchemy statement from a geo digital tools config.
+
+    Args:
+        engine: A configured SQLAlchemy Engine.
+        metadata: A configured SQLAlchemy MetaData instance.
+        selection: Configured geodigital dictionary.
+        joins: Configured geodigital dictionary.
+        alias: Configured geodigital dictionary.
+
+    Returns:
+        "statement": An SQL alchemy select statement.
+
+    Raises:
+        KnownException: Misconfigured software/network/selection config.
     """
     statement = None
     tables_to_alias = list(alias.keys())
