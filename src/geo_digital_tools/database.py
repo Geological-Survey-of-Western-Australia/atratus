@@ -6,7 +6,9 @@ import sqlalchemy as sqla
 from typing import Literal
 
 
-def connect(cfg_path: str | Path, local_db_path=None) -> tuple[sqla.Engine, sqla.MetaData]:
+def connect(
+    cfg_path: str | Path, local_db_path=None
+) -> tuple[sqla.Engine, sqla.MetaData]:
     """Connect to an engine from a config file.
 
     e.g. configs/config.json:
@@ -103,3 +105,29 @@ def insert(
             )
     except Exception as exc:
         raise exc
+
+
+def write_db_metadata_table(engine: sqla.Engine, cygnet, run_datetime, **metadata):
+    """Record runtime metadata to generated database.
+
+    Args:
+        engine: SQLAlchemy Engine.
+        cygnet: Module containing the codebase of the running code.
+        run_datetime: Timestamp to record start of script running - preferred ISO UTC.
+        **metadata: Additional cygnet specific metadata terms to record against their kwarg name.
+
+    Hint:
+        Suggested kwargs to capture as additional metadata include:
+            - The geodigital configuration file contents,
+            - The select statement that was generated,
+            - The walltime of the database building script.
+    """
+    meta = dict(
+        gdt_version=f"{gdt.__name__}@{gdt.__version__}",
+        cygnet=f"{cygnet.__name__}@{cygnet.__version__}",
+        isotime_utc=run_datetime,
+        **metadata,
+    )
+
+    meta_df = pd.DataFrame(meta, index=["Value at runtime:"])
+    gdt.insert(engine=engine, table_name="runtime_metadata", dataframe=meta_df)
