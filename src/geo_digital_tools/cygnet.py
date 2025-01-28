@@ -103,6 +103,6 @@ class Process:
                 print("Process Complete")
 
             # run the next step
-            if step_name != "end":
+            else:
                 current_state = step.handle(current_state)
         return current_state
