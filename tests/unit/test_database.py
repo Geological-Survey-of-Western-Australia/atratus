@@ -1,3 +1,4 @@
+import datetime
 import json
 from pathlib import Path
 
@@ -173,3 +174,20 @@ class TestInsert:
         result_of_insert_df = gdt.select(engine, select_inserted)
 
         assert result_of_insert_df.equals(result_of_select_df)
+
+
+def test_write_db_metadata_table(mocked_connect):
+    engine, metadata = mocked_connect
+    gdt.write_db_metadata_table(
+        engine,
+        gdt,  # Normally this is a cygnet, but we just need a package name and version
+        datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        test_meta={"Test": "I am here!"},
+    )
+    metadata.reflect(engine)
+    returned_db = gdt.select(engine, sqla.select(metadata.tables["runtime_metadata"]))
+
+    assert all(
+        test in returned_db
+        for test in ["geo_digital_tools", "cygnet", "utc_iso_start", "test_meta"]
+    )

@@ -113,7 +113,7 @@ def write_db_metadata_table(engine: sqla.Engine, cygnet, run_datetime, **metadat
     Args:
         engine: SQLAlchemy Engine.
         cygnet: Module containing the codebase of the running code.
-        run_datetime: Timestamp to record start of script running - preferred ISO UTC.
+        utc_iso_start: Timestamp to record start of script running - preferred ISO UTC.
         **metadata: Additional cygnet specific metadata terms to record against their kwarg name.
 
     Hint:
@@ -123,9 +123,9 @@ def write_db_metadata_table(engine: sqla.Engine, cygnet, run_datetime, **metadat
             - The walltime of the database building script.
     """
     meta = dict(
-        gdt_version=f"{gdt.__name__}@{gdt.__version__}",
+        geo_digital_tools=f"{gdt.__name__}@{gdt.__version__}",
         cygnet=f"{cygnet.__name__}@{cygnet.__version__}",
-        isotime_utc=run_datetime,
+        utc_iso_start=run_datetime,
         **metadata,
     )
 
