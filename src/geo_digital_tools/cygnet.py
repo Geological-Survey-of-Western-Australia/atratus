@@ -9,13 +9,12 @@ class Step:
         This is a modification of the chain of responsibility behavioural pattern.
 
     Args:
-        parent_process() : A parent proces that this step is executed in.
-        successor (Step) : A subclassed instance of step.
+        name (str) : An identifier for the step.
 
     Attributes:
         step_success(bool) : Defaults to False, overwritten by run method.
         input (any) : Input for stage.
-        output (any) : Output of Run
+        output (any) : Output of self.run()
 
     """
 
