@@ -2,13 +2,15 @@ import json
 from pathlib import Path
 
 import sqlalchemy as sqla
-from sqlalchemy.orm import aliased
 from sqlalchemy import exc as sqlae
+from sqlalchemy.orm import aliased
 
 import geo_digital_tools as gdt
 
 
-def load_statement_config(cfg_path: Path | str) -> tuple[dict, dict, dict]:
+def load_statement(
+    cfg_path: Path | str, engine: sqla.Engine, metadata: sqla.MetaData
+) -> sqla.Select:
     """Load a geo digital tools config defining your SQL statement."""
     try:
         with open(cfg_path) as f:
@@ -24,60 +26,79 @@ def load_statement_config(cfg_path: Path | str) -> tuple[dict, dict, dict]:
             should_raise=True,
         )
 
-    return selection, joins, alias
+    statement = statement_builder(engine, metadata, selection, joins, alias)
+    return statement
 
 
 def statement_builder(
     engine: sqla.Engine,
     metadata: sqla.MetaData,
-    columns_dict: dict,
-    join_list: list[dict],
+    selection: dict,
+    joins: list[dict],
     alias: dict,
 ) -> sqla.Select:
-    """
-    Build an SQLAlchemy statement from a geo digital tools config.
-    colummns : dict {table_name : [col1, col2]}
+    """Build an SQLAlchemy statement from a geo digital tools config.
+
+    Args:
+        engine: A configured SQLAlchemy Engine.
+        metadata: A configured SQLAlchemy MetaData instance.
+        selection: Configured geodigital dictionary.
+        joins: Configured geodigital dictionary.
+        alias: Configured geodigital dictionary.
+
+    Returns:
+        "statement": An SQL alchemy select statement.
+
+    Raises:
+        KnownException: Misconfigured software/network/selection config.
     """
     statement = None
     tables_to_alias = list(alias.keys())
     # retrieve tables
     tables_dict = {}
-    for t in list(columns_dict.keys()):
+    for t in list(selection.keys()):
         try:
             table_i = sqla.Table(t, metadata, autoload_with=engine)
             if t in tables_to_alias:
                 tables_dict[alias[t]] = aliased(table_i, name=alias[t])
-            if t not in tables_to_alias:
+            else:
                 tables_dict[t] = table_i
-
-        except sqlae.NoSuchTableError:
-            gdt.KnownException(
-                f"Table [{t}] specified in config, does not exist in engine.",
-                should_raise=True,
-            )
+        except sqlae.InterfaceError as exc:
+            raise gdt.KnownException(
+                "There are several possible reasons for this error."
+                " One possibility is that the ODBC driver specified"
+                " in the config is not installed on your system."
+            ) from exc
+        except sqlae.NoSuchTableError as exc:
+            raise gdt.KnownException(
+                f"Table [{t}] specified in config, does not exist in engine."
+            ) from exc
+        except sqlae.OperationalError as exc:
+            raise gdt.KnownException(
+                f"Network connection to configured URL [{engine.url}] is not available."
+                " Check network status or VPN."
+            ) from exc
 
     # retrieve columns
     columns_list = []
-    for table, column_list in columns_dict.items():
+    for table, column_list in selection.items():
         for col in column_list:
             try:
                 if table in tables_to_alias:
                     t = tables_dict[alias[table]]
-                if table not in tables_to_alias:
+                else:
                     t = tables_dict[table]
                 c = t.c[col]
                 columns_list.append(c)
-            except KeyError or sqlae.NoSuchColumnError:
-                # TODO: Consider if an Exception group is appropriate here.
-                gdt.KnownException(
-                    f"Column [{col}] specified in config, does not exist in table [{table}] contains columns [{t.c.keys()}].",
-                    should_raise=True,
-                )
+            except (KeyError, sqlae.NoSuchColumnError) as exc:
+                raise gdt.KnownException(
+                    f"Column [{col}] specified in config, does not exist in table."
+                    f" [{table}] contains columns [{t.c.keys()}].",
+                ) from exc
     statement = sqla.select(*columns_list)
 
     # add joins
-    for j in join_list:
-
+    for j in joins:
         table_str = list(j.keys())[0]
 
         # extract_all strings

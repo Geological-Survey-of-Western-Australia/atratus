@@ -42,3 +42,9 @@ Homepage = "https://github.com/Geological-Survey-of-Western-Australia"
 Issues = "https://github.com/Geological-Survey-of-Western-Australia/issues"
 
 [tool.setuptools_scm]
+
+[tool.ruff.lint]
+select = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
