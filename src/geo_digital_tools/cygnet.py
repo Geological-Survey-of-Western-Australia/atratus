@@ -2,53 +2,59 @@ from collections import OrderedDict
 
 
 class Step:
-    """
-    Cygnets harmonisation processing step.
+    """Cygnets harmonisation processing step.
 
     Note:
         This is a modification of the chain of responsibility behavioural pattern.
-
-    Args:
-        name (str) : An identifier for the step.
-
-    Attributes:
-        step_success(bool) : Defaults to False, overwritten by run method.
-        input (any) : Input for stage.
-        output (any) : Output of self.run()
-
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str , save : bool = False):
+        """Initialise the stage with a name and save.
+        
+        Args:
+            name (str) : An identifier for the step.
+            save (bool) : Weather or not to execute the steps save behaviour if implemented.
+
+        Attributes:
+            step_success(bool) : Defaults to False, overwritten by run method.
+            input (any) : Input for stage.
+            output (any) : Output of self.run()
+        """
         self.name = name
+        self.save = save
         self.stepsuccess = False
         self.input = None
         self.output = None
 
     def handle(self, input, globals):
-        """
-        Handle function performs 3 tasks:
+        """Handle function performs 3 tasks.
+
          - Confirms a valid input via logic defined in canhandle
          - Runs the processing logic.
          - If successful either returned the parent process or runs the next step.
 
         Args:
-            input : could be anything
+            input : could be anything.
+            globals : dictionary provided by parent process.
 
         """
         if self.canhandle(input, globals):
             self.input = input
             self.output = self.run()
+            if self.save:
+                self.save_method()
             return self.output
 
     def canhandle(self, input, globals) -> bool:
-        """
-        Confirms a valid input for this step.
+        """Confirms a valid input for this step.
 
         Args:
             input : could be anything.
             globals : variables in a dict availalbe to the Parent Process
+
         Raises/Logs:
             KnownExceptions : for anything known data issues.
+            
         Returns:
             True if valid input, False otherwise.
 
@@ -56,17 +62,23 @@ class Step:
         raise NotImplementedError("Should be overwritten")
 
     def run(self):
-        """
-        Confirms a valid input for this step.
+        """Confirms a valid input for this step.
 
         Args:
             input : could be anything.
+
         Raises/Logs:
             KnownExceptions : for anything known data issues.
+
         Returns:
             True if valid input, False otherwise.
 
         """
+        self.stepsuccess = False
+        raise NotImplementedError("Should be overwritten")
+
+    def save_method(self):
+        """Defines save Behaviour for a given Step."""
         self.stepsuccess = False
         raise NotImplementedError("Should be overwritten")
 
