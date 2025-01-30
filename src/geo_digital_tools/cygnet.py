@@ -24,7 +24,7 @@ class Step:
         self.input = None
         self.output = None
 
-    def handle(self, input):
+    def handle(self, input, globals):
         """
         Handle function performs 3 tasks:
          - Confirms a valid input via logic defined in canhandle
@@ -35,17 +35,18 @@ class Step:
             input : could be anything
 
         """
-        if self.canhandle(input):
+        if self.canhandle(input, globals):
             self.input = input
             self.output = self.run()
             return self.output
 
-    def canhandle(self, input) -> bool:
+    def canhandle(self, input, globals) -> bool:
         """
         Confirms a valid input for this step.
 
         Args:
             input : could be anything.
+            globals : variables in a dict availalbe to the Parent Process
         Raises/Logs:
             KnownExceptions : for anything known data issues.
         Returns:
@@ -73,6 +74,7 @@ class Step:
 class Process:
     def __init__(self, name, **kwargs):
         self.name = name
+        self.globals = {**kwargs}
         self.step_dict = OrderedDict()
         self.step_out = OrderedDict()
         self.step_logs = {}
@@ -89,11 +91,10 @@ class Process:
     def dropstep(self, step):
         self.step_dict.pop([step.name], None)
 
-    def run(self, data):
+    def run(self):
         # just before running add a final step
         self.step_dict["end"] = None
-        current_state = data
-
+        current_state = self.globals['input']
         # run each step and pass the inputs
         for step_name, step in self.step_dict.items():
 
@@ -103,5 +104,5 @@ class Process:
 
             # run the next step
             else:
-                current_state = step.handle(current_state)
+                current_state = step.handle(current_state, self.globals)
         return current_state
