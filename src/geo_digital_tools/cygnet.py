@@ -1,5 +1,5 @@
 from collections import OrderedDict
-
+import geo_digital_tools as gdt
 
 class Step:
     """Cygnets harmonisation processing step.
@@ -84,7 +84,23 @@ class Step:
 
 
 class Process:
+    """Cygnets process.
+
+    Note:
+        This is a modification of the chain of responsibility behavioural pattern.
+    """
     def __init__(self, name, **kwargs):
+        """Initialise the process with a name and any keyword args used by your process.
+        
+        Args:
+            name : An name for the process usefull in logging.
+            **kwargs : all kwargs are unpacked in the process.globals and passed to all steps.
+
+        Attributes:
+            step_dict : An orderered Dictionary of Steps that we iterate over.
+            step_out : An optional location to add the outputs of each step.
+            step_logs : Unused but we could add logs to the class.
+        """
         self.name = name
         self.globals = {**kwargs}
         self.step_dict = OrderedDict()
@@ -92,18 +108,25 @@ class Process:
         self.step_logs = {}
 
     def __str__(self):
+        """String that prints a useful summary of the process steps."""
         summary = f'''The {self.name} process contains {len(self.step_dict)} steps.\nThese are :
         {'\n        '.join([k for k in self.step_dict.keys()])} \nThe process will return the outputs of {next(reversed(self.step_dict))}
         '''
         return summary
 
     def addstep(self, step):
-        self.step_dict[step.name] = step
+        """Adds a Step object to the process."""
+        if isinstance(step, Step):
+            self.step_dict[step.name] = step
+        else:
+            gdt.KnownException('This is not a valid step.')
 
     def dropstep(self, step):
+        """Removes a step from the process."""
         self.step_dict.pop([step.name], None)
 
     def run(self):
+        """Executes the process."""
         # just before running add a final step
         self.step_dict["end"] = None
         current_state = self.globals['input']
