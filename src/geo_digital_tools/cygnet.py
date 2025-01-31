@@ -1,5 +1,7 @@
 from collections import OrderedDict
+
 import geo_digital_tools as gdt
+
 
 class Step:
     """Cygnets harmonisation processing step.
@@ -8,12 +10,12 @@ class Step:
         This is a modification of the chain of responsibility behavioural pattern.
     """
 
-    def __init__(self, name: str , save : bool = False):
-        """Initialise the stage with a name and save.
-        
+    def __init__(self, name: str, save: bool = False):
+        """Initialise the stage with a name, and configure saving.
+
         Args:
             name (str) : An identifier for the step.
-            save (bool) : Weather or not to execute the steps save behaviour if implemented.
+            save (bool) : Whether or not to execute the steps save behaviour if implemented.
 
         Attributes:
             step_success(bool) : Defaults to False, overwritten by run method.
@@ -27,16 +29,16 @@ class Step:
         self.output = None
 
     def handle(self, input, globals):
-        """Handle function performs 3 tasks.
+        """Handle the input, with validation and error checking.
 
+        This function performs 3 tasks.
          - Confirms a valid input via logic defined in canhandle
          - Runs the processing logic.
          - If successful either returned the parent process or runs the next step.
 
         Args:
-            input : could be anything.
+            input : Any valid input to the Steps processing code.
             globals : dictionary provided by parent process.
-
         """
         if self.canhandle(input, globals):
             self.input = input
@@ -46,39 +48,37 @@ class Step:
             return self.output
 
     def canhandle(self, input, globals) -> bool:
-        """Confirms a valid input for this step.
+        """Confirms if the input is valid for this step.
 
         Args:
-            input : could be anything.
-            globals : variables in a dict availalbe to the Parent Process
+            input : Any input. Overwrite this function to define which inputs can be handled.
+            globals : variables in a dict available to the Parent Process
 
-        Raises/Logs:
-            KnownExceptions : for anything known data issues.
-            
+        Raises:
+            KnownException : for any known data issues.
+
         Returns:
             True if valid input, False otherwise.
-
         """
         raise NotImplementedError("Should be overwritten")
 
     def run(self):
-        """Confirms a valid input for this step.
+        """Run user-defined processing code on a valid input.
 
         Args:
-            input : could be anything.
+            input : Any input which has been validated by canhandle()
 
-        Raises/Logs:
-            KnownExceptions : for anything known data issues.
+        Raises:
+            KnownException : for any known data issues.
 
         Returns:
             True if valid input, False otherwise.
-
         """
         self.stepsuccess = False
         raise NotImplementedError("Should be overwritten")
 
     def save_method(self):
-        """Defines save Behaviour for a given Step."""
+        """Defines save behaviour for a given Step."""
         self.stepsuccess = False
         raise NotImplementedError("Should be overwritten")
 
@@ -89,11 +89,12 @@ class Process:
     Note:
         This is a modification of the chain of responsibility behavioural pattern.
     """
+
     def __init__(self, name, **kwargs):
         """Initialise the process with a name and any keyword args used by your process.
-        
+
         Args:
-            name : An name for the process usefull in logging.
+            name : An name for the process useful in logging.
             **kwargs : all kwargs are unpacked in the process.globals and passed to all steps.
 
         Attributes:
@@ -109,19 +110,19 @@ class Process:
 
     def __str__(self):
         """String that prints a useful summary of the process steps."""
-        summary = f'''The {self.name} process contains {len(self.step_dict)} steps.\nThese are :
-        {'\n        '.join([k for k in self.step_dict.keys()])} \nThe process will return the outputs of {next(reversed(self.step_dict))}
-        '''
+        summary = f"The {self.name} process contains {len(self.step_dict)} steps.\n"
+        f"These are:{'\n        '.join([k for k in self.step_dict.keys()])}\n"
+        f"The process will return the outputs of {next(reversed(self.step_dict))}"
         return summary
 
-    def addstep(self, step):
+    def addstep(self, step: Step):
         """Adds a Step object to the process."""
         if isinstance(step, Step):
             self.step_dict[step.name] = step
         else:
-            gdt.KnownException('This is not a valid step.')
+            gdt.KnownException("This is not a valid Step object.")
 
-    def dropstep(self, step):
+    def dropstep(self, step: Step):
         """Removes a step from the process."""
         self.step_dict.pop([step.name], None)
 
@@ -129,10 +130,9 @@ class Process:
         """Executes the process."""
         # just before running add a final step
         self.step_dict["end"] = None
-        current_state = self.globals['input']
+        current_state = self.globals["input"]
         # run each step and pass the inputs
         for step_name, step in self.step_dict.items():
-
             # check if its the end
             if step_name == "end":
                 print("Process Complete")
