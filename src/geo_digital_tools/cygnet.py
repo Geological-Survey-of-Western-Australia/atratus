@@ -14,13 +14,13 @@ class Step:
         """Initialise the stage with a name, and configure saving.
 
         Args:
-            name (str) : An identifier for the step.
-            save (bool) : Whether or not to execute the steps save behaviour if implemented.
+            name : An identifier for the step.
+            save : Whether or not to execute the steps save behaviour if implemented.
 
         Attributes:
-            step_success(bool) : Defaults to False, overwritten by run method.
-            input (any) : Input for stage.
-            output (any) : Output of self.run()
+            step_success: Defaults to False, overwritten by run method.
+            input : Input for stage.
+            output : Output of self.run()
         """
         self.name = name
         self.save = save
