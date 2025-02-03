@@ -4,7 +4,22 @@ import geo_digital_tools as gdt
 
 
 class Step:
-    """Cygnets harmonisation processing step.
+    """A framework to define processing code within a cygnet's Process.
+
+    Each Step represents a distinct transformation of an input.
+    Steps can access a class level namespace of global configuration and state.
+
+    A Step is defined with a few key considerations:
+    - Determine if the Step can be executed on a provided input.
+        canhandle() is where failures due to input to step are handled.
+        e.g. Step loads a path -> it receives an invalid path = invalid input -> Step does not run.
+    - Execute a defined set of transforms and rules.
+        All code that transforms the data is defined in the run method.
+        run() is where failures occuring within the step are handled.
+        e.g. Step loads a path -> it receives a valid path -> loading path fails = Step fails.
+    - Shared functionality such as save /database write*.
+        We might want to do things at each step (catalogue errors, save outputs etc)
+            Presently this feature is still being defined.
 
     Note:
         This is a modification of the chain of responsibility behavioural pattern.
@@ -84,10 +99,21 @@ class Step:
 
 
 class Process:
-    """Cygnets process.
+    """A container for processing Steps within a cygnet.
 
-    Note:
-        This is a modification of the chain of responsibility behavioural pattern.
+    A cygnet is a defined series of operations (Steps) to apply to geoscientific data.
+    The order and configuration of those Steps is defined within a Process.
+
+    Global variables
+        Some variables (such as database views etc.) should be created once and available through the process.
+        These process inputs are variable (process to process) and should be able to be specified by the developer.
+    Chain of Responsibility
+        Each step passes its outputs to the next step added to the process.
+        Each step has access to variables global to the process.
+        Each step can validate that the required global variables exist, and outputs of steps meet requirements.
+    Centralised collection of arguments (input, output, logs) *
+        It is likely that in future we will want to collect logs on a process-by-process approach.
+        It's also useful to be able to view the outputs of each step of a process to aid in debugging.
     """
 
     def __init__(self, name, **kwargs):
@@ -104,8 +130,8 @@ class Process:
         """
         self.name = name
         self.globals = {**kwargs}
-        self.step_dict = OrderedDict()
-        self.step_out = OrderedDict()
+        self.step_dict: OrderedDict[str, Step] = OrderedDict()
+        self.step_out: OrderedDict[str, Step] = OrderedDict()
         self.step_logs = {}
 
     def __str__(self):
@@ -128,16 +154,15 @@ class Process:
 
     def run(self):
         """Executes the process."""
-        # just before running add a final step
+        # Append a finalising "end" step to the process.
         self.step_dict["end"] = None
+
         current_state = self.globals["input"]
         # run each step and pass the inputs
         for step_name, step in self.step_dict.items():
-            # check if its the end
             if step_name == "end":
                 print("Process Complete")
-
-            # run the next step
             else:
                 current_state = step.handle(current_state, self.globals)
+
         return current_state
