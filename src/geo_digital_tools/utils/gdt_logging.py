@@ -28,7 +28,6 @@ class KnownExceptionsFilter(logging.Filter):
     or if "ERROR" is the level of the LogRecord.
     The modifications to the log only apply in KnownExceptions.log,
     (the handler the filter is attached to).
-
     """
 
     def filter(self, lr: logging.LogRecord):
@@ -36,7 +35,7 @@ class KnownExceptionsFilter(logging.Filter):
             # Capture exception and traceback
             lr_ = copy.copy(lr)
             if lr.exc_info is not None:
-                lr_.msg = f"Raised: {repr(lr_.exc_info[1])}, with message '{lr_.msg}'"
+                lr_.msg = f"{lr_.msg} -> {repr(lr_.exc_info[1])}"
                 lr_.exc_info = None  # (lr.exc_info[0], lr.exc_info[1], None)
                 lr_.exc_text = None
             return lr_
@@ -49,26 +48,7 @@ class NotKnownExceptionsFilter(logging.Filter):
 
     def filter(self, lr: logging.LogRecord):
         if "KnownException" not in lr.msg:
-            return True
-
-
-class KnownExceptionFormatter(logging.Formatter):
-    """Customise the format for KnownExceptions.
-
-    We want to make the KnownException log more useful, by including custom parameters,
-    such as filename, Step name, etc. Currently just the documented example from Python.
-    """
-
-    def formatException(self, exc_info):
-        """Format an exception so that it prints on a single line."""
-        result = super().formatException(exc_info)
-        return repr(result)  # or format into one line however you want to
-
-    def format(self, record):
-        s = super().format(record)
-        if record.exc_text:
-            s = s.replace("\n", "") + "|"
-        return s
+            return lr
 
 
 def use_gdt_logging(
@@ -95,12 +75,13 @@ def use_gdt_logging(
 
     # Standard output logs of WARNING or above.
     standard_formatter = logging.Formatter(
-        "%(asctime)s: %(name)s:%(lineno)s | %(levelname)s > %(message)s"
+        "%(asctime)s: %(name)s:%(lineno)s | %(levelname)s | %(message)s"
     )
 
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.WARNING)
     stdout_handler.setFormatter(standard_formatter)
+    stdout_handler.addFilter(NotKnownExceptionsFilter())
 
     # Logfile that captures all program logs EXCEPT KnownException
     logfile_handler = logging.handlers.RotatingFileHandler(
@@ -122,8 +103,9 @@ def use_gdt_logging(
     )
     ke_handler.setLevel(logging.INFO)
     ke_handler.setFormatter(
-        logging.Formatter("%(asctime)s: %(name)s | %(levelname)s | > %(message)s")
-        # KnownExceptionFormatter("%(name)s: %(asctime)s | %(levelname)s | > %(message)s")
+        logging.Formatter(
+            "%(asctime)s: %(process_)s.%(step_)s.%(funcName)s | '%(input_)s' | %(message)s"
+        )
     )
     ke_handler.addFilter(KnownExceptionsFilter())
 
