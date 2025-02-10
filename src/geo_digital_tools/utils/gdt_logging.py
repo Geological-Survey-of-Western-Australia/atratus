@@ -20,22 +20,6 @@ from pathlib import Path
 
 from geo_digital_tools.utils.exceptions import KnownException
 
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
-
-
-def handle_exception(exc_type, exc_value, exc_traceback):
-    """Ensure raised exceptions are logged."""
-    if issubclass(exc_type, KeyboardInterrupt):
-        # Allow KeyboardInterrupt to execute the standard excepthook
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    else:
-        logger.critical(
-            "Quit due to uncaught exception: ",
-            exc_info=(exc_type, exc_value, exc_traceback),
-        )
-
 
 class KnownExceptionsFilter(logging.Filter):
     """Filter to capture log records that guide development of Cygnet Process/Steps.
@@ -69,6 +53,7 @@ def use_gdt_logging(log_dir: str | Path = "logs", use_excepthook: bool = False):
     """Configure logging to gdt recommendation.
 
     Args:
+        name: Name to provide to getLogger(name). None for Root logger.
         log_dir: Directory to save logs in.
         use_excepthook: Use a custom exception hook (gdt_logging.handle_exception()).
 
@@ -108,8 +93,7 @@ def use_gdt_logging(log_dir: str | Path = "logs", use_excepthook: bool = False):
     ke_handler.setFormatter(standard_formatter)
     ke_handler.addFilter(KnownExceptionsFilter())
 
-    logger.setLevel(logging.INFO)
-
+    logger = logging.getLogger(name)
     logger.addHandler(stdout_handler)
     logger.addHandler(logfile_handler)
     logger.addHandler(ke_handler)
@@ -119,6 +103,20 @@ def use_gdt_logging(log_dir: str | Path = "logs", use_excepthook: bool = False):
     )
 
     if use_excepthook:
-        # Insert exception handler
-        sys.excepthook = handle_exception
+
+        def _handle_exception(exc_type, exc_value, exc_traceback):
+            """Log the unhandled exception that caused code to exit."""
+            if issubclass(exc_type, KeyboardInterrupt):
+                # Allow KeyboardInterrupt to execute the standard excepthook
+                sys.__excepthook__(exc_type, exc_value, exc_traceback)
+                return
+            else:
+                logger.critical(
+                    "Quit due to uncaught exception: ",
+                    exc_info=(exc_type, exc_value, exc_traceback),
+                )
+
+        sys.excepthook = _handle_exception
         logger.warning("sys.excepthook has been modified to log raised errors.")
+
+    return logger
