@@ -34,16 +34,15 @@ class Step:
 
         Attributes:
             step_success: Defaults to False, overwritten by run method.
-            input : Input for stage.
+            input_ : Input for stage.
             output : Output of self.run()
         """
         self.name = name
         self.save = save
-        self.stepsuccess = False
-        self.input = None
+        self.input_ = None
         self.output = None
 
-    def handle(self, input, globals):
+    def handle(self, input_, global_cfg):
         """Handle the input, with validation and error checking.
 
         This function performs 3 tasks.
@@ -52,22 +51,22 @@ class Step:
          - If successful either returned the parent process or runs the next step.
 
         Args:
-            input : Any valid input to the Steps processing code.
-            globals : dictionary provided by parent process.
+            input_ : Any valid input to the Steps processing code.
+            global_cfg : dictionary provided by parent process.
         """
-        if self.canhandle(input, globals):
-            self.input = input
+        if self.canhandle(input_, global_cfg):
+            self.input_ = input_
             self.output = self.run()
-            if self.save:
+            if self.save and self.output is not None:
                 self.save_method()
             return self.output
 
-    def canhandle(self, input, globals) -> bool:
+    def canhandle(self, input_, global_cfg) -> bool:
         """Confirms if the input is valid for this step.
 
         Args:
-            input : Any input. Overwrite this function to define which inputs can be handled.
-            globals : variables in a dict available to the Parent Process
+            input_ : Any input. Overwrite this function to define which inputs can be handled.
+            global_cfg : variables in a dict available to the Parent Process
 
         Raises:
             KnownException : for any known data issues.
@@ -89,12 +88,10 @@ class Step:
         Returns:
             True if valid input, False otherwise.
         """
-        self.stepsuccess = False
         raise NotImplementedError("Should be overwritten")
 
     def save_method(self):
         """Defines save behaviour for a given Step."""
-        self.stepsuccess = False
         raise NotImplementedError("Should be overwritten")
 
 
@@ -121,7 +118,7 @@ class Process:
 
         Args:
             name : An name for the process useful in logging.
-            **kwargs : all kwargs are unpacked in the process.globals and passed to all steps.
+            **kwargs : all kwargs are unpacked in the process.global_cfg and passed to all steps.
 
         Attributes:
             step_dict : An orderered Dictionary of Steps that we iterate over.
@@ -129,10 +126,10 @@ class Process:
             step_logs : Unused but we could add logs to the class.
         """
         self.name = name
-        self.globals = {**kwargs}
+        self.global_cfg = {**kwargs}
         self.step_dict: OrderedDict[str, Step] = OrderedDict()
         self.step_out: OrderedDict[str, Step] = OrderedDict()
-        self.step_logs = {}
+        self.step_history = {}
 
     def __str__(self):
         """String that prints a useful summary of the process steps."""
@@ -152,17 +149,20 @@ class Process:
         """Removes a step from the process."""
         self.step_dict.pop([step.name], None)
 
-    def run(self):
+    def start(self):
         """Executes the process."""
         # Append a finalising "end" step to the process.
         self.step_dict["end"] = None
 
-        current_state = self.globals["input"]
+        output = self.global_cfg["input_"]
         # run each step and pass the inputs
         for step_name, step in self.step_dict.items():
             if step_name == "end":
-                print("Process Complete")
+                self.step_history["end"] = True
             else:
-                current_state = step.handle(current_state, self.globals)
+                output = step.handle(output, self.global_cfg)
+            if output is None:  # Step failed
+                self.step_history[step.name] = False
+                break
 
-        return current_state
+        return output
