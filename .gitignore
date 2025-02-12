@@ -10,6 +10,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Sphinx documentation
+docs/_build/
+
 # Distribution / packaging
 .Python
 build/
@@ -74,3 +77,5 @@ venv*/
 ENV/
 env.bak/
 venv.bak/
+docs/source/api/
+.DS_Store
