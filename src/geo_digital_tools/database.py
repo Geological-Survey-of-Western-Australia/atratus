@@ -1,32 +1,62 @@
+"""Cygnet Database Utilities.
+
+Description:
+    A collection of tools for database operations using SQLAlchemy and Pandas.
+    Provides functions to connect to databases, create/update tables from schemas or DataFrames,
+    execute queries, and manage runtime metadata.
+
+Key Features:
+    - Config-driven database connections
+    - Schema definition via SQLAlchemy or DataFrame inference
+    - Type-safe CRUD operations
+    - Runtime metadata tracking
+"""
+
 import json
+import types
+from datetime import datetime
 from pathlib import Path
-import geo_digital_tools as gdt
+from typing import Any, Literal
+
 import pandas as pd
 import sqlalchemy as sqla
-from typing import Literal
+from sqlalchemy.sql.expression import Selectable
+
+import geo_digital_tools as gdt
 
 
 def connect(
-    cfg_path: str | Path, local_db_path=None
+    cfg_path: str | Path, local_db_path: str | Path | None = None
 ) -> tuple[sqla.Engine, sqla.MetaData]:
     """Connect to an engine from a config file.
 
-    e.g. configs/config.json:
+    For example, configs/config.json might contain:
     {"sqlalchemy": {"sqlalchemy.url": "sqlite+pysqlite:///:memory:"}}
 
     Args:
-        cfg_path: Path to config file.
-        local_db_path: Overwrite the SQLAlchemy URL in config with new path to local file.
+        cfg_path (str | Path): Path to the JSON config file.
+        local_db_path (str | Path | None, optional):  Overwrite the `sqlalchemy.url` in config with the provided local file path. Defaults to None.
+
+    Returns:
+        tuple[sqla.Engine, sqla.MetaData]: SQLAlchemy Engine and MetaData objects.
+
+    Raises:
+        FileNotFoundError: If the config file does not exist.
+        gdt.KnownException: If the config file is malformed.
     """
     cfg_path = Path(cfg_path)
     if not cfg_path.exists():
-        FileNotFoundError(f"{cfg_path.absolute()} not found.")
+        raise FileNotFoundError(f"{cfg_path.absolute()} not found.")
 
-    with open(cfg_path) as f:
+    with open(cfg_path, encoding="utf-8") as f:
         db_config = json.load(f)
     sqla_cfg = db_config.pop("sqlalchemy")
+
     if local_db_path:
-        sqla_cfg["sqlalchemy.url"] = f"sqlite:///{local_db_path}\\atratus_WAMEX.db"
+        sqla_cfg["sqlalchemy.url"] = (
+            f"sqlite:///{local_db_path}\\atratus_WAMEX.db"  # for windows
+        )
+        # sqla_url = f"sqlite:///{local_db_path}/{atratus_WAMEX.db}" # for linux/macOS
     try:
         engine = sqla.engine_from_config(configuration=sqla_cfg)
     except sqla.exc.ArgumentError as e:
@@ -43,15 +73,31 @@ def create_from_sqla(
     metadata: sqla.MetaData,
     table_name: str,
     column_name: str,
-    sqla_dtype: sqla.types.TypeDecorator,
+    sqla_dtype: sqla.types.TypeEngine,
 ) -> None:
-    """An example function to define Tables and Columns from sqlalchemy function calls."""
-    sqla.Table(
-        table_name,
-        metadata,
-        sqla.Column(column_name, sqla_dtype),
-        autoload_with=engine,
-    )
+    """Define tables and columns in a database from SQLAlchemy function calls.
+
+    Args:
+        engine (sqlalchemy.Engine): Database connection engine.
+        metadata (sqlalchemy.MetaData): SQLAlchemy MetaData object.
+        table_name (str): Name of the table to create or update.
+        column_name (str): Name of the column to create or update.
+        sqla_dtype (sqlalchemy.types.TypeEngine): SQLAlchemy data type to apply.
+
+    Returns:
+        None
+    Raises:
+        Exception: If table/column definition fails.
+    """
+    try:
+        sqla.Table(
+            table_name,
+            metadata,
+            sqla.Column(column_name, sqla_dtype),
+            autoload_with=engine,
+        )
+    except Exception as exc:
+        raise exc
 
 
 def create_from_dataframe(
@@ -61,13 +107,29 @@ def create_from_dataframe(
     table_name: str = "unnamed_table",
     schema_name: str | None = None,
 ) -> None:
-    """Create tables and columns in a database inferred an example DataFrame."""
+    """Create tables and columns in a database, inferred from a sample DataFrame.
+
+    Args:
+        engine (sqlalchemy.Engine): Database connection engine.
+        metadata (sqlalchemy.MetaData): SQLAlchemy MetaData object.
+        dataframe (pd.DataFrame): DataFrame with columns used to infer table schema.
+        table_name (str, optional): Name of the table to create. Defaults to "unnamed_table".
+        schema_name (str | None, optional): Optional schema name. Defaults to None.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If table creation fails.
+    """
     # NOTE we might want the schema to be linked to cygnet name eg geodigitaldatabase.skippy.table1
     # schema_name = ''
+    _ = schema_name  # noqa: F841
     try:
         with engine.begin() as connection:
             dataframe.to_sql(name=table_name, con=connection, index=False)
             # schema=schema_name
+        metadata.reflect(bind=engine)
     # TODO we'll be populating this area will all the possible gdt.KnownExceptions
     except Exception as exc:
         raise exc
@@ -75,8 +137,19 @@ def create_from_dataframe(
     metadata.create_all(bind=engine)
 
 
-def select(engine: sqla.Engine, statement) -> pd.DataFrame:
-    """Execute a select statement against a specific engine, returning a Dataframe."""
+def select(engine: sqla.Engine, statement: Selectable | str) -> pd.DataFrame:
+    """Execute a SELECT statement against a specific engine, returning a DataFrame.
+
+    Args:
+        engine (sqlalchemy.Engine): Database connection engine.
+        statement (Selectable | str): A SQLAlchemy statement or raw SQL text to execute.
+
+    Returns:
+        pd.DataFrame: Results of the SELECT query.
+
+    Raises:
+        Exception: If execution or data retrieval fails.
+    """
     try:
         with engine.begin() as conn:
             result = conn.execute(statement).all()
@@ -93,7 +166,21 @@ def insert(
     dataframe: pd.DataFrame,
     if_exists: Literal["replace", "fail", "append"] = "replace",
 ) -> None:
-    """Execute an insert statement against a specific engine."""
+    """Execute an INSERT statement against a specific engine.
+
+    Args:
+        engine (sqlalchemy.Engine): Database connection engine.
+        table_name (str): Name of the target table for insertion.
+        dataframe (pd.DataFrame): DataFrame to insert into the table.
+        if_exists (Literal["replace", "fail", "append"], optional): Behavior if table
+            already exists. Defaults to "replace".
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If insertion fails.
+    """
     try:
         with engine.begin() as connection:
             dataframe.to_sql(
@@ -107,25 +194,38 @@ def insert(
         raise exc
 
 
-def write_db_metadata_table(engine: sqla.Engine, cygnet, run_datetime, **metadata):
+def write_db_metadata_table(
+    engine: sqla.Engine,
+    cygnet: types.ModuleType,
+    run_datetime: str | datetime,
+    **metadata: dict[str, Any],
+) -> None:
     """Record runtime metadata to generated database.
 
     Args:
-        engine: SQLAlchemy Engine.
-        cygnet: Module containing the codebase of the running code.
-        utc_iso_start: Timestamp to record start of script running - preferred ISO UTC.
-        **metadata: Additional cygnet specific metadata terms to record against their kwarg name.
+        engine (sqlalchemy.Engine): Database connection engine,SQLAlchemy Engine.
+        cygnet (types.ModuleType): A module containing the codebase of the running code,
+            expected to have `__name__` and `__version__` attributes.
+        run_datetime (str | datetime): Timestamp to record the start of script execution (preferably an ISO UTC string).
+        **metadata (dict[str, Any]): Additional metadata to record, using the keyword argument as the metadata field name.
 
     Hint:
         Suggested kwargs to capture as additional metadata include:
             - The geodigital configuration file contents,
-            - The select statement that was generated,
-            - The walltime of the database building script.
+            - The generated SQL `SELECT` statement,
+            - The total execution time of the database building script.
     """
+    if not hasattr(cygnet, "__version__"):
+        raise AttributeError("cygnet module must have __version__ attribute")
+
     meta = dict(
         geo_digital_tools=f"{gdt.__name__}@{gdt.__version__}",
         cygnet=f"{cygnet.__name__}@{cygnet.__version__}",
-        utc_iso_start=run_datetime,
+        utc_iso_start=(
+            run_datetime.isoformat()
+            if isinstance(run_datetime, datetime)
+            else run_datetime
+        ),
         **metadata,
     )
 
