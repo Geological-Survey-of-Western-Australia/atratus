@@ -15,7 +15,7 @@ This system is intended purely for internal usage by GSWA personnel, for reading
  - Storage Operations (Blob/Local)*
 
 ## Documentation
-- [Getting Started for Developers](docs/getting_started_developer.md)
-- [General Design & Flow](docs/high_level_design.md)
-- [Installation and Use](docs/installation_and_use.md)
-- [Logging](docs/logging.md)
+- [Getting Started for Developers](docs/source/getting_started_developer.rst)
+- [General Design & Flow](docs/source/high_level_design.rst)
+- [Installation and Use](docs/source/installation_and_use.rst)
+- [Logging](docs/source/logging.rst)
