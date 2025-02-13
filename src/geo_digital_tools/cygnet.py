@@ -1,4 +1,7 @@
+"""Cygnet processing module (Chain of Responsibility pattern implementation)."""
+
 from collections import OrderedDict
+from typing import Any, Optional
 
 import geo_digital_tools as gdt
 
@@ -60,6 +63,7 @@ class Step:
             if self.save and self.output is not None:
                 self.save_method()
             return self.output
+        return None  # if canhandle fails
 
     def canhandle(self, input_, global_cfg) -> bool:
         """Confirms if the input is valid for this step.
