@@ -26,6 +26,13 @@ repository
 - Git, required to push/pull/etc git commands
    - https://git-scm.com/downloads
 
+.. note::
+   
+   Recommended VS Code extensions:
+    - Python
+    - Gitlens
+    - Ruff
+
 Access
 ------
 In the short term it is likely that access will remain relative to locally provideed harddrives. This is a placeholder for if we move to a live access approach.
