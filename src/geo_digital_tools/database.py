@@ -105,7 +105,7 @@ def create_from_dataframe(
     metadata: sqla.MetaData,
     dataframe: pd.DataFrame,
     table_name: str = "unnamed_table",
-    schema_name: str | None = None,
+    # schema_name: str | None = None,
 ) -> None:
     """Create tables and columns in a database, inferred from a sample DataFrame.
 
@@ -114,7 +114,6 @@ def create_from_dataframe(
         metadata (sqlalchemy.MetaData): SQLAlchemy MetaData object.
         dataframe (pd.DataFrame): DataFrame with columns used to infer table schema.
         table_name (str, optional): Name of the table to create. Defaults to "unnamed_table".
-        schema_name (str | None, optional): Optional schema name. Defaults to None.
 
     Returns:
         None
@@ -123,8 +122,6 @@ def create_from_dataframe(
         Exception: If table creation fails.
     """
     # NOTE we might want the schema to be linked to cygnet name eg geodigitaldatabase.skippy.table1
-    # schema_name = ''
-    _ = schema_name
     try:
         with engine.begin() as connection:
             dataframe.to_sql(name=table_name, con=connection, index=False)
