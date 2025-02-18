@@ -124,7 +124,7 @@ def create_from_dataframe(
     """
     # NOTE we might want the schema to be linked to cygnet name eg geodigitaldatabase.skippy.table1
     # schema_name = ''
-    _ = schema_name  # noqa: F841
+    _ = schema_name
     try:
         with engine.begin() as connection:
             dataframe.to_sql(name=table_name, con=connection, index=False)
