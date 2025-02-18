@@ -3,6 +3,7 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import importlib.metadata
 import os
 import sys
 
@@ -14,7 +15,12 @@ sys.path.insert(0, os.path.abspath("."))
 project = "GeoDigitalToolkit"
 copyright = "2025, Geoscience Data Integrations Team - GSWA"
 author = "Geoscience Data Integrations Team - GSWA"
-release = "0.1.2"
+
+try:
+    release = importlib.metadata.version("geo_digital_tools")
+except importlib.metadata.PackageNotFoundError:
+    release = "unknown"
+print(f"Sphinx release version: {release}")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
