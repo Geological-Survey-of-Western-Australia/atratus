@@ -35,7 +35,7 @@ repository
 
 Access
 ------
-In the short term it is likely that access will remain relative to locally provideed harddrives. This is a placeholder for if we move to a live access approach.
+In the short term, access will likely remain limited to locally provided hard drives. This serves as a placeholder in case we transition to live access in the future.
 
 - Clone the repository
 - Clone the repository locally, this can be done through devops, github desktop or vs code. 
