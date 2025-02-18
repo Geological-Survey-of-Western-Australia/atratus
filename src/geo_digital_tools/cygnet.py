@@ -63,7 +63,8 @@ class Step:
             if self.save and self.output is not None:
                 self.save_method()
             return self.output
-        return None  # if canhandle fails
+        else:
+            return None  # File failed checks and cannot be processed
 
     def canhandle(self, input_, global_cfg) -> bool:
         """Confirms if the input is valid for this step.
