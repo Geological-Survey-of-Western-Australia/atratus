@@ -215,9 +215,6 @@ def write_db_metadata_table(
             - The generated SQL `SELECT` statement,
             - The total execution time of the database building script.
     """
-    if not hasattr(cygnet, "__version__"):
-        raise AttributeError("cygnet module must have __version__ attribute")
-
     meta = dict(
         geo_digital_tools=f"{gdt.__name__}@{gdt.__version__}",
         cygnet=f"{cygnet.__name__}@{cygnet.__version__}",
