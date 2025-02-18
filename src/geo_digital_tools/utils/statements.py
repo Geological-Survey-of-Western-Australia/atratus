@@ -41,11 +41,9 @@ def load_statement(
         alias = stmt_cfg["aliases"]
 
     except Exception as exc:
-        _ = exc
-        gdt.KnownException(
+        raise gdt.KnownException(
             f"Config file {cfg_path} is malformed or missing : Should contain statement_configs, selection, and joins.",
-            should_raise=True,
-        )
+        ) from exc
 
     statement = statement_builder(engine, metadata, selection, joins, alias)
     return statement

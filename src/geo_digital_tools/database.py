@@ -59,11 +59,10 @@ def connect(
         # sqla_url = f"sqlite:///{local_db_path}/{atratus_WAMEX.db}" # for linux/macOS
     try:
         engine = sqla.engine_from_config(configuration=sqla_cfg)
-    except sqla.exc.ArgumentError as e:
-        gdt.KnownException(
-            f"Malformed config file: While parsing {sqla_cfg} encountered {e}",
-            should_raise=True,
-        )
+    except sqla.exc.ArgumentError as exc:
+        raise gdt.KnownException(
+            f"Malformed config file: While parsing {sqla_cfg}.",
+        ) from exc
     meta_data = sqla.MetaData()
     return (engine, meta_data)
 
