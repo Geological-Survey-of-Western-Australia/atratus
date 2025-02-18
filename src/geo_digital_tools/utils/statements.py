@@ -1,5 +1,12 @@
+"""This module loads and builds SQLAlchemy Select statements from a JSON configuration file.
+
+It uses geo_digital_tools (gdt) for custom exception handling and leverages SQLAlchemy’s engine,
+metadata, and table objects to construct query statements dynamically based on the provided JSON.
+"""
+
 import json
 from pathlib import Path
+from typing import Any
 
 import sqlalchemy as sqla
 from sqlalchemy import exc as sqlae
@@ -11,9 +18,22 @@ import geo_digital_tools as gdt
 def load_statement(
     cfg_path: Path | str, engine: sqla.Engine, metadata: sqla.MetaData
 ) -> sqla.Select:
-    """Load a geo digital tools config defining your SQL statement."""
+    """Load and build a SQLAlchemy Select statement from a geo digital tools config file.
+
+    Args:
+        cfg_path (Path | str): Path to the JSON config file, which must include
+            "statement_configs", "selection", and "joins" sections.
+        engine (sqlalchemy.Engine): A configured SQLAlchemy Engine.
+        metadata (sqlalchemy.MetaData): A configured SQLAlchemy MetaData instance.
+
+    Returns:
+        sqlalchemy.Select: The constructed SQLAlchemy select statement.
+
+    Raises:
+        gdt.KnownException: If the config file is malformed or missing required sections.
+    """
     try:
-        with open(cfg_path) as f:
+        with open(cfg_path, encoding="utf-8") as f:
             db_config = json.load(f)
         stmt_cfg = db_config.pop("statement_configs")
         selection = stmt_cfg["selection"]
@@ -21,10 +41,9 @@ def load_statement(
         alias = stmt_cfg["aliases"]
 
     except Exception as exc:
-        gdt.KnownException(
+        raise gdt.KnownException(
             f"Config file {cfg_path} is malformed or missing : Should contain statement_configs, selection, and joins.",
-            should_raise=True,
-        )
+        ) from exc
 
     statement = statement_builder(engine, metadata, selection, joins, alias)
     return statement
@@ -37,25 +56,26 @@ def statement_builder(
     joins: list[dict],
     alias: dict,
 ) -> sqla.Select:
-    """Build an SQLAlchemy statement from a geo digital tools config.
+    """Build an SQLAlchemy Select statement from a geo digital tools config.
 
     Args:
-        engine: A configured SQLAlchemy Engine.
-        metadata: A configured SQLAlchemy MetaData instance.
-        selection: Configured geodigital dictionary.
-        joins: Configured geodigital dictionary.
-        alias: Configured geodigital dictionary.
+        engine (sqlalchemy.Engine): A configured SQLAlchemy Engine.
+        metadata (sqlalchemy.MetaData): A configured SQLAlchemy MetaData instance.
+        selection (dict): Configured geodigital dictionary specifying tables and columns.
+        joins (list[dict]): Configured geodigital dictionary detailing table joins.
+        alias (dict): Configured geodigital dictionary for alias mapping of tables.
 
     Returns:
-        "statement": An SQL alchemy select statement.
+        sqlalchemy.Select: "statement", an SQLAlchemy select statement.
 
     Raises:
-        KnownException: Misconfigured software/network/selection config.
+        gdt.KnownException: For misconfigured software/network/selection config,
+            missing tables or columns, or unavailable network/ODBC driver issues.
     """
     statement = None
     tables_to_alias = list(alias.keys())
     # retrieve tables
-    tables_dict = {}
+    tables_dict: dict[str, Any] = {}
     for t in list(selection.keys()):
         try:
             table_i = sqla.Table(t, metadata, autoload_with=engine)
@@ -80,20 +100,20 @@ def statement_builder(
             ) from exc
 
     # retrieve columns
-    columns_list = []
+    columns_list: list[sqla.Column] = []
     for table, column_list in selection.items():
         for col in column_list:
             try:
                 if table in tables_to_alias:
-                    t = tables_dict[alias[table]]
+                    t_aliased = tables_dict[alias[table]]
                 else:
-                    t = tables_dict[table]
-                c = t.c[col]
+                    t_aliased = tables_dict[table]
+                c = t_aliased.c[col]
                 columns_list.append(c)
             except (KeyError, sqlae.NoSuchColumnError) as exc:
                 raise gdt.KnownException(
                     f"Column [{col}] specified in config, does not exist in table."
-                    f" [{table}] contains columns [{t.c.keys()}].",
+                    f" [{table}] contains columns [{t_aliased.c.keys()}].",
                 ) from exc
     statement = sqla.select(*columns_list)
 
