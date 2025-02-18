@@ -41,16 +41,8 @@ docs = ['sphinx',
   'sphinx-rtd-theme',
   'sphinx-autodoc-typehints',
   'sphinx-autobuild',
-  'sphinx-autodoc-annotation',
   'sphinx-copybutton',
   ]
-
-docs-extra = [
-    'myst-parser',
-    'sphinxcontrib-mermaid',
-    # Note: Install pandoc separately from https://pandoc.org/installing.html 
-    # On macOS, you can use Homebrew: brew install pandoc
-]
 
 [project.urls]
 Homepage = "https://github.com/Geological-Survey-of-Western-Australia"

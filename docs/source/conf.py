@@ -37,20 +37,6 @@ extensions = [
     "sphinx_copybutton",
 ]
 
-# Enable Markdown and Mermaid.js only when docs-extra is installed
-try:
-    import myst_parser
-
-    extensions.append("myst_parser")
-except ImportError:
-    pass
-
-try:
-    import sphinxcontrib.mermaid
-
-    extensions.append("sphinxcontrib.mermaid")
-except ImportError:
-    pass
 
 templates_path = ["_templates"]
 exclude_patterns = []
