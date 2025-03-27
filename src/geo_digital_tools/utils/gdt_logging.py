@@ -2,13 +2,16 @@
 
 1. As library users (writers of scripts), we want log files that indicate our script status
 2. As library developers, we want to be able to diagnose user applications
-
 3. gdt and other libraries should not configure the logger.
 4. Scripts should configure the logger.
 5. A default logger configuration should be available to users IF they want to use it.
-    - i.e. Document how to configure the gdt default logger in a script, but don't do it in the library.
 
-https://docs.python.org/3/howto/logging.html#configuring-logging-for-a-library
+With the above in mind, the logging submodule exists to configure the recommended logger,
+ but doesn't do it automatically.
+
+See this link for justification:
+ https://docs.python.org/3/howto/logging.html#configuring-logging-for-a-library
+
 """
 
 import copy
@@ -22,19 +25,19 @@ from geo_digital_tools.utils.exceptions import KnownException
 
 
 class KnownExceptionsFilter(logging.Filter):
-    """Filter to capture log records that guide development of Cygnet Process/Steps.
+    """Filter which captures log records that guide development of Cygnet Process/Steps.
 
     It triggers if a gdt.KnownException is included in the exc_info,
     or if "ERROR" is the level of the LogRecord.
-    The modifications to the log only apply in KnownExceptions.log,
-    (the handler the filter is attached to).
+    The modifications to the log only apply in KnownExceptions.log, which is the handler
+    the filter is attached to.
     """
 
-    def filter(self, lr: logging.LogRecord):
-        if "KnownException" in lr.msg:
+    def filter(self, log_record: logging.LogRecord):
+        if "KnownException" in log_record.msg:
             # Capture exception and traceback
-            lr_ = copy.copy(lr)
-            if lr.exc_info is not None:
+            lr_ = copy.copy(log_record)
+            if log_record.exc_info is not None:
                 lr_.msg = f"{lr_.msg} -> {repr(lr_.exc_info[1])}"
                 lr_.exc_info = None  # (lr.exc_info[0], lr.exc_info[1], None)
                 lr_.exc_text = None
@@ -44,11 +47,14 @@ class KnownExceptionsFilter(logging.Filter):
 
 
 class NotKnownExceptionsFilter(logging.Filter):
-    """Filter to exclude KnownException logs from general log."""
+    """Filter to exclude KnownException logs from general log.
 
-    def filter(self, lr: logging.LogRecord):
-        if "KnownException" not in lr.msg:
-            return lr
+    Performs the inverse of the KnownExceptionsFilter.
+    """
+
+    def filter(self, log_record: logging.LogRecord):
+        if "KnownException" not in log_record.msg:
+            return log_record
 
 
 def use_gdt_logging(
@@ -59,16 +65,17 @@ def use_gdt_logging(
     """Configure logging to gdt recommendation.
 
     Args:
-        name: Name to provide to getLogger(name). None for Root logger.
-        log_dir: Directory to save logs in.
-        use_excepthook: Use a custom exception hook (gdt_logging.handle_exception()).
+        name: Name to provide to getLogger(name). None will use the global Root logger.
+        log_dir: Directory to save log files to.
+        use_excepthook: Use the gdt_logging.handle_exception() exception hook.
 
-    The preferred configuration is stdout and rotating logfiles.
+    The preferred configuration is to print to stdout and write to rotating logfiles.
 
     One logfile (KnownExceptions.log) captures data issues from Cygnet processes.
     This log can be used to interpret where the majority of files being processed
     fail, as a way to guide development.
-    e.g., To notice that there are a large number of CSV files with an unusual delimiter.
+    e.g., KnownException might trigger on CSV files with an unusual delimiter, but will
+    allow continued execution of the calling program whilst logging the Exception.
     """
     log_dir = Path(log_dir)
     log_dir.mkdir(exist_ok=True, parents=True)

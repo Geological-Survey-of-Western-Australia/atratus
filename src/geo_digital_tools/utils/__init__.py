@@ -1,16 +1,4 @@
-"""GeoDigitalToolkit
-
-A common toolkit for data handling at GSWA
-"""
-
-from importlib.metadata import PackageNotFoundError, version
-
-try:
-    __version__ = version("geo_digital_tools")
-except PackageNotFoundError:
-    # package is not installed
-    pass
-
+"""Utility functions for geodigitaltoolkit."""
 
 from geo_digital_tools.utils.statements import statement_builder
 
