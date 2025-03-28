@@ -92,3 +92,53 @@ stages:
         - script: |
             python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
           displayName: 'Upload to feed'
+
+- stage: BuildWithJFrog
+  displayName: 'Build and Publish using JFrog'
+  trigger: manual
+  isSkippable: true
+  condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
+  jobs:
+    - job: Build
+      displayName: 'Install and build'
+      steps:                
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.11'
+            addToPath: true
+            architecture: 'x64'
+
+        - script: |
+            python -m pip wheel --no-deps -w dist/ .
+          displayName: 'Python build'
+  
+    - job: JFrogScan
+      displayName: Jfrog publish and Xray scan
+      steps:
+        - task: JFrogPublishBuildInfo@1
+          inputs:
+            artifactoryConnection: 'Artifactory V2 service connection'
+            buildName: '$(Build.DefinitionName)'
+            buildNumber: '$(Build.BuildNumber)'
+          displayName : 'Publish build info'
+            
+        - task: JFrogBuildPromotion@1
+          inputs:
+            artifactoryConnection: 'Artifactory V2 service connection'
+            buildName: '$(Build.DefinitionName)'
+            buildNumber: '$(Build.BuildNumber)'
+            targetRepo: 'gsrsd-gdi-pypi-dev-local'
+            status: 'Released'
+            includeDependencies: true
+            copy: false
+            dryRun: false
+          displayName : 'Promote build'
+
+        - task: JFrogBuildScan@1
+          inputs:
+            xrayConnection: 'JFrog Xray V2 service connection'
+            buildName: '$(Build.DefinitionName)'
+            buildNumber: '$(Build.BuildNumber)'
+            allowFailBuild: true
+            vuln: true
+          displayName : 'Scan build with JFrog'

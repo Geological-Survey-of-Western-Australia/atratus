@@ -37,6 +37,13 @@ dev = [
   'twine',
 ]
 
+docs = ['sphinx', 
+  'sphinx-rtd-theme',
+  'sphinx-autodoc-typehints',
+  'sphinx-autobuild',
+  'sphinx-copybutton',
+  ]
+
 [project.urls]
 Homepage = "https://github.com/Geological-Survey-of-Western-Australia"
 Issues = "https://github.com/Geological-Survey-of-Western-Australia/issues"

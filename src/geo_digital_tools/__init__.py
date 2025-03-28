@@ -22,9 +22,8 @@ from geo_digital_tools.database import (
 from geo_digital_tools.utils.exceptions import (
     CodeError,
     KnownException,
-    exception_handler,
 )
-from geo_digital_tools.utils.logging import setup_logger
+from geo_digital_tools.utils.loggers import use_gdt_logging
 from geo_digital_tools.utils.statements import load_statement
 
 __all__ = [
@@ -36,7 +35,6 @@ __all__ = [
     "write_db_metadata_table",
     "CodeError",
     "KnownException",
-    "exception_handler",
-    "setup_logger",
+    "use_gdt_logging",
     "load_statement",
 ]
