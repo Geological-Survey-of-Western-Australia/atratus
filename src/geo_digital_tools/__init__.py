@@ -23,7 +23,7 @@ from geo_digital_tools.utils.exceptions import (
     CodeError,
     KnownException,
 )
-from geo_digital_tools.utils.gdt_logging import use_gdt_logging
+from geo_digital_tools.utils.loggers import use_gdt_logging
 from geo_digital_tools.utils.statements import load_statement
 
 __all__ = [

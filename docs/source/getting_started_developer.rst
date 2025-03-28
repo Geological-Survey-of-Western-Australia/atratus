@@ -16,12 +16,12 @@ repository
 
 - Desired IDE/text editor, eg. Visual Studio Code
    - [Download VS Code](https://code.visualstudio.com/download)
-   - if you can’t install this raise a service now ticket.
+   - if you can't install this raise a service now ticket.
 
 - Python, 3.11 is currently being used within the project 
    - The 64 bit version is required for several of the used packages (Windows)
    - https://www.python.org/downloads
-   - if you can’t install this raise a service now ticket.
+   - if you can't install this raise a service now ticket.
 
 - Git, required to push/pull/etc git commands
    - https://git-scm.com/downloads

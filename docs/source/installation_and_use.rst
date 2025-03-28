@@ -38,83 +38,76 @@ Both of these use cases are demonstrated in the example script
   **Exceptions**
 
   In our code we broadly have two types of errors: those we expect and
-  those we don’t expect.
+  those we don't expect.
 
   To streamline how these exceptions are encountered, handled, and logged,
-  we use our gde exceptions in one of two ways: 
-  - The exception_handler decorator 
-  - Calling the gde.KnownException function.
+  we use a standard logging system to redirect KnownException to a Known Exceptions log file.
 
   The convenience here is that these two ways of invoking effectively log
   the errors into one of two log files to streamline debugging.
 
-  Lets consider a scenario where we’re loading and processing a thousand
+  Lets consider a scenario where we're loading and processing a thousand
   files. We write a function to load the file processing_step_1() and a
   function that does some task with the loaded file processing_step_2().
 
   .. code-block:: python
 
-    from geo_digital_tools import exception_handler, KnownException
+    from geo_digital_tools import use_gdt_logging
 
-    @exception_handler()
-    def processing_step_1(file):
-      file_object = None
-      # try to load file
+    def Step_1(file):
+      try:
+        load_file()
       ....
 
       # handling known issues
-      if issue_1:
-        KnownException(f'This file fails {file} - issue_1')
-      if issue_2:
-        KnownException(f'This file fails {file} - issue_2')
+      except issue_1:
+        logger.info("KnownException: This file fails {file} - issue_1')
+      except issue_2:
+        logger.info("KnownException: This file fails {file} - issue_2')
+      else:
+        break/quit/continue as required.
 
       return(file_object)
 
-    @exception_handler()
-    def processing_step_2(file_object):
-      # some fancy processing code being prototyped
-      ....
-
-      return(final)
-
 In the two functions above you can see that my first processing step has
 already started to map out some known issues with loading the file.
-You’ll also see that I’ve decorated both my functions with the exception
-handler, here any uncaught exceptions will be passed into my code issues
-log file.
 
 Lets consider the main part of the script below.
 
 .. code:: python
 
-   if __name__=='__main__':
+  if __name__=='__main__':
+    # 1.
+    logger = gdt.use_gdt_logging(name="cygnet_skippy", log_dir="logs", use_excepthook=True)
+    
+    # define Steps
+    step_0 = cygnet.Step_1("Step_1_Open", save=True)
+    step_1 = cygnet.Step_2("Step_2_Transform", save=True)
+    step_2 = cygnet.Step_3("Step_3_Integrate", save=True)
+  
+    cygnet_process = cygnet.Process("cygnet_process", input_=_input)
+    cygnet_process.addstep(step=step_0)
+    cygnet_process.addstep(step=step_1)
+    cygnet_process.addstep(step=step_2)
 
-       # a big list of files we're trying to load
-       files = [.....] 
-       final_outputs = []
+    result = cygnet_process.run()
 
-       # iterating through the list
-       for file in files:
-           file_object = processing_step_1(file) 
-           if file_object != None:
-               final_object = processing_step_2(file) 
-               final_outputs.append(final_object)
 
-       print('completed')
+**So what's interesting about the code above?**
 
-**So what’s interesting about the code above?**
-
-- First : Every file will attempt processing_step_1 regardless of any exceptions encounterd. 
-- Second : Any KnownExcpetions will be logged to a seperate file. 
-- Third : Any exceptions encountered in processing step 2 will also be logged. 
-- Fourth : the print statement will always be executed.
+- 1. We configured logging that creates a KnownException logfile using one line.
+Any KnownExcpetions will be logged to a seperate file.
+Any exceptions encountered but not handled will also be logged using use_excepthook. 
+- 1. We created a process to handle our original data input and contain our steps.
+The data input will be passed between steps, getting transformed along the way.
+- 1. We run the process pipeline using Process.run()
 
 
 **Why would we want this?**
 
 - It will allow us to characterise multiple issues in larger numbers of files and prioritise fixes:
   
-  - i.e. you’ll know if the error is encountered once or 300 times based on the logs.
+  - i.e. you'll know if the error is encountered once or 300 times based on the logs.
 
 - It allows us to characterise issues in downstream tasks.
   
@@ -124,5 +117,5 @@ Lets consider the main part of the script below.
 
 
 For more information on how they can be effectively can be used consider
-the should_raise argument and the logging.md
+to raise exceptions, and continue on to logging.rst.
 

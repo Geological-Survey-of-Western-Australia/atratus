@@ -13,7 +13,7 @@ domain specific ETL processing.
 
 .. note::
 
-      THIS DOESN’T Render in Devops, but does in Sphinx.
+      THIS DOESN'T Render in Devops, but does in Sphinx.
 
 
 Repo Structure
@@ -23,7 +23,7 @@ Repo Structure
 
    GDI_GEODIGITAL
    ├── configs                            ] Example configuration files to define a database connection and its schema
-   ├── docs                               ┐ Package documentation
+   ├── docs/src                           ┐ Package documentation
    │   └── getting_started_developer.md   |
    │   └── high_level_design.md           │
    │   └── installation_and_use.md        │
@@ -36,13 +36,13 @@ Repo Structure
    ├── src                                ┐
    │   └── geo_digital_tools              │
    │       ├── __init__.py                │ Package source code
-   │       ├── database.py                │
    |       ├── utils                      |
    │       |      ├── __init__.py         |
    │       |      ├── exceptions.py       |
    │       |      ├── statements.py       |
-   │       |      └── logging.py          |
-   │       └── storage*                   ┘
+   │       |      └── loggers.py           |
+   │       |   database.py                |
+   │       └── cygnet.py                  ┘
    └── tests                              ┐
          └── unit                         |
                ├── test_database.py       | Package tests
@@ -53,16 +53,8 @@ Repo Structure
 Architecture
 ------------
 
-The geodigitaltoolkit is intended to have 3 core modules. 
-
-- database 
-      - intended to handle any flavour of sql operations. 
-- utils 
-      - intended to handle internally known exceptions. 
-      - logging operations 
-- storage \* 
-      - a future extension that will handles connections and file handling operations 
-      - moving files, blob storage, file streams etc
+Geodigitaltoolkit is structured to provide generic tools for other geoscience python packages used within the GDI team.
+The common workflow is to define a cygnet.Process as a series of cygnet.Steps, each pertaining to a single logical process.
 
 --------------
 
@@ -70,13 +62,14 @@ Related Projects
 ----------------
 
 | All systems we build in this space do so with a single goal.
-| Loading data to centralised ‘cleaned’ location.
+| Loading data to centralised "cleaned" location.
 
 **Systems and Tools**
 
-- Tchaikovsky : Orchestration, Loadbalancing, Resource Creation\* 
-- Atratus : File Classification 
-- Cygnets : Domain Specific Transformation and Load
+- Cygnets  : Domain Specific Transformation and Load
+- Atratus  : File Classification 
+- Skippy   : Downhole Petrophysics (.las file) harmonisation
+- GravHarm : Gravity point data harmonisation
 
 **Outputs**
 

@@ -1,6 +1,6 @@
 """This module loads and builds SQLAlchemy Select statements from a JSON configuration file.
 
-It uses geo_digital_tools (gdt) for custom exception handling and leverages SQLAlchemy’s engine,
+It uses geo_digital_tools (gdt) for custom exception handling and leverages SQLAlchemy's engine,
 metadata, and table objects to construct query statements dynamically based on the provided JSON.
 """
 
