@@ -54,7 +54,7 @@ def connect(
 
     if local_db_path:
         sqla_cfg["sqlalchemy.url"] = (
-            f"sqlite:///{local_db_path}\\atratus_WAMEX.db"  # for windows
+            f"sqlite:///{local_db_path}"  # for windows
         )
         # sqla_url = f"sqlite:///{local_db_path}/{atratus_WAMEX.db}" # for linux/macOS
     try:
