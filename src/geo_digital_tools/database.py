@@ -56,7 +56,7 @@ def connect(
         sqla_cfg["sqlalchemy.url"] = (
             f"sqlite:///{local_db_path}"  # for windows
         )
-        # sqla_url = f"sqlite:///{local_db_path}/{atratus_WAMEX.db}" # for linux/macOS
+        # sqla_url = f"sqlite:///{local_db_path}" # for linux/macOS
     try:
         engine = sqla.engine_from_config(configuration=sqla_cfg)
     except sqla.exc.ArgumentError as exc:
