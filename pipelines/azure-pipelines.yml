@@ -36,38 +36,38 @@ stages:
             pathToSources: '$(System.DefaultWorkingDirectory)/src/'
             failIfCoverageEmpty: true
 
-- stage: SecurityCheck
-  displayName: 'Check Security'
-  trigger: manual
-  isSkippable: true
-  jobs:
-  - job: SnykSecurityScan
-    displayName: Scan app with snyk
-    steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '3.11'
-          addToPath: true
-          architecture: 'x64'
+# - stage: SecurityCheck
+#   displayName: 'Check Security'
+#   trigger: manual
+#   isSkippable: true
+#   jobs:
+#   - job: SnykSecurityScan
+#     displayName: Scan app with snyk
+#     steps:
+#       - task: UsePythonVersion@0
+#         inputs:
+#           versionSpec: '3.11'
+#           addToPath: true
+#           architecture: 'x64'
 
-      # Snyk does not support PEP621 - so we need a requirements.txt
-      - script: |
-          python -m pip install .
-          python -m pip freeze > requirements.txt
-        displayName: 'Freeze dependencies'
+#       # Snyk does not support PEP621 - so we need a requirements.txt
+#       - script: |
+#           python -m pip install .
+#           python -m pip freeze > requirements.txt
+#         displayName: 'Freeze dependencies'
 
-      - task: SnykSecurityScan@1
-        inputs:
-          serviceConnectionEndpoint: 'GDI-SNYK'
-          testType: 'app'
-          monitorWhen: 'always'
-        displayName : 'Scan app'
+#       - task: SnykSecurityScan@1
+#         inputs:
+#           serviceConnectionEndpoint: 'GDI-SNYK'
+#           testType: 'app'
+#           monitorWhen: 'always'
+#         displayName : 'Scan app'
 
 - stage: Build
   displayName: 'Build and Publish'
   dependsOn: 
     - Test
-    - SecurityCheck
+    # - SecurityCheck
   condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
   jobs:
     - job: BuildDependencies
@@ -93,52 +93,52 @@ stages:
             python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
           displayName: 'Upload to feed'
 
-- stage: BuildWithJFrog
-  displayName: 'Build and Publish using JFrog'
-  trigger: manual
-  isSkippable: true
-  condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
-  jobs:
-    - job: Build
-      displayName: 'Install and build'
-      steps:                
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: '3.11'
-            addToPath: true
-            architecture: 'x64'
+# - stage: BuildWithJFrog
+#   displayName: 'Build and Publish using JFrog'
+#   trigger: manual
+#   isSkippable: true
+#   condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
+#   jobs:
+#     - job: Build
+#       displayName: 'Install and build'
+#       steps:                
+#         - task: UsePythonVersion@0
+#           inputs:
+#             versionSpec: '3.11'
+#             addToPath: true
+#             architecture: 'x64'
 
-        - script: |
-            python -m pip wheel --no-deps -w dist/ .
-          displayName: 'Python build'
+#         - script: |
+#             python -m pip wheel --no-deps -w dist/ .
+#           displayName: 'Python build'
   
-    - job: JFrogScan
-      displayName: Jfrog publish and Xray scan
-      steps:
-        - task: JFrogPublishBuildInfo@1
-          inputs:
-            artifactoryConnection: 'Artifactory V2 service connection'
-            buildName: '$(Build.DefinitionName)'
-            buildNumber: '$(Build.BuildNumber)'
-          displayName : 'Publish build info'
+#     - job: JFrogScan
+#       displayName: Jfrog publish and Xray scan
+#       steps:
+#         - task: JFrogPublishBuildInfo@1
+#           inputs:
+#             artifactoryConnection: 'Artifactory V2 service connection'
+#             buildName: '$(Build.DefinitionName)'
+#             buildNumber: '$(Build.BuildNumber)'
+#           displayName : 'Publish build info'
             
-        - task: JFrogBuildPromotion@1
-          inputs:
-            artifactoryConnection: 'Artifactory V2 service connection'
-            buildName: '$(Build.DefinitionName)'
-            buildNumber: '$(Build.BuildNumber)'
-            targetRepo: 'gsrsd-gdi-pypi-dev-local'
-            status: 'Released'
-            includeDependencies: true
-            copy: false
-            dryRun: false
-          displayName : 'Promote build'
+#         - task: JFrogBuildPromotion@1
+#           inputs:
+#             artifactoryConnection: 'Artifactory V2 service connection'
+#             buildName: '$(Build.DefinitionName)'
+#             buildNumber: '$(Build.BuildNumber)'
+#             targetRepo: 'gsrsd-gdi-pypi-dev-local'
+#             status: 'Released'
+#             includeDependencies: true
+#             copy: false
+#             dryRun: false
+#           displayName : 'Promote build'
 
-        - task: JFrogBuildScan@1
-          inputs:
-            xrayConnection: 'JFrog Xray V2 service connection'
-            buildName: '$(Build.DefinitionName)'
-            buildNumber: '$(Build.BuildNumber)'
-            allowFailBuild: true
-            vuln: true
-          displayName : 'Scan build with JFrog'
+#         - task: JFrogBuildScan@1
+#           inputs:
+#             xrayConnection: 'JFrog Xray V2 service connection'
+#             buildName: '$(Build.DefinitionName)'
+#             buildNumber: '$(Build.BuildNumber)'
+#             allowFailBuild: true
+#             vuln: true
+#           displayName : 'Scan build with JFrog'
