@@ -7,7 +7,6 @@ import sqlalchemy as sqla
 
 import geo_digital_tools as gdt
 
-
 @pytest.fixture
 def mocked_db_valid() -> tuple[sqla.Engine, sqla.MetaData]:
     memory_engine = sqla.engine.engine_from_config(
@@ -108,7 +107,7 @@ class TestStatement:
         statement_str = str(statement)
         assert (
             statement_str
-            == "SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 \nFROM table_1 AS table_1_label JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1 JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1"
+            == "SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 \nFROM table_1 AS table_1_label LEFT OUTER JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1 LEFT OUTER JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1"
         )
 
     def test_bad_config(self, mocked_db_valid, invalid_cfg_disk):
@@ -138,7 +137,7 @@ class TestStatement:
         statement_str = str(statement)
         assert (
             statement_str
-            == "SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 \nFROM table_1 AS table_1_label JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1 JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1"
+            == "SELECT table_1_label.table_1_col_1, table_1_label.table_1_col_2, table_2_label.table_2_col_1, table_2_label.table_2_col_2 \nFROM table_1 AS table_1_label LEFT OUTER JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1 LEFT OUTER JOIN table_2 AS table_2_label ON table_2_label.table_2_col_1 = table_1_label.table_1_col_1"
         )
 
     def test_statement_builder_missingtable(

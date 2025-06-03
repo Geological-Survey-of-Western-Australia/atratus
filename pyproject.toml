@@ -21,10 +21,10 @@ classifiers = [
 ]
 
 dependencies = [
-  'SQLAlchemy==2.0.36',
-  'pandas==2.2.2',
-  'pyodbc==5.2.0',
-  'pydantic==2.9.2',
+  'SQLAlchemy~=2.0.36',
+  'pandas~=2.2.2',
+  'pyodbc~=5.2.0',
+  'pydantic~=2.9.2',
 ]
 
 [project.optional-dependencies]

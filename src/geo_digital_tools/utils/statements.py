@@ -147,6 +147,6 @@ def statement_builder(
         left_col = t_l.c[left_col_str]
         right_col = t_r.c[right_col_str]
 
-        statement = statement.join(t, left_col == right_col)
+        statement = statement.outerjoin(t, left_col == right_col)
 
     return statement
