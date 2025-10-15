@@ -18,7 +18,7 @@ repository
    - [Download VS Code](https://code.visualstudio.com/download)
    - if you can't install this raise a service now ticket.
 
-- Python, 3.11 is currently being used within the project 
+- Python, 3.12 is currently being used within the project 
    - The 64 bit version is required for several of the used packages (Windows)
    - https://www.python.org/downloads
    - if you can't install this raise a service now ticket.
