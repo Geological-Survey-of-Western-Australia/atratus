@@ -4,7 +4,7 @@ High Level Design
 This section covers where the geo digital toolkit sits in the overal
 domain specific ETL processing.
 
-.. |A High level overview| image:: ../assets/tchaikovsky.svg
+.. |A High level overview| image:: ../source/static/assets/tchaikovsky.svg
    :alt: High level overview
    :width: 80%
 
