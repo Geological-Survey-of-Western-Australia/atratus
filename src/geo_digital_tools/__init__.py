@@ -1,6 +1,6 @@
-"""GeoDigitalToolkit
+"""GeoDigitalTools
 
-A common toolkit for data handling at GSWA.
+A common tools for data handling at GSWA.
 """
 
 from importlib.metadata import PackageNotFoundError, version

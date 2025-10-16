@@ -1,7 +1,7 @@
-Geo Digital Toolkit
+Geo Digital Tools
 =============================================
 
-The Geo Digital Toolkit (**gdt**) is designed to handle the diverse Extract, Transform, Load (ETL) processes required to support harmonising geoscience data. 
+The Geo Digital Tools (**gdt**) is designed to handle the diverse Extract, Transform, Load (ETL) processes required to support harmonising geoscience data. 
 
 This package facilitates:
  - Loading tabular data from databases and files.

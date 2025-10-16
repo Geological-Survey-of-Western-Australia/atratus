@@ -5,13 +5,13 @@ This package is distributed via the pypi.org so installation is as simple as.
 
 .. code-block:: shell
 
-   pip install geo_digital_toolkit
+   pip install geo_digital_tools
 
-If you're intending to use the utilities in **geo_digital_toolkit** to do your own data harmonisation workflow we recommend this method of import.
+If you're intending to use the utilities in **geo_digital_tools** to do your own data harmonisation workflow we recommend this method of import.
 
 .. code-block:: python
    
-   import geo_digital_toolkit as gdt
+   import geo_digital_tools as gdt
 
 
 Developer Installation

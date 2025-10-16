@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath("."))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "GeoDigitalToolkit"
+project = "GeoDigitalTools"
 copyright = "2025, Geoscience Data Integrations Team - GSWA"
 author = "Geoscience Data Integrations Team - GSWA"
 
