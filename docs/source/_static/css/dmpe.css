@@ -34,7 +34,7 @@ a {
 
 a:hover {
   /* Keeping the color consistent on hover, relying on base theme for underline/decoration changes */
-  color: var(--brand-primary);
+  color: var(--color-white);
 }
 
 /* Utility Links */
