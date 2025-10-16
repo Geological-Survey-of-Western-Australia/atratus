@@ -86,12 +86,12 @@ div.reference .sig:active {
 
 /* Python class signature */
 dt.sig.sig-object.py {
-  margin-bottom: 1em;
-  padding: 0.5em 0.75em;
-  border: 1px solid #a0291d;
-  border-radius: 5px;
-  background-color: #fff8f8 !important;
-  color: #a0291d;
+    background-color: #fff8f8 !important;   /* light background */
+    border: 1px solid #a0291d !important;   /* red/brown border */
+    border-radius: 5px !important;
+    color: #a0291d !important;              /* text color */
+    padding: 0.5em 0.75em !important;
+    box-shadow: none !important;            /* remove default blue shadow */
 }
 
 dt.sig.sig-object.py:before,
