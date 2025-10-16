@@ -1,13 +1,23 @@
 Installation
 ========================
 
+This package is distributed via the pypi.org so installation is as simple as. 
 
-**Standard Installation:**
-
-This package is distributed via the pypi.org 
 .. code-block:: shell
 
-    pip install geo_digital_toolkit
+   pip install geo_digital_toolkit
+
+If you're intending to use the utilities in **geo_digital_toolkit** to do your own data harmonisation workflow we recommend this method of import.
+
+.. code-block:: python
+   
+   import geo_digital_toolkit as gdt
+
+
+Developer Installation
+----------
+
+If you're a developer and interested in contributing then we reommend cloning our code base directly from git, and doing any testing and prototyping using the workflow below.
 
 **Editable Installation:**
 
@@ -21,37 +31,19 @@ To set up an editable install, execute the following commands in your terminal w
    # This command also installs all package dependencies.
    pip install -e .
 
-If you require optional dependencies, use the following commands:
+We would welcome code changes or documentation improvements or both!
+To support this you can install the optional dependencies below by using the following commands:
 
 For Windows users
 
 .. code-block:: shell
 
-   # Install the optional dependencies for testing
+   # Install the optional dependencies for code contributions
    pip install .[tests]
    pip install .[dev]
-   # Install the optional dependencies for documentation
+   # Install the optional dependencies for documentation contributions
    pip install .[docs]
    pip install .[docs-extra]
 
-For Mac users：
-
-.. code-block:: shell
-
-
-   # Install the optional dependencies for testing
-   pip install '.[tests]'
-   pip install '.[dev]'
-   # Install the optional dependencies for documentation
-   pip install '.[docs]'
-   pip install '.[docs-extra]'
-
-.. note::
-   
-   If you use Jupyter notebooks during the development process, you may need to restart the kernel periodically to ensure that any changes are loaded into the kernel session.
-
-
-Unit tests
-----------
-
-If you encounter any issues 
+.. Note::
+   For Mac users substitute `pip install .[docs-extra]` for **`pip install '.[docs-extra]'`**.
