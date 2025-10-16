@@ -19,13 +19,10 @@
   --color-sig-param: #7a1d1d;    /* Signature Parameter Text */
   --color-sig-default: #993399;  /* Signature Default Value Text */
   
-  /* API Signature & Syntax Colors (Dracula-like) */
-  --api-sig-bg: #2b1e1e;
-  --api-sig-text: #f0f0f0;
-  --api-keyword: #ff79c6;
-  --api-name: #50fa7b;
-  --api-punctuation: #f1fa8c;
-  --api-comment: #6272a4;
+  /* Source Code View Colors */
+  --code-bg: #333333;            /* Updated to match signature background */
+  --code-line-numbers: #6272a4;  /* Line number color */
+  --code-text-color: #DCDCDC;    /* Updated to match signature text color */
 }
 
 /* --- 2. LINKS & TYPOGRAPHY ---------------------------------------------- */
@@ -184,3 +181,5 @@ em.property {
 .default_value {
   color: var(--color-sig-default); /* Default values */
 }
+
+

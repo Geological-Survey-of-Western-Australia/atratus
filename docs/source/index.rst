@@ -1,9 +1,7 @@
-GeoDigitalToolkit
+Geo Digital Toolkit : *A Common Toolkit for Geoscience Data*
 =============================================
 
-*A Common Toolkit for Data Handling*
-
-GeoDigitalToolkit is designed to handle the diverse ETL processes required for digital geoscience data. While extraction and transformation are often project-specific (cygnets), data loading is typically performed with general-purpose tools. 
+Geo Digital Toolkit is designed to handle the diverse ETL processes required for digital geoscience data. While extraction and transformation are often project-specific (cygnets), data loading is typically performed with general-purpose tools. 
 
 This library facilitates:
  - Loading tabular data from various projects.
