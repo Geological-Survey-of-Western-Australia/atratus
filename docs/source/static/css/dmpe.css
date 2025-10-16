@@ -1,22 +1,4 @@
-/* Change project title color in sidebar header */
-.wy-side-nav-search .project {
-  color: #ffffff !important;  /* White title text */
-}
-
-/* Optional: change subtitle or version color */
-.wy-side-nav-search .version {
-  color: #d9e6f2 !important;
-}
-
-/* Optional: tweak hover/focus colors for links */
-a {
-  color: #a0291d;
-}
-a:hover {
-  color: #a0291d;
-}
-
-/* === HEADER (project title area) === */
+/* === SIDEBAR HEADER === */
 .wy-side-nav-search {
   background-color: #a0291d !important; /* base header color */
 }
@@ -30,7 +12,16 @@ a:hover {
   color: #ffd6c2 !important;  /* version text */
 }
 
-/* === SIDEBAR (navigation) === */
+/* === LINKS === */
+a {
+  color: #a0291d;
+}
+
+a:hover {
+  color: #a0291d;
+}
+
+/* === SIDEBAR NAVIGATION === */
 .wy-nav-side {
   background-color: #7f1f15 !important; /* darker sidebar */
 }
@@ -44,216 +35,113 @@ a:hover {
   letter-spacing: 0.5px;
 }
 
-
 .wy-menu-vertical a:hover {
   color: #ffffff !important;
   background-color: #bf3b2a !important;
 }
 
-
-/* Scrollbar to match theme */
+/* Sidebar scrollbar */
 .wy-nav-side::-webkit-scrollbar {
   width: 8px;
 }
+
 .wy-nav-side::-webkit-scrollbar-thumb {
   background: #7f1f15;
-  border-
 }
 
-/* Remove default blue outline and add theme-consistent border */
+/* Sidebar search input */
 .wy-side-nav-search input[type="text"] {
   border: 1px solid #7f1f15;  /* sidebar-dark border */
-  outline: none;               /* remove default blue focus */
-  background-color: #ffffff;  /* optional light background */
-  color: #7f1f15;             /* text color inside input */
+  outline: none;
+  background-color: #ffffff;
+  color: #7f1f15;
 }
 
-/* On focus, change border color to match your main color */
 .wy-side-nav-search input[type="text"]:focus {
-  border: 2px solid #5c1910;   /* highlight with main color */
-  box-shadow: 0 0 4px #5c1910aa; /* optional subtle glow */
+  border: 2px solid #5c1910;
+  box-shadow: 0 0 4px #5c1910aa;
 }
 
-/* === API DOC REFERENCE SIGNATURE BOXES === */
-
-/* Outer wrapper of each signature */
+/* === API DOC SIGNATURES === */
 div.reference .sig {
-    background-color: #2b1e1e !important;   /* change box background */
-    border-left: 4px solid #a0291d !important; /* colored accent instead of blue */
-    color: #f0f0f0 !important;              /* text color */
-    border-radius: 0.3rem !important;
-    padding: 0.25rem 0.5rem !important;
-    box-shadow: none !important;            /* remove blue shadow */
-    display: inline-block;
-    margin-bottom: 0.25rem !important;
+  background-color: #2b1e1e !important;
+  border-left: 4px solid #a0291d !important;
+  color: #f0f0f0 !important;
+  border-radius: 0.3rem !important;
+  padding: 0.25rem 0.5rem !important;
+  box-shadow: none !important;
+  display: inline-block;
+  margin-bottom: 0.25rem !important;
 }
 
-/* Keywords / names inside signature */
-div.reference .sig .k { color: #ff79c6 !important; }  /* keyword like def/class */
-div.reference .sig .n { color: #50fa7b !important; }  /* name / parameter */
-div.reference .sig .p { color: #f1fa8c !important; }  /* punctuation */
-div.reference .sig .c { color: #6272a4 !important; font-style: italic; } /* comments */
+div.reference .sig .k { color: #ff79c6 !important; }
+div.reference .sig .n { color: #50fa7b !important; }
+div.reference .sig .p { color: #f1fa8c !important; }
+div.reference .sig .c { color: #6272a4 !important; font-style: italic; }
 
-/* Remove any default focus outline */
 div.reference .sig:focus,
 div.reference .sig:active {
-    outline: none !important;
+  outline: none !important;
 }
 
 /* Python class signature */
 dt.sig.sig-object.py {
-    margin-bottom: 1em;
-    padding: 0.3em 0;
+  margin-bottom: 1em;
+  padding: 0.5em 0.75em;
+  border: 1px solid #a0291d;
+  border-radius: 5px;
+  background-color: #fff8f8 !important;
+  color: #a0291d;
 }
 
-/* Keyword 'class' */
-em.property {
-    color: #a0291d;
-    font-weight: bold;
-}
-
-/* Module/namespace */
-.sig-prename.descclassname {
-    color: #555555;
-    font-style: italic;
-}
-
-/* Class name */
-.sig-name.descname {
-    color: #004d7a;
-    font-weight: bold;
-    font-size: 1.05em;
-}
-
-/* Parentheses */
-.sig-paren {
-    color: #333333;
-}
-
-/* Parameters */
-.sig-param {
-    font-style: italic;
-    color: #7a1d1d;
-}
-
-/* Default values */
-.default_value {
-    color: #993399;
-}
-
-/* Source link */
-.viewcode-link {
-    font-size: 0.85em;
-    color: #888888;
-}
-
-/* Header link */
-.headerlink {
-    color: #999999;
-}
-
-/* Python class signature */
-dt.sig.sig-object.py {
-    margin-bottom: 1em;
-    padding: 0.3em 0;
-}
-
-/* Keyword 'class' */
-em.property {
-    color: #a0291d;
-    font-weight: bold;
-}
-
-/* Module/namespace */
-.sig-prename.descclassname {
-    color: #555555;
-    font-style: italic;
-}
-
-/* Class name */
-.sig-name.descname {
-    color: #004d7a;
-    font-weight: bold;
-    font-size: 1.05em;
-}
-
-/* Parentheses */
-.sig-paren {
-    color: #333333;
-}
-
-/* Parameters */
-.sig-param {
-    font-style: italic;
-    color: #7a1d1d;
-}
-
-/* Default values */
-.default_value {
-    color: #993399;
-}
-
-/* Source link */
-.viewcode-link {
-    font-size: 0.85em;
-    color: #888888;
-}
-
-/* Header link */
-.headerlink {
-    color: #999999;
-}
-
-/* Apply theme color to the entire signature container */
-dt.sig.sig-object.py {
-    color: #a0291d;       /* text color for the whole signature */
-}
-
-/* Apply the same theme color to the 'class' keyword */
-em.property {
-    color: #a0291d;
-    font-weight: bold;    /* optional to keep it bold like keywords */
-}
-
-dt.sig.sig-object.py {
-    border: 1px solid #a0291d;   /* border color */
-    border-radius: 5px;           /* optional rounded corners */
-    padding: 0.5em 0.75em;        /* some spacing inside the box */
-    background-color: #fff8f8;    /* optional light background */
-    color: #a0291d;               /* text color */
-}
-
-/* Ensure the 'class' keyword matches */
-em.property {
-    color: #a0291d;
-    font-weight: bold;
-}
-
-.highlight-python .sig.sig-object.py {
-    border-color: #a0291d;
-}
-
-/* Remove or recolor the blue overlay around Python signatures */
-dt.sig.sig-object.py {
-    background-color: #fff8f8 !important;   /* light background */
-    border: 1px solid #a0291d !important;   /* red frame */
-    border-radius: 5px !important;
-}
-
-/* Optional: override pseudo-elements added by RTD */
 dt.sig.sig-object.py:before,
 dt.sig.sig-object.py:after {
-    background: none !important;
+  background: none !important;
 }
 
-/* Keyword 'class' color */
+/* Keyword 'class' */
 em.property {
-    color: #a0291d;
-    font-weight: bold;
+  color: #a0291d;
+  font-weight: bold;
 }
 
-/* Module + class name text */
+/* Module + class name */
 .sig-prename.descclassname,
 .sig-name.descname {
-    color: #a0291d;
+  color: #a0291d;
+  font-style: italic;
+  font-weight: bold;
+  font-size: 1.05em;
+}
+
+/* Parentheses */
+.sig-paren {
+  color: #333333;
+}
+
+/* Parameters */
+.sig-param {
+  font-style: italic;
+  color: #7a1d1d;
+}
+
+/* Default values */
+.default_value {
+  color: #993399;
+}
+
+/* Source link */
+.viewcode-link {
+  font-size: 0.85em;
+  color: #888888;
+}
+
+/* Header link */
+.headerlink {
+  color: #999999;
+}
+
+/* Optional: Python highlight box border */
+.highlight-python .sig.sig-object.py {
+  border-color: #a0291d;
 }
