@@ -17,7 +17,7 @@ If you're intending to use the utilities in **geo_digital_tools** to do your own
 Developer Installation
 ----------
 
-If you're a developer and interested in contributing then we reommend cloning our code base directly from git, and doing any testing and prototyping using the workflow below.
+If you're a developer and interested in contributing then we recommend cloning our code base directly from git, and doing any testing and prototyping using the workflow below.
 
 **Editable Installation:**
 

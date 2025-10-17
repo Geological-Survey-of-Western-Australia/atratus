@@ -15,7 +15,7 @@ exceptions should not stop the operation of the system as a whole.
 1. How do we ensure that issues with inputs and code are easily distinguished? 
 1. How do we get rid of the try:except boilerplate?
 
-The **first** of these issues is handled by loggging every data-associated fault with a *KnownException*.
+The **first** of these issues is handled by logging every data-associated fault with a *KnownException*.
 Faults with the codebase may cause the program to exit per normal.
 
 The **second** case is handled by the division of logging files into two
