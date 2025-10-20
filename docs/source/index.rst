@@ -8,9 +8,9 @@ This package facilitates:
  - A common approach to logging errors for data and code issues.
  - Abstract base classes for processing pipelines.
 
-The diagram below is intended to help visualise where **gdt** sits in the data ecosystem.
+The diagram below is intended to help visualise where **gdt** sits in the data ecosystem. The gdt package provides as consistent approach to logging, database interaction, and process definition that will help ensure a consistent approach across the various data harmonisation efforts undertaken by the GSWA.
 
-.. |A High level overview| image:: ../source/_static/assets/tchaikovsky.svg
+.. |A High level overview| image:: ../source/_static/assets/geo_digital_tools_highlevel.svg
    :alt: High level overview
    :width: 80%
 
