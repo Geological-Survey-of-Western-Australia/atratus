@@ -55,6 +55,9 @@ Another challenge about geodata harmonisation is the distinguishing between prob
 
 These exceptions are 'tagged' and sent to different log files to facilitate user and developer review of the existing data harmonisation workplace.  
 
+.. Warning::
+    This functionality is being revisited as part of the next release and will change.
+
 Getting data from a Database
 ----------
 
