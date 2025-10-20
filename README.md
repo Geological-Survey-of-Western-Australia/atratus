@@ -1,9 +1,12 @@
-## GDI - GeoDigitalTools
+# GDI - GeoDigitalTools
+*Common tools for GeoData Handling and Harmonisation*
 
-*A Common tools for GeoData Handling*
-___
 
-# Introduction 
+| License | Latest Commit | DOI | Coverage
+|----------|----------|----------| -------|
+| [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html) | [![Last Commit](https://img.shields.io/github/last-commit/Geological-Survey-of-Western-Australia/Vocabularies?logo=git&color=blue)](https://github.com/Geological-Survey-of-Western-Australia/Vocabularies/commits) | TBC |![Coverage](https://img.shields.io/badge/coverage-85%25-green)
+
+## Introduction 
 This repository contains code for geoscience data handling and harmonisation, it is developed as part of the core operations of the Geoscience Data Integrations Branch, of the Geological Surevy of Western Australia.
 
 All digital geoscience data requires extremely diverse ETL processes. While the extraction and transformation processes require highly bespoke solutions (cygnets), some utilities should be shared across projects. 
