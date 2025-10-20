@@ -16,7 +16,6 @@ See this link for justification:
 
 import copy
 import logging
-import logging.config
 import logging.handlers
 import sys
 from pathlib import Path
