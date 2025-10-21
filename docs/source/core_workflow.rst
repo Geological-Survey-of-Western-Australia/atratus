@@ -13,12 +13,14 @@ This process of data harmonisation has distinct input requirements for each step
 
 Examples
 --------
-This diagram
+This UML diagram is intended to capture the two key workflows executed as part of geo_digital_tools and the implementation of a data harmonisation workflow. 
+
+- The Red : Executing a defined process (Run Time)
+- The Green : Defining a new process (Developing Steps)
+
+This captures how systems build with geo_digital_tools are expected to function.
 
 .. |UML of Harmonisation Workflow| image:: ../source/_static/assets/geo_digital_tools_core_workflow.svg
    :alt: UML Diagram Overview of Data Harmonisation Process in Geo Digital Tools
 |UML of Harmonisation Workflow|
 
-some other other 
-
-some other tests
