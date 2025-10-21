@@ -3,7 +3,7 @@ Database Configuration
 
 Many organisations as part of internal processes load their various geoscience relevant meta-data into internal databases. 
 
-Geoscientists that review and ultimately use geo-data products; are mostly unfamiliar with the structure of the SQL backend. This can create communication issues between users and DB admins who can provide the database extracts or views needed to complete geodata harmonisation workflows. 
+Geoscientists that review and ultimately use geodata products; are mostly unfamiliar with the structure of the SQL backend. This can create communication issues between users and DB admins who can provide the database extracts or views needed to complete geodata harmonisation workflows. 
 
 Overview
 --------

@@ -1,7 +1,7 @@
 Basic Usage
 ===========
 
-So you're ready to take on geo-data harmonisation! Great how do you get started? 
+So you're ready to take on geodata harmonisation! Great how do you get started? 
 
 Now is a great time to talk at a high level about three common problems in geodata harmonisation and how GDT solves them. 
 
@@ -12,7 +12,7 @@ These are:
 
 Data harmonisation
 ------------------
-Geo-data harmonisation involves the correction of meta data, data measurements, and user input in large legacy collections of similar data. These issues arise largely due to variation in industry practice and human factors. We address this with a submodule internally referred to as a cygnet.
+Geodata harmonisation involves the correction of meta data, data measurements, and user input in large legacy collections of similar data. These issues arise largely due to variation in industry practice and human factors. We address this with a submodule internally referred to as a cygnet.
 
 In **GDT** the data harmonisation process is broken into two concepts:
  - **Step** - A single operation or transformation done to a set of inputs.
