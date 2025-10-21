@@ -12,7 +12,7 @@ These are:
 
 Data harmonisation
 ------------------
-Geodata harmonisation involves the correction of meta data, data measurements, and user input in large legacy collections of similar data. These issues arise largely due to variation in industry practice and human factors. We address this with a submodule internally referred to as a cygnet.
+Geodata harmonisation involves the correction of metadata, data measurements, and user input in large legacy collections of similar data. These issues arise largely due to variation in industry practice and human factors. We address this with a submodule internally referred to as a cygnet.
 
 In **GDT** the data harmonisation process is broken into two concepts:
  - **Step** - A single operation or transformation done to a set of inputs.
