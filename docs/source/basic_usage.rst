@@ -10,7 +10,7 @@ These are:
  - Distinguishing between **Data Problems** and **Code Problems**
  - Performing data retrieval from structured databases
 
-Data harmonisation
+Data Harmonisation
 ------------------
 Geodata harmonisation involves the correction of metadata, data measurements, and user input in large legacy collections of similar data. These issues arise largely due to variation in industry practice and human factors. We address this with a submodule internally referred to as a cygnet.
 
