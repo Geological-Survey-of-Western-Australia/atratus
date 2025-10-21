@@ -6,14 +6,14 @@ Many organisations as part of internal processes load their various geoscience r
 Geoscientists that review and ultimately use geo-data products; are mostly unfamiliar with the structure of the SQL backend. This can create communication issues between users and DB admins who can provide the database extracts or views needed to complete geodata harmonisation workflows. 
 
 Overview
-----------------------
+--------
 
 Here we define a preliminary structure that is intended to act as a tool to define this interface to support automated extraction from SQL databases. This means that users can create a config file that can be easily read and edited by a geoscientist. 
 
 We use `SQLAlchemy <https://www.sqlalchemy.org/>`_  to translate these configs to select statements that can be on databases built with different SQL technologies (t-SQL, ms-SQL etc.).
 
 Examples
-----------------------
+--------
 
 To define your first gdt database config lets consider the various keys and their values:
 

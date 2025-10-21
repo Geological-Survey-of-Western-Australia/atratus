@@ -1,5 +1,5 @@
 Basic Usage
-=============================================
+===========
 
 So you're ready to take on geo-data harmonisation! Great how do you get started? 
 
@@ -11,7 +11,7 @@ These are:
  - Performing data retrieval from structured databases
 
 Data harmonisation
-----------
+------------------
 Geo-data harmonisation involves the correction of meta data, data measurements, and user input in large legacy collections of similar data. These issues arise largely due to variation in industry practice and human factors. We address this with a submodule internally referred to as a cygnet.
 
 In **GDT** the data harmonisation process is broken into two concepts:
@@ -47,7 +47,7 @@ These methods are :
 
 
 Developers and Geoscientists
-----------
+----------------------------
 Another challenge about geodata harmonisation is the distinguishing between problems that can be solved by a developer and problems that can be solved by a geoscientist. **GDT** handles this by raising two types of exceptions:
 
  - :py:class:`geo_digital_tools.KnownException` - This Exception is intended to be raised when the cause of the issue/error is known. Ideally this is something that can be explained to a geoscientist to either fix or at least be aware of.
@@ -59,7 +59,7 @@ These exceptions are 'tagged' and sent to different log files to facilitate user
     This functionality is being revisited as part of the next release and will change.
 
 Getting data from a Database
-----------
+----------------------------
 
 Many organisations collate and organise their geoscience data in centralised SQL databases. However the schemas of the databases and flavours of SQL used vary team to team and organisations.
 Further many tools used for file parsing are written and maintained in python. Many geoscientists have little familiarity with either of these languages but have a clear understanding of what data they need from the database to perform a given harmonisation task.

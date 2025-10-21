@@ -4,7 +4,7 @@ Logging and Exceptions
 In data harmonisation tools, we expect to encounter a host of errors associated with the exceptionally diverse data we work with. Each data set has its own unique edge cases and harmonising decades of cross-disciplinary data is by no means an easy task. To achieve this part of our team's work will be codifying the process of parsing files into harmonised databases. In many cases these exceptions should not stop the operation of the system as a whole.
 
 Overview
-----------------------
+--------
 
 **There are two main ideas this part of the code is trying to capture:** 
 
@@ -17,7 +17,7 @@ The **second** case is handled by the division of logging files into two separat
 
 
 Examples
-----------------------
+--------
 
 Below is a general example on how to use the gdt logging methods. Note in the example below we show that the type error captures various perturbations of the issues with the inputs. 
 

@@ -1,5 +1,5 @@
 Geo Digital Tools
-=============================================
+=================
 
 The Geo Digital Tools (**gdt**) is designed to handle the diverse Extract, Transform, Load (ETL) processes required to support harmonising geoscience data. 
 
