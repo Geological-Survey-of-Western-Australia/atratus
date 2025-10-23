@@ -1,7 +1,6 @@
 """Cygnet processing module (Chain of Responsibility pattern implementation)."""
 
 from collections import OrderedDict
-from typing import Any, Optional
 
 import geo_digital_tools as gdt
 

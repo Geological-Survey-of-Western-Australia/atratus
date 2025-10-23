@@ -1,22 +1,22 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
+requires = ["setuptools>=80", "setuptools_scm[simple]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = 'geo_digital_tools'
 dynamic = ["version"]
-description = "A package designed to abstract GSWA internal database operations."
+description = "Common tools for Geodata Handling and Harmonisation"
 authors = [
   { name = "Geoscience Data Integrations Team - GSWA", email = "gdi.contact@demirs.wa.gov.au" },
 ]
 
 readme = "README.md"
-requires-python = ">=3.11"
-license = { file = 'LICENSE' }
+requires-python = ">=3.12"
+license = "GPL-3.0-only"
+license-files = ["LICEN[CS]E*", "COPYING"]
 
 classifiers = [
   "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: Apache 2.0",
   "Operating System :: OS Independent",
 ]
 

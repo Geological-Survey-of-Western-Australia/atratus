@@ -1,39 +1,67 @@
-GeoDigitalToolkit
-=============================================
+Geo Digital Tools
+=================
 
-*A Common Toolkit for Data Handling*
+The Geo Digital Tools (**gdt**) is designed to handle the diverse Extract, Transform, Load (ETL) processes required to support harmonising geoscience data. 
 
-GeoDigitalToolkit is designed to handle the diverse ETL processes required for digital geoscience data. While extraction and transformation are often project-specific (cygnets), data loading is typically performed with general-purpose tools. 
+This package facilitates:
+ - Loading tabular data from databases and files.
+ - A common approach to logging errors for data and code issues.
+ - Abstract base classes for processing pipelines.
 
-This library facilitates:
- - Loading tabular data from various projects.
- - Centralized data handling and logging.
- - Integration with structured databases.
- - A consistent approach to database interactions** via the CCRUD (Connect, Create, Read, Update, and Delete) methodology.
+The diagram below is intended to help visualise where **gdt** sits in the data ecosystem. The gdt package provides as consistent approach to logging, database interaction, and process definition that will help ensure a consistent approach across the various data harmonisation efforts undertaken by the GSWA.
 
-This system is intended for internal usage by GSWA personnel to read and load tabular datasets.
+.. |A High level overview| image:: ../source/_static/assets/geo_digital_tools_highlevel.svg
+   :alt: High level overview
+   :width: 80%
+
+|A High level overview|
 
 
-Feature List:
- - Basic database operations (SQL)
- - Error Logging and Handling
- - Storage Operations (Blob/Local)
+.. Seealso::
 
+      **Want to know what's new checkout the** :doc:`changelog`.
+
+
+
+Related Projects
+----------------
+
+| All systems we build in this space do so with a single goal.
+| Loading data to centralised "cleaned" location.
+
+- Skippy   : Downhole Petrophysics (.las file) harmonisation
+
+
+----------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Getting Started:
 
-   getting_started_developer
-   high_level_design
-   installation_and_use
-   logging
+   installation
+   basic_usage
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Guides:
+
+   core_workflow
+   logging_exceptions
+   database_configuration
 
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
 
    api/geo_digital_tools
+   changelog
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Project Links
+
+   GitHub Repository <https://github.com/Geological-Survey-of-Western-Australia>
+   Issue Tracker <https://github.com/Geological-Survey-of-Western-Australia>
 
 .. 
    automodule:: geo_digital_tools

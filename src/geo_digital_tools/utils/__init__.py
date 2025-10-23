@@ -1,4 +1,4 @@
-"""Utility functions for geodigitaltoolkit."""
+"""Utility functions for geodigitaltools."""
 
 from geo_digital_tools.utils.statements import statement_builder
 
