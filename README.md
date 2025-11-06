@@ -1,4 +1,4 @@
-# GDI - GeoDigitalTools
+# GSWA - Atratus
 *Common tools for GeoData Handling and Harmonisation*
 
 
@@ -33,7 +33,7 @@ gdi.contact@dmpe.wa.gov.au
 ### Installation process
 This tool is built and distributed via pypi and can be installed with the following command. 
 ```
-pip install geo_digital_tools
+pip install gswa-atratus
 ```
 This tools is largely intended to be used by the various other projects of the GDI team and as such is likely installed simply as a dependency.
 

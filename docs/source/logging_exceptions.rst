@@ -23,7 +23,7 @@ Below is a general example on how to use the gdt logging methods. Note in the ex
 
 .. code-block:: python
 
-    import geo_digital_tools as gdt
+    import gswa_atratus as gdt
 
     # initialise the logger
     logger = gdt.use_gdt_logging(name="my_cygnet", log_dir="logs", use_excepthook=True)

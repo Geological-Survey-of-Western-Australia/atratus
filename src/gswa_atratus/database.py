@@ -22,7 +22,7 @@ import pandas as pd
 import sqlalchemy as sqla
 from sqlalchemy.sql.expression import Selectable
 
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 
 def connect(
@@ -53,9 +53,7 @@ def connect(
     sqla_cfg = db_config.pop("sqlalchemy")
 
     if local_db_path:
-        sqla_cfg["sqlalchemy.url"] = (
-            f"sqlite:///{local_db_path}"  # for windows
-        )
+        sqla_cfg["sqlalchemy.url"] = f"sqlite:///{local_db_path}"  # for windows
         # sqla_url = f"sqlite:///{local_db_path}" # for linux/macOS
     try:
         engine = sqla.engine_from_config(configuration=sqla_cfg)
@@ -212,7 +210,7 @@ def write_db_metadata_table(
             - The total execution time of the database building script.
     """
     meta = dict(
-        geo_digital_tools=f"{gdt.__name__}@{gdt.__version__}",
+        gswa_atratus=f"{gdt.__name__}@{gdt.__version__}",
         cygnet=f"{cygnet.__name__}@{cygnet.__version__}",
         utc_iso_start=(
             run_datetime.isoformat()

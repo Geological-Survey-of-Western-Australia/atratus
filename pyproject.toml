@@ -3,7 +3,7 @@ requires = ["setuptools>=80", "setuptools_scm[simple]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = 'geo_digital_tools'
+name = 'gswa-atratus'
 dynamic = ["version"]
 description = "Common tools for Geodata Handling and Harmonisation"
 authors = [

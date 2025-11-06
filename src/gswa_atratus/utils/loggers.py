@@ -20,7 +20,7 @@ import logging.handlers
 import sys
 from pathlib import Path
 
-from geo_digital_tools.utils.exceptions import KnownException
+from gswa_atratus.utils.exceptions import KnownException
 
 
 class KnownExceptionsFilter(logging.Filter):

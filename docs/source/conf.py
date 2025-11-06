@@ -12,12 +12,12 @@ sys.path.insert(0, os.path.abspath("."))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "GeoDigitalTools"
+project = "Atratus"
 copyright = "2025, Geoscience Data Integrations Team - GSWA"
 author = "Geoscience Data Integrations Team - GSWA"
 
 try:
-    release = importlib.metadata.version("geo_digital_tools")
+    release = importlib.metadata.version("gswa_atratus")
 except importlib.metadata.PackageNotFoundError:
     release = "unknown"
 print(f"Sphinx release version: {release}")

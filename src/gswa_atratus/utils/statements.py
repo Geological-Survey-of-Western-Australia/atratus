@@ -12,7 +12,7 @@ import sqlalchemy as sqla
 from sqlalchemy import exc as sqlae
 from sqlalchemy.orm import aliased
 
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 
 def load_statement(

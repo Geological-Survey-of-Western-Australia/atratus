@@ -29,7 +29,7 @@ These methods are :
 
 
 .. Seealso::
-    More detail can be found in the api docs :py:class:`geo_digital_tools.cygnet.Step`.
+    More detail can be found in the api docs :py:class:`gswa_atratus.cygnet.Step`.
 
 ----------
 
@@ -43,7 +43,7 @@ These methods are :
 
 
 .. Seealso::
-    More detail can be found in the api docs :py:class:`geo_digital_tools.cygnet.Process`.
+    More detail can be found in the api docs :py:class:`gswa_atratus.cygnet.Process`.
 
 
 Developers and Geoscientists

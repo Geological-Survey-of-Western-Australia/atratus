@@ -2,7 +2,7 @@
 
 from collections import OrderedDict
 
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 
 class Step:
