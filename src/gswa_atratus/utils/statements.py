@@ -1,6 +1,6 @@
 """This module loads and builds SQLAlchemy Select statements from a JSON configuration file.
 
-It uses geo_digital_tools (gdt) for custom exception handling and leverages SQLAlchemy's engine,
+It uses gswa-atratus (gdt) for custom exception handling and leverages SQLAlchemy's engine,
 metadata, and table objects to construct query statements dynamically based on the provided JSON.
 """
 
@@ -18,7 +18,7 @@ import gswa_atratus as gdt
 def load_statement(
     cfg_path: Path | str, engine: sqla.Engine, metadata: sqla.MetaData
 ) -> sqla.Select:
-    """Load and build a SQLAlchemy Select statement from a geo digital tools config file.
+    """Load and build a SQLAlchemy Select statement from a gswa-atratus config file.
 
     Args:
         cfg_path (Path | str): Path to the JSON config file, which must include
@@ -56,14 +56,14 @@ def statement_builder(
     joins: list[dict],
     alias: dict,
 ) -> sqla.Select:
-    """Build an SQLAlchemy Select statement from a geo digital tools config.
+    """Build an SQLAlchemy Select statement from a gswa-atratus config.
 
     Args:
         engine (sqlalchemy.Engine): A configured SQLAlchemy Engine.
         metadata (sqlalchemy.MetaData): A configured SQLAlchemy MetaData instance.
-        selection (dict): Configured geodigital dictionary specifying tables and columns.
-        joins (list[dict]): Configured geodigital dictionary detailing table joins.
-        alias (dict): Configured geodigital dictionary for alias mapping of tables.
+        selection (dict): Configured gswa-atratus dictionary specifying tables and columns.
+        joins (list[dict]): Configured gswa-atratus dictionary detailing table joins.
+        alias (dict): Configured gswa-atratus dictionary for alias mapping of tables.
 
     Returns:
         sqlalchemy.Select: "statement", an SQLAlchemy select statement.

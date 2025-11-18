@@ -118,7 +118,6 @@ def create_from_dataframe(
     Raises:
         Exception: If table creation fails.
     """
-    # NOTE we might want the schema to be linked to cygnet name eg geodigitaldatabase.skippy.table1
     try:
         with engine.begin() as connection:
             dataframe.to_sql(name=table_name, con=connection, index=False)
@@ -205,7 +204,7 @@ def write_db_metadata_table(
 
     Hint:
         Suggested kwargs to capture as additional metadata include:
-            - The geodigital configuration file contents,
+            - The gswa-atratus configuration file contents,
             - The generated SQL `SELECT` statement,
             - The total execution time of the database building script.
     """

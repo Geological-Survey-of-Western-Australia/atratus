@@ -189,5 +189,5 @@ def test_write_db_metadata_table(mocked_connect):
 
     assert all(
         test in returned_db
-        for test in ["geo_digital_tools", "cygnet", "utc_iso_start", "test_meta"]
+        for test in ["gswa_atratus", "cygnet", "utc_iso_start", "test_meta"]
     )

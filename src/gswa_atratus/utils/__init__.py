@@ -1,4 +1,4 @@
-"""Utility functions for geodigitaltools."""
+"""Utility functions for gswa-atratus."""
 
 from gswa_atratus.utils.statements import statement_builder
 
