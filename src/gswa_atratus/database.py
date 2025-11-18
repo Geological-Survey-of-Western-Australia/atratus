@@ -130,15 +130,23 @@ def create_from_dataframe(
     metadata.create_all(bind=engine)
 
 
-def select(engine: sqla.Engine, statement: Selectable | str) -> pd.DataFrame:
+def select(
+    engine: sqla.Engine,
+    statement: Selectable | str,
+    mnemonics: dict | None = None,
+) -> pd.DataFrame:
     """Execute a SELECT statement against a specific engine, returning a DataFrame.
 
     Args:
         engine (sqlalchemy.Engine): Database connection engine.
         statement (Selectable | str): A SQLAlchemy statement or raw SQL text to execute.
+        mnemonics: dictionary from config, containing mnemonic mappings for database headers.
+
+    Specifying Mnemonics will rename columns from the database header to the mnemonic used
+    by skippy. This is required for automatically pulling data from your database.
 
     Returns:
-        pd.DataFrame: Results of the SELECT query.
+        pd.DataFrame: Results of the SELECT query with optionally renamed columns.
 
     Raises:
         Exception: If execution or data retrieval fails.
@@ -147,6 +155,8 @@ def select(engine: sqla.Engine, statement: Selectable | str) -> pd.DataFrame:
         with engine.begin() as conn:
             result = conn.execute(statement).all()
         df = pd.DataFrame(result)
+        if mnemonics:
+            df.rename(columns=mnemonics, inplace=True)
     except Exception as exc:
         raise exc
 
