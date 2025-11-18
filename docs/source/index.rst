@@ -60,8 +60,8 @@ Related Projects
    :maxdepth: 2
    :caption: Project Links
 
-   GitHub Repository <https://github.com/Geological-Survey-of-Western-Australia>
-   Issue Tracker <https://github.com/Geological-Survey-of-Western-Australia>
+   GitHub Repository <https://github.com/Geological-Survey-of-Western-Australia/atratus>
+   Issue Tracker <https://github.com/Geological-Survey-of-Western-Australia/atratus/issues>
 
 .. 
    automodule:: gswa_atratus
