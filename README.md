@@ -1,36 +1,18 @@
 # GSWA - Atratus
 *Common tools for GeoData Handling and Harmonisation*
 
-
-| License | Latest Commit | DOI | Coverage
-|----------|----------|----------| -------|
-| [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html) | [![Last Commit](https://img.shields.io/github/last-commit/Geological-Survey-of-Western-Australia/Vocabularies?logo=git&color=blue)](https://github.com/Geological-Survey-of-Western-Australia/Vocabularies/commits) | TBC |![Coverage](https://img.shields.io/badge/coverage-85%25-green)
-
 ## Introduction 
-This repository contains code for geoscience data handling and harmonisation, it is developed as part of the core operations of the Geoscience Data Integrations Branch, of the Geological Survey of Western Australia.
+This repository contains code to support geoscience data handling and harmonisation, it is developed as part of the core operations of the Geoscience Data Integrations Branch, of the Geological Survey of Western Australia.
 
 All digital geoscience data requires extremely diverse ETL processes. While the extraction and transformation processes require highly bespoke solutions (cygnets), some utilities should be shared across projects. 
 
-This library is designed to facilitate the loading of tabular data from various projects,centralise logging, and provide a base abstraction to the proccess and steps typical for geodata harmonisation.
+This library is designed to facilitate the **loading of tabular data** from various projects, **centralise logging**, and provide a base abstraction to the **process and steps** typical for geodata harmonisation.
 
 This system is intended to support the various geodata harmonisation efforts of the GSWA-GDI team called cygnets. 
 
-## Feature List
- - Basic database operations
- - Error Logging and Handling
- - Cygnet: Data Harmonisation (Process and Steps)
 
-### Acknowledgements
-This work would not be made possible without key contributions from members of the GDI team: Luke Smith, Tasman Gillfeather-Clark, and Jianli Zhi. 
+## Getting Started
 
-### Contact
-If you have any questions about the tool you can contact the GDI team here.
-
-gdi.contact@dmpe.wa.gov.au
-
-# Getting Started
-
-### Installation process
 This tool is built and distributed via pypi and can be installed with the following command. 
 ```
 pip install gswa-atratus
@@ -40,35 +22,16 @@ This tools is largely intended to be used by the various other projects of the G
 Alternatively you can clone the git repository and do an editable install. 
 
 ```
-git clone
+git clone https://github.com/Geological-Survey-of-Western-Australia/atratus.git
 ```
 
-### Software dependencies
-The packages t`pyproject.toml` or `environment.yaml` or `requirements.txt`.
+## Maintenance and Support
+This codebase was developed for research purposes and is maintained. If you encounter issues or have suggestions for improvement, feel free to submit them to [GitHub Issues](https://github.com/Geological-Survey-of-Western-Australia/atratus) or via the email see links below.
 
-## Documentation
-- [Getting Started for Developers](docs/source/getting_started_developer.rst)
-- [General Design & Flow](docs/source/high_level_design.rst)
-- [Installation and Use](docs/source/installation_and_use.rst)
-- [Logging](docs/source/logging.rst)
+If you have any questions about the tool you can contact the GDI team. You can [ask a question](mailto:gdi.contact@dmpe.wa.gov.au?subject=[Atratus%20Question]) or [flag an issue](mailto:gdi.contact@dmpe.wa.gov.au?subject=[Atratus%20Issue]), via these email links.
 
 
-
-[Describe the folder/file structure of the repository]:
-1. **file1.py** takes data from [GSWA's Data and Software Centre](https://dasc.dmirs.wa.gov.au/).
-2. **file2.py** does an action.
-3. **file3.py** contains functions used in file 2.
-
-
-
-# Contributing
+### Acknowledgements
+This work would not be made possible without key contributions from members of the GDI team: Luke Smith, Tasman Gillfeather-Clark, and Jianli Zhi. 
 
 Contributions to this project are welcome. Please refer to [contributing guide](#link) to learn more about how to contribute.
-
-# Maintenance and Support
-
-This codebase was developed for research purposes and is not actively maintained. If you encounter issues or have suggestions for improvement, feel free to submit them to [GitHub Issues](#link) or via [email](#link). Feedback is appreciated and may inform future work, but any changes will be addressed in a new project, not this one.
-
-# License
-
-[GNU GPL 3.0](https://choosealicense.com/licenses/gpl-3.0/)
