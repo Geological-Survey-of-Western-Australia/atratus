@@ -4,7 +4,7 @@ import logging
 from collections import OrderedDict
 from typing import Any, Optional
 
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 
 class Step:

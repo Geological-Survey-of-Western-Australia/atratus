@@ -3,7 +3,7 @@
 
 # import pytest
 
-# from geo_digital_tools.utils.exceptions import (
+# from gswa-atratus.utils.exceptions import (
 #     CodeError,
 #     KnownException,
 # )

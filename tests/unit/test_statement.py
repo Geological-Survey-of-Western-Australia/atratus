@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 import sqlalchemy as sqla
 
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 @pytest.fixture
 def mocked_db_valid() -> tuple[sqla.Engine, sqla.MetaData]:

@@ -25,7 +25,7 @@ To define your first gdt database config lets consider the various keys and thei
     - **aliases** - defines a mapping from one table name to another (useful when backend table names are confusing to users.)
 
 .. Note::
-    Note most errors that could reasonably be encountered when creating this config (such as specifying a column that isn't in a table), will be raised as errors when the config is loaded. See the API reference :py:class:`geo_digital_tools.load_statement`.
+    Note most errors that could reasonably be encountered when creating this config (such as specifying a column that isn't in a table), will be raised as errors when the config is loaded. See the API reference :py:class:`gswa_atratus.load_statement`.
 
 .. literalinclude:: _static\assets\_example_cfg.json
    :language: json

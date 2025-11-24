@@ -22,7 +22,7 @@ import pandas as pd
 import sqlalchemy as sqla
 from sqlalchemy.sql.expression import Selectable
 
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 
 def connect(
@@ -53,9 +53,7 @@ def connect(
     sqla_cfg = db_config.pop("sqlalchemy")
 
     if local_db_path:
-        sqla_cfg["sqlalchemy.url"] = (
-            f"sqlite:///{local_db_path}"  # for windows
-        )
+        sqla_cfg["sqlalchemy.url"] = f"sqlite:///{local_db_path}"  # for windows
         # sqla_url = f"sqlite:///{local_db_path}" # for linux/macOS
     try:
         engine = sqla.engine_from_config(configuration=sqla_cfg)
@@ -120,7 +118,6 @@ def create_from_dataframe(
     Raises:
         Exception: If table creation fails.
     """
-    # NOTE we might want the schema to be linked to cygnet name eg geodigitaldatabase.skippy.table1
     try:
         with engine.begin() as connection:
             dataframe.to_sql(name=table_name, con=connection, index=False)
@@ -217,12 +214,12 @@ def write_db_metadata_table(
 
     Hint:
         Suggested kwargs to capture as additional metadata include:
-            - The geodigital configuration file contents,
+            - The gswa-atratus configuration file contents,
             - The generated SQL `SELECT` statement,
             - The total execution time of the database building script.
     """
     meta = dict(
-        geo_digital_tools=f"{gdt.__name__}@{gdt.__version__}",
+        gswa_atratus=f"{gdt.__name__}@{gdt.__version__}",
         cygnet=f"{cygnet.__name__}@{cygnet.__version__}",
         utc_iso_start=(
             run_datetime.isoformat()

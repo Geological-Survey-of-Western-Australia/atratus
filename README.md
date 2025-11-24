@@ -1,4 +1,4 @@
-# GDI - GeoDigitalTools
+# GSWA - Atratus
 *Common tools for GeoData Handling and Harmonisation*
 
 
@@ -7,7 +7,7 @@
 | [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html) | [![Last Commit](https://img.shields.io/github/last-commit/Geological-Survey-of-Western-Australia/Vocabularies?logo=git&color=blue)](https://github.com/Geological-Survey-of-Western-Australia/Vocabularies/commits) | TBC |![Coverage](https://img.shields.io/badge/coverage-85%25-green)
 
 ## Introduction 
-This repository contains code for geoscience data handling and harmonisation, it is developed as part of the core operations of the Geoscience Data Integrations Branch, of the Geological Surevy of Western Australia.
+This repository contains code for geoscience data handling and harmonisation, it is developed as part of the core operations of the Geoscience Data Integrations Branch, of the Geological Survey of Western Australia.
 
 All digital geoscience data requires extremely diverse ETL processes. While the extraction and transformation processes require highly bespoke solutions (cygnets), some utilities should be shared across projects. 
 
@@ -33,7 +33,7 @@ gdi.contact@dmpe.wa.gov.au
 ### Installation process
 This tool is built and distributed via pypi and can be installed with the following command. 
 ```
-pip install geo_digital_tools
+pip install gswa-atratus
 ```
 This tools is largely intended to be used by the various other projects of the GDI team and as such is likely installed simply as a dependency.
 

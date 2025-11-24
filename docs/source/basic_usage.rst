@@ -29,7 +29,7 @@ These methods are :
 
 
 .. Seealso::
-    More detail can be found in the api docs :py:class:`geo_digital_tools.cygnet.Step`.
+    More detail can be found in the api docs :py:class:`gswa_atratus.cygnet.Step`.
 
 ----------
 
@@ -43,15 +43,15 @@ These methods are :
 
 
 .. Seealso::
-    More detail can be found in the api docs :py:class:`geo_digital_tools.cygnet.Process`.
+    More detail can be found in the api docs :py:class:`gswa_atratus.cygnet.Process`.
 
 
 Developers and Geoscientists
 ----------------------------
 Another challenge about geodata harmonisation is the distinguishing between problems that can be solved by a developer and problems that can be solved by a geoscientist. **GDT** handles this by raising two types of exceptions:
 
- - :py:class:`geo_digital_tools.KnownException` - This Exception is intended to be raised when the cause of the issue/error is known. Ideally this is something that can be explained to a geoscientist to either fix or at least be aware of.
- - :py:class:`geo_digital_tools.CodeError` - This Exception is intended to be raised by any uncaught exceptions, or any issue that a developer needs to consider and discuss. Often it will be used for discovering new edge cases.
+ - :py:class:`gswa_atratus.KnownException` - This Exception is intended to be raised when the cause of the issue/error is known. Ideally this is something that can be explained to a geoscientist to either fix or at least be aware of.
+ - :py:class:`gswa_atratus.CodeError` - This Exception is intended to be raised by any uncaught exceptions, or any issue that a developer needs to consider and discuss. Often it will be used for discovering new edge cases.
 
 These exceptions are 'tagged' and sent to different log files to facilitate user and developer review of the existing data harmonisation workplace.  
 
