@@ -39,7 +39,7 @@ Please let us know if something is not working as expected. If you have identifi
 
 ### Suggest a new feature/enhancement
 
-Please let us know if there are additional features or enhancements to the code that can improve [this project].
+Please let us know if there are additional features or enhancements to the code that can improve atratus.
 
 **Before suggesting a new feature/enhancement** 
 - Make sure you are using the latest version/are using code from the main branch.
@@ -50,7 +50,7 @@ When suggesting a feature, provide a clear and descriptive title, and explain ho
 
 ### Patch a bug or implement a new feature/enhancement
 
-To contribute code to [the project] open a new GitHub pull request. Ideally each patch should be linked with a bug identified in [GitHub issues](link).
+To contribute code to Atratus open a new GitHub pull request. Ideally each patch should be linked with a bug identified in [GitHub issues](link).
 
 **When contributing code** 
 - Ensure that the PR description has a clear and descriptive title.
@@ -61,10 +61,6 @@ To contribute code to [the project] open a new GitHub pull request. Ideally each
 - Describe the verification process to ensure bugs weren't introduced.
 
 ## Getting started
-
-### Which branch to use
-
-[Describe branches, and which is the main branch contributors should use]
 
 ### Setting up a development environment
 
