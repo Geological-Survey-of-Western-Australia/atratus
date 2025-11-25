@@ -11,7 +11,7 @@ Thank you for considering contributing to the gswa-atratus! Contributions are we
 
 Atratus is a tool to faciltate geoscience data processing pipelines and harmonisation. This tool provides abstract base clases, centralises logging, and database interactions!
 
-As it stands, Atratus is stable enough to use to generate facilitate the basics. That being said, some great contributions to the Atratus project would include:
+As it stands, Atratus is stable enough to use to facilitate the basics. That being said, some great contributions to the Atratus project would include:
 - Improved logging reporting including dashboards and more effective collation.
 - Support of Array and geometry type data fields in databases.
 
@@ -43,14 +43,14 @@ Please let us know if there are additional features or enhancements to the code 
 
 **Before suggesting a new feature/enhancement** 
 - Make sure you are using the latest version/are using code from the main branch.
-- Read the [documentation](#link) to ensure the feature/enhancement has not been implemented.
+- Read the [documentation](https://gswa-atratus.readthedocs.io/en/latest/) to ensure the feature/enhancement has not been implemented.
 - Check [GitHub issues](https://github.com/Geological-Survey-of-Western-Australia/atratus/issues) to see if the feature/enhancement has already been suggested. 
 
 When suggesting a feature, provide a clear and descriptive title, and explain how the suggestion improves the project. Describe the current behaviour of the code, and how the suggestion would change it. Provide examples and use cases when useful.
 
 ### Patch a bug or implement a new feature/enhancement
 
-To contribute code to Atratus open a new GitHub pull request. Ideally each patch should be linked with a bug identified in [GitHub issues](link).
+To contribute code to Atratus open a new GitHub pull request. Ideally each patch should be linked with a bug identified in [GitHub issues](https://github.com/Geological-Survey-of-Western-Australia/atratus/issues).
 
 **When contributing code** 
 - Ensure that the PR description has a clear and descriptive title.
@@ -74,18 +74,15 @@ To contribute to this project, please follow the steps below to set up a local d
 
 2. Create an environment and install dependencies
 
-    ```
-    conda create -n your-environment-name -f environment.yaml
-    conda activate your-environment-name
-    ```
-    or (depending on availability of `environment.yaml` or `pyproject.toml`)
+
+    Dependencies are tracked in the `pyproject.toml` and can be installed via.
     ```
     pip install pyproject.toml
     ```
 
 ### GitHub Issues
 
-[GitHub issues](https://github.com/Geological-Survey-of-Western-Australia/atratus) is the primary method for tracking changes and updates to [the project]. [X] tags are available when making a submitting to [GitHub issues](link):
+[GitHub issues](https://github.com/Geological-Survey-of-Western-Australia/atratus) is the primary method for tracking changes and updates to atratus. The following tags are available when making a submitting to [GitHub issues](https://github.com/Geological-Survey-of-Western-Australia/atratus):
 - **discussion (code):** These are inquiries regarding the functionality of the code. Depending on the inquiry, these can become **bug** or **new feature/enhancement** issues.
 - **discussion (geoscience):** These are inquiries regarding the geoscience and research aspects of the project. Depending on the inquiry, these can become **bug** or **new feature/enhancement** issues.
 - **proposal:** These are suggestions for new ideas or functionality that require larger discussions with [project members]. A proposal can become a **new feature/enhancement** 
@@ -108,7 +105,7 @@ In the PR description, include:
 
 **Testing and Verification**
 
-[How are we testing?]
+Atratus uses the pytest unit test framework, located in `tests/`. Please install the `gswa-atratus[tests]` dependencies and ensure tests pass with any new code contributions.
 
 If your changes affect functionality, include or update unit tests where applicable. Verify that your changes do not break existing functionality.
 If your contribution includes new features, consider adding example usage or updating relevant documentation.
