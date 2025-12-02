@@ -11,22 +11,25 @@ class Step:
     """A framework to define processing code within a cygnet's Process.
 
     Each Step represents a distinct transformation of an input.
-    Steps can access a class level namespace of global configuration and state.
+    Steps can access a class-level namespace of global configuration and state.
 
     A Step is defined with a few key considerations:
-    - Determine if the Step can be executed on a provided input.
-        canhandle() is where failures due to input to step are handled.
-        e.g. Step loads a path -> it receives an invalid path = invalid input -> Step does not run.
-    - Execute a defined set of transforms and rules.
-        All code that transforms the data is defined in the run method.
-        run() is where failures occuring within the step are handled.
-        e.g. Step loads a path -> it receives a valid path -> loading path fails = Step fails.
-    - Shared functionality such as save /database write*.
-        We might want to do things at each step (catalogue errors, save outputs etc)
-            Presently this feature is still being defined.
 
-    Note:
-        This is a modification of the chain of responsibility behavioural pattern.
+    - **Determine if the Step can be executed on a provided input.**
+      The ``canhandle()`` method is where failures due to invalid input are handled.
+      For example: if the Step expects a path and receives an invalid one, the Step is skipped.
+
+    - **Execute a defined set of transforms and rules.**
+      All transformation logic goes in ``run()``.
+      ``run()`` handles failures *within* the step.
+      For example: a valid path is provided, but loading fails → the Step fails.
+
+    - **Shared functionality such as saving or database writes.**
+      We may want to perform actions at each step (catalogue errors, save outputs, etc.).
+      This feature is still under development.
+
+    .. note::
+       This module modifies the Chain of Responsibility behavioural pattern.
     """
 
     def __init__(self, name: str, save: bool = False):
@@ -45,11 +48,10 @@ class Step:
         self.save = save
         self.input_ = None
         self.output = None
-    
-    def addLogger(self, logger:logging.Logger=None):
+
+    def addLogger(self, logger: logging.Logger = None):
         self.logger = logger.getChild(self.__class__.__name__)
 
-    
     def handle(self, input_, global_cfg):
         """Handle the input, with validation and error checking.
 
@@ -79,7 +81,7 @@ class Step:
             global_cfg : variables in a dict available to the Parent Process
 
         Raises:
-            KnownException : for any known data issues.
+            gdt.KnownException : for any known data issues.
 
         Returns:
             True if valid input, False otherwise.
@@ -93,7 +95,7 @@ class Step:
             input : Any input which has been validated by canhandle()
 
         Raises:
-            KnownException : for any known data issues.
+            gdt.KnownException : for any known data issues.
 
         Returns:
             True if valid input, False otherwise.
@@ -123,7 +125,7 @@ class Process:
         It's also useful to be able to view the outputs of each step of a process to aid in debugging.
     """
 
-    def __init__(self, name, logger:logging.Logger=None, **kwargs):
+    def __init__(self, name, logger: logging.Logger = None, **kwargs):
         """Initialise the process with a name and any keyword args used by your process.
 
         Args:
@@ -140,8 +142,10 @@ class Process:
         self.step_dict: OrderedDict[str, Step] = OrderedDict()
         self.step_out: OrderedDict[str, Step] = OrderedDict()
         self.step_history = {}
-        #TODO review if inlcuding the input Path name is sanitary here.
-        self.logger = logger.getChild(f'"{kwargs["input_"].stem}".'f'{self.__class__.__name__}')
+        # TODO review if inlcuding the input Path name is sanitary here.
+        self.logger = logger.getChild(
+            f'"{kwargs["input_"].stem}".' f"{self.__class__.__name__}"
+        )
 
     def __str__(self):
         """String that prints a useful summary of the process steps."""
@@ -174,7 +178,7 @@ class Process:
                 self.step_history["end"] = True
             else:
                 output = step.handle(output, self.global_cfg)
-            
+
             if output is None:  # Step failed
                 self.step_history[step.name] = False
                 break

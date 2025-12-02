@@ -1,49 +1,50 @@
 GSWA Atratus
 ============
 
-The GSWA Atratus (**gdt**) is designed to handle the diverse Extract, Transform, Load (ETL) processes required to support harmonising geoscience data. 
+The GSWA Atratus (**gdt**) is designed to handle the diverse Extract, Transform, Load (ETL) 
+processes required to support harmonising geoscience data.
 
-This package facilitates:
- - Loading tabular data from databases and files.
- - A common approach to logging errors for data and code issues.
- - Abstract base classes for processing pipelines.
+This package provides:
 
-The diagram below is intended to help visualise where **gdt** sits in the data ecosystem. The gdt package provides as consistent approach to logging, database interaction, and process definition that will help ensure a consistent approach across the various data harmonisation efforts undertaken by the GSWA.
+- Loading tabular data from databases and files.
+- A common approach to logging errors for data and code issues.
+- Abstract base classes for processing pipelines.
 
-.. |A High level overview| image:: ../source/_static/assets/gswa_atratus_highlevel.svg
+The diagram below illustrates where **gdt** sits in the data ecosystem. It provides consistent
+approaches to logging, database interaction, and process definition—supporting the various data
+harmonisation efforts undertaken by GSWA.
+
+.. |high_level_overview| image:: _static/assets/gswa_atratus_highlevel.svg
    :alt: High level overview
    :width: 80%
 
-|A High level overview|
+|high_level_overview|
 
+.. seealso::
 
-.. Seealso::
-
-      **Want to know what's new checkout the** :doc:`changelog`.
-
-
+   Want to know what's new? Check out the :doc:`changelog`.
 
 Related Projects
 ----------------
 
-| All systems we build in this space do so with a single goal.
-| Loading data to centralised "cleaned" location.
+All systems we build in this space aim to achieve a single goal:
+loading data into a centralised, "cleaned" location.
 
-- Skippy   : Downhole Petrophysics (.las file) harmonisation
+**Skippy**
 
+Downhole Petrophysics (.las file) harmonisation
 
-----------
 
 .. toctree::
    :maxdepth: 1
-   :caption: Getting Started:
+   :caption: Getting Started
 
    installation
    basic_usage
 
 .. toctree::
    :maxdepth: 1
-   :caption: Guides:
+   :caption: Guides
 
    core_workflow
    logging_exceptions
@@ -53,19 +54,13 @@ Related Projects
    :maxdepth: 2
    :caption: API Reference
 
-   api/gswa_atratus
+   autoapi/index
    changelog
    contributing
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Project Links
 
    GitHub Repository <https://github.com/Geological-Survey-of-Western-Australia/atratus>
    Issue Tracker <https://github.com/Geological-Survey-of-Western-Australia/atratus/issues>
-
-.. 
-   automodule:: gswa_atratus
-   :members:
-   :undoc-members:
-   :show-inheritance:
