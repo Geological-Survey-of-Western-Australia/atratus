@@ -35,9 +35,13 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
+    "autoapi.extension",
 ]
 
 
+autoapi_type = "python"
+autoapi_dirs = ["../../src"]
+autoapi_add_toctree_entry = True
 templates_path = ["_templates"]
 exclude_patterns = []
 

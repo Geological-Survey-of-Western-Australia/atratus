@@ -78,4 +78,5 @@ ENV/
 env.bak/
 venv.bak/
 docs/source/api/
+docs/source/autoapi/
 .DS_Store
