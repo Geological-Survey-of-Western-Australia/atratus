@@ -22,5 +22,5 @@ This captures how systems build with gswa_atratus are expected to function.
 
 .. |UML of Harmonisation Workflow| image:: ../source/_static/assets/gswa_atratus_core_workflow.svg
    :alt: UML Diagram Overview of Data Harmonisation Process in GSWA Atratus
-   |UML of Harmonisation Workflow|
 
+|UML of Harmonisation Workflow|
