@@ -55,6 +55,7 @@ Related Projects
 
    api/gswa_atratus
    changelog
+   contributing
 
 .. toctree::
    :maxdepth: 2
