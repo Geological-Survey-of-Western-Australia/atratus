@@ -1,5 +1,5 @@
 from pathlib import Path
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 if __name__ == "__main__":
     # setting up loggers

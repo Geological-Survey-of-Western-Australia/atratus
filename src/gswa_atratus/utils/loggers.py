@@ -21,7 +21,7 @@ import logging.handlers
 import sys
 from pathlib import Path
 
-from geo_digital_tools.utils.exceptions import KnownException
+from gswa_atratus.utils.exceptions import KnownException
 
 
 class KnownExceptionsFilter(logging.Filter):
@@ -55,12 +55,13 @@ class NotKnownExceptionsFilter(logging.Filter):
     def filter(self, log_record: logging.LogRecord):
         if "KnownException" not in log_record.msg:
             return log_record
-
+        
 
 def use_gdt_logging(
     name: str | None = None,
     log_dir: str | Path = "logs",
     use_excepthook: bool = False,
+    gdtprocess_format = "%(asctime)s: %(process_)s.%(step_)s.%(funcName)s | '%(input_)s' | %(message)s",
 ):
     """Configure logging to gdt recommendation.
 
@@ -109,11 +110,7 @@ def use_gdt_logging(
         backupCount=2,
     )
     ke_handler.setLevel(logging.INFO)
-    ke_handler.setFormatter(
-        logging.Formatter(
-            "%(asctime)s: %(process_)s.%(step_)s.%(funcName)s | '%(input_)s' | %(message)s"
-        )
-    )
+    ke_handler.setFormatter(logging.Formatter(gdtprocess_format))
     ke_handler.addFilter(KnownExceptionsFilter())
 
     # Initialise root logger.
@@ -126,7 +123,9 @@ def use_gdt_logging(
     logger.warning(
         f"Initialiased root logger with gdt configuration. Writing to {log_dir.absolute()}."
     )
-
+    logger.warning(
+        f"KnownException: Initialised gdt logging for KnownExceptions."
+    )
     if use_excepthook:
 
         def _handle_exception(exc_type, exc_value, exc_traceback):

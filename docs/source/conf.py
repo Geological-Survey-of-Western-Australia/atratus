@@ -12,12 +12,12 @@ sys.path.insert(0, os.path.abspath("."))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "GeoDigitalToolkit"
+project = "Atratus"
 copyright = "2025, Geoscience Data Integrations Team - GSWA"
 author = "Geoscience Data Integrations Team - GSWA"
 
 try:
-    release = importlib.metadata.version("geo_digital_tools")
+    release = importlib.metadata.version("gswa_atratus")
 except importlib.metadata.PackageNotFoundError:
     release = "unknown"
 print(f"Sphinx release version: {release}")
@@ -41,9 +41,11 @@ extensions = [
 templates_path = ["_templates"]
 exclude_patterns = []
 
-
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
+html_css_files = [
+    "css/dmpe.css",
+]

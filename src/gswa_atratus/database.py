@@ -22,7 +22,7 @@ import pandas as pd
 import sqlalchemy as sqla
 from sqlalchemy.sql.expression import Selectable
 
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 
 def connect(
@@ -53,9 +53,7 @@ def connect(
     sqla_cfg = db_config.pop("sqlalchemy")
 
     if local_db_path:
-        sqla_cfg["sqlalchemy.url"] = (
-            f"sqlite:///{local_db_path}"  # for windows
-        )
+        sqla_cfg["sqlalchemy.url"] = f"sqlite:///{local_db_path}"  # for windows
         # sqla_url = f"sqlite:///{local_db_path}" # for linux/macOS
     try:
         engine = sqla.engine_from_config(configuration=sqla_cfg)
@@ -120,7 +118,6 @@ def create_from_dataframe(
     Raises:
         Exception: If table creation fails.
     """
-    # NOTE we might want the schema to be linked to cygnet name eg geodigitaldatabase.skippy.table1
     try:
         with engine.begin() as connection:
             dataframe.to_sql(name=table_name, con=connection, index=False)
@@ -133,15 +130,23 @@ def create_from_dataframe(
     metadata.create_all(bind=engine)
 
 
-def select(engine: sqla.Engine, statement: Selectable | str) -> pd.DataFrame:
+def select(
+    engine: sqla.Engine,
+    statement: Selectable | str,
+    mnemonics: dict | None = None,
+) -> pd.DataFrame:
     """Execute a SELECT statement against a specific engine, returning a DataFrame.
 
     Args:
         engine (sqlalchemy.Engine): Database connection engine.
         statement (Selectable | str): A SQLAlchemy statement or raw SQL text to execute.
+        mnemonics: dictionary from config, containing mnemonic mappings for database headers.
+
+    Specifying Mnemonics will rename columns from the database header to the mnemonic used
+    by skippy. This is required for automatically pulling data from your database.
 
     Returns:
-        pd.DataFrame: Results of the SELECT query.
+        pd.DataFrame: Results of the SELECT query with optionally renamed columns.
 
     Raises:
         Exception: If execution or data retrieval fails.
@@ -150,6 +155,8 @@ def select(engine: sqla.Engine, statement: Selectable | str) -> pd.DataFrame:
         with engine.begin() as conn:
             result = conn.execute(statement).all()
         df = pd.DataFrame(result)
+        if mnemonics:
+            df.rename(columns=mnemonics, inplace=True)
     except Exception as exc:
         raise exc
 
@@ -207,12 +214,12 @@ def write_db_metadata_table(
 
     Hint:
         Suggested kwargs to capture as additional metadata include:
-            - The geodigital configuration file contents,
+            - The gswa-atratus configuration file contents,
             - The generated SQL `SELECT` statement,
             - The total execution time of the database building script.
     """
     meta = dict(
-        geo_digital_tools=f"{gdt.__name__}@{gdt.__version__}",
+        gswa_atratus=f"{gdt.__name__}@{gdt.__version__}",
         cygnet=f"{cygnet.__name__}@{cygnet.__version__}",
         utc_iso_start=(
             run_datetime.isoformat()

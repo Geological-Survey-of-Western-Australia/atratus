@@ -1,22 +1,22 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
+requires = ["setuptools>=80", "setuptools_scm[simple]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = 'geo_digital_tools'
+name = 'gswa-atratus'
 dynamic = ["version"]
-description = "A package designed to abstract GSWA internal database operations."
+description = "Common tools for Geodata Handling and Harmonisation"
 authors = [
   { name = "Geoscience Data Integrations Team - GSWA", email = "gdi.contact@demirs.wa.gov.au" },
 ]
 
 readme = "README.md"
-requires-python = ">=3.11"
-license = { file = 'LICENSE' }
+requires-python = ">=3.12"
+license = "GPL-3.0-only"
+license-files = ["LICEN[CS]E*"]
 
 classifiers = [
   "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: Apache 2.0",
   "Operating System :: OS Independent",
 ]
 
@@ -24,7 +24,6 @@ dependencies = [
   'SQLAlchemy~=2.0.36',
   'pandas~=2.2.2',
   'pyodbc~=5.2.0',
-  'pydantic~=2.9.2',
 ]
 
 [project.optional-dependencies]
@@ -32,8 +31,7 @@ tests = ['pytest==8.1.1', 'pytest-cov==5.0.0']
 dev = [
   'artifacts-keyring',
   'build==1.2.2',
-  'pytest==8.1.1',
-  'pytest-cov==5.0.0',
+  'gswa-atratus[tests]',
   'twine',
 ]
 
@@ -45,8 +43,8 @@ docs = ['sphinx',
   ]
 
 [project.urls]
-Homepage = "https://github.com/Geological-Survey-of-Western-Australia"
-Issues = "https://github.com/Geological-Survey-of-Western-Australia/issues"
+Homepage = "https://github.com/Geological-Survey-of-Western-Australia/atratus/"
+Issues = "https://github.com/Geological-Survey-of-Western-Australia/atratus/issues"
 
 [tool.setuptools_scm]
 

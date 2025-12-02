@@ -1,9 +1,10 @@
 """Cygnet processing module (Chain of Responsibility pattern implementation)."""
 
+import logging
 from collections import OrderedDict
 from typing import Any, Optional
 
-import geo_digital_tools as gdt
+import gswa_atratus as gdt
 
 
 class Step:
@@ -44,7 +45,11 @@ class Step:
         self.save = save
         self.input_ = None
         self.output = None
+    
+    def addLogger(self, logger:logging.Logger=None):
+        self.logger = logger.getChild(self.__class__.__name__)
 
+    
     def handle(self, input_, global_cfg):
         """Handle the input, with validation and error checking.
 
@@ -118,7 +123,7 @@ class Process:
         It's also useful to be able to view the outputs of each step of a process to aid in debugging.
     """
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name, logger:logging.Logger=None, **kwargs):
         """Initialise the process with a name and any keyword args used by your process.
 
         Args:
@@ -135,6 +140,8 @@ class Process:
         self.step_dict: OrderedDict[str, Step] = OrderedDict()
         self.step_out: OrderedDict[str, Step] = OrderedDict()
         self.step_history = {}
+        #TODO review if inlcuding the input Path name is sanitary here.
+        self.logger = logger.getChild(f'"{kwargs["input_"].stem}".'f'{self.__class__.__name__}')
 
     def __str__(self):
         """String that prints a useful summary of the process steps."""
@@ -146,6 +153,7 @@ class Process:
     def addstep(self, step: Step):
         """Adds a Step object to the process."""
         if isinstance(step, Step):
+            step.addLogger(self.logger)
             self.step_dict[step.name] = step
         else:
             gdt.KnownException("This is not a valid Step object.")
@@ -166,6 +174,7 @@ class Process:
                 self.step_history["end"] = True
             else:
                 output = step.handle(output, self.global_cfg)
+            
             if output is None:  # Step failed
                 self.step_history[step.name] = False
                 break
