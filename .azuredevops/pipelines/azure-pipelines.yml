@@ -90,18 +90,18 @@ stages:
           displayName: 'Twine authenticate'
 
         - script: |
-            jf xr scan dist/ --format=sarif > xray.sarif
+            jf xr scan dist/ --format=sarif > xray.json
           displayName: Scan package + dependencies
 
         - task: PublishPipelineArtifact@1
           inputs:
-            targetPath: xray.sarif
+            targetPath: xray.json
             artifactName: Sarif File
           displayName: Publish Pipeline Artifact - SARIF
 
         - task: PublishBuildArtifacts@1
           inputs:
-            targetPath: $(System.DefaultWorkingDirectory)/xray.sarif
+            targetPath: $(System.DefaultWorkingDirectory)/xray.json
             artifactName: CodeAnalysisLogs
           displayName: Publish Build Artifact - SARIF
 
