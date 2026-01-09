@@ -88,7 +88,23 @@ stages:
           inputs:
             artifactFeed: GSRSD/gdi_packages
           displayName: 'Twine authenticate'
-          
+
+        - script: |
+            jf xr scan dist/ --format=sarif > xray.sarif
+          displayName: Scan package + dependencies
+
+        - task: PublishPipelineArtifact@1
+          inputs:
+            targetPath: xray.sarif
+            artifactName: Sarif File
+          displayName: Publish Pipeline Artifact - SARIF
+
+        - task: PublishBuildArtifacts@1
+          inputs:
+            targetPath: $(System.DefaultWorkingDirectory)/xray.sarif
+            artifactName: CodeAnalysisLogs
+          displayName: Publish Build Artifact - SARIF
+
         - script: |
             python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
           displayName: 'Upload to feed'
