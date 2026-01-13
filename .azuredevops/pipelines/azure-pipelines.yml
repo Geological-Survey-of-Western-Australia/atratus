@@ -22,7 +22,7 @@ pool:
 
 stages:
 - stage: Test
-  displayName: 'Run Tests'
+  displayName: 'Unit Tests'
   condition: always()
   jobs:
     - job: TestCoverage
