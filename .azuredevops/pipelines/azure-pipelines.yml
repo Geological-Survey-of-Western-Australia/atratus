@@ -118,11 +118,11 @@ stages:
           displayName: 'Parse Vulnerabilities in xray Report'
 
 - stage: Build
-  displayName: 'Build and Publish'
+  displayName: 'JFrog Build and Publish'
+  condition: and( succeeded('Test'), succeeded('Xray'), or(eq(variables.isMain, true), eq(variables.isRC, true), eq(variables.isCICD, true)) )
   dependsOn: 
     - Test
-    # - SecurityCheck
-  condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
+    - Xray
   jobs:
     - job: BuildDependencies
       displayName: 'Install and build'
@@ -138,36 +138,14 @@ stages:
             python -m pip wheel --no-deps -w dist/ .
           displayName: 'Python build'
 
-        - task: TwineAuthenticate@1
-          inputs:
-            artifactFeed: GSRSD/gdi_packages
-          displayName: 'Twine authenticate'
-
         - script: |
-            jf xr scan dist/ --format=sarif > xray.json
-          displayName: Scan package + dependencies
+            ls -lah dist/ 
+            twine upload --repository-url $(artifactory_pypi_url) dist/*
+          env:
+            TWINE_USERNAME: $(jfrog_bot_username)
+            TWINE_PASSWORD: $(jfrog-bot-token)
+          displayName: Upload to JFrog Artifactory
 
-        - task: PublishPipelineArtifact@1
-          inputs:
-            targetPath: xray.json
-            artifactName: Sarif File
-          displayName: Publish Pipeline Artifact - SARIF
-
-        - task: PublishBuildArtifacts@1
-          inputs:
-            targetPath: $(System.DefaultWorkingDirectory)/xray.json
-            artifactName: CodeAnalysisLogs
-          displayName: Publish Build Artifact - SARIF
-
-        - script: |
-            python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
-          displayName: 'Upload to feed'
-
-# - stage: BuildWithJFrog
-#   displayName: 'Build and Publish using JFrog'
-#   trigger: manual
-#   isSkippable: true
-#   condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
 #   jobs:
 #     - job: Build
 #       displayName: 'Install and build'
