@@ -5,8 +5,17 @@ trigger:
     - '*'
 
 variables:
-  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isRC: $[contains(variables['Build.SourceBranch'], 'releases/')]
+  - group: gswa-pypi
+  - group: gswa-jfrog
+  # for releases
+  - name: isMain
+    value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  # for integration testing
+  - name: isRC
+    value: $[contains(variables['Build.SourceBranch'], 'releases/')]
+  # for modifying/reviewing pipeline
+  - name: isCICD 
+    value: $[contains(variables['Build.SourceBranch'], 'cicd')]
 
 pool:
   vmImage: ubuntu-latest
