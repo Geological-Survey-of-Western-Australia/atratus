@@ -146,47 +146,32 @@ stages:
             TWINE_PASSWORD: $(jfrog-bot-token)
           displayName: Upload to JFrog Artifactory
 
+# - stage: Release
+#   displayName: 'Bells and Whistles'
+#   dependsOn: 
+#     - Test
+#     - Xray
+#     - Build
+#   condition: and( succeeded('Test'), succeeded('Xray'), succeeded('Build'), eq(variables.isMain, true))
 #   jobs:
-#     - job: Build
+#     - job: BuildDependencies
 #       displayName: 'Install and build'
 #       steps:                
 #         - task: UsePythonVersion@0
 #           inputs:
-#             versionSpec: '3.11'
+#             versionSpec: '3.12'
 #             addToPath: true
 #             architecture: 'x64'
 
 #         - script: |
+#             python -m pip install twine
 #             python -m pip wheel --no-deps -w dist/ .
 #           displayName: 'Python build'
   
-#     - job: JFrogScan
-#       displayName: Jfrog publish and Xray scan
-#       steps:
-#         - task: JFrogPublishBuildInfo@1
-#           inputs:
-#             artifactoryConnection: 'Artifactory V2 service connection'
-#             buildName: '$(Build.DefinitionName)'
-#             buildNumber: '$(Build.BuildNumber)'
-#           displayName : 'Publish build info'
-            
-#         - task: JFrogBuildPromotion@1
-#           inputs:
-#             artifactoryConnection: 'Artifactory V2 service connection'
-#             buildName: '$(Build.DefinitionName)'
-#             buildNumber: '$(Build.BuildNumber)'
-#             targetRepo: 'gsrsd-gdi-pypi-dev-local'
-#             status: 'Released'
-#             includeDependencies: true
-#             copy: false
-#             dryRun: false
-#           displayName : 'Promote build'
-
-#         - task: JFrogBuildScan@1
-#           inputs:
-#             xrayConnection: 'JFrog Xray V2 service connection'
-#             buildName: '$(Build.DefinitionName)'
-#             buildNumber: '$(Build.BuildNumber)'
-#             allowFailBuild: true
-#             vuln: true
-#           displayName : 'Scan build with JFrog'
+#         - script: |
+#             ls -lah dist
+#             twine upload --repository-url https://upload.pypi.org/legacy/ dist/*.whl dist/*.tar.gz
+#           env:
+#             TWINE_USERNAME: $(pypi_user_global)
+#             TWINE_PASSWORD: $(pypi_token_global)
+#           displayName: Upload to PyPI
