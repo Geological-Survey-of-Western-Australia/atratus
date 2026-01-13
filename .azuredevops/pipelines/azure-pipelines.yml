@@ -45,32 +45,77 @@ stages:
             pathToSources: '$(System.DefaultWorkingDirectory)/src/'
             failIfCoverageEmpty: true
 
-# - stage: SecurityCheck
-#   displayName: 'Check Security'
-#   trigger: manual
-#   isSkippable: true
-#   jobs:
-#   - job: SnykSecurityScan
-#     displayName: Scan app with snyk
-#     steps:
-#       - task: UsePythonVersion@0
-#         inputs:
-#           versionSpec: '3.11'
-#           addToPath: true
-#           architecture: 'x64'
+- stage: Xray
+  displayName: 'Xray Scan'
+  trigger: manual
+  isSkippable: false
+  jobs:
+    - job: BuildDependencies
+      displayName: 'Install, build, and scan'
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.12'
+            addToPath: true
+            architecture: 'x64'
 
-#       # Snyk does not support PEP621 - so we need a requirements.txt
-#       - script: |
-#           python -m pip install .
-#           python -m pip freeze > requirements.txt
-#         displayName: 'Freeze dependencies'
+        - script: |
+            python -m pip install twine
+            python -m pip wheel -w dist/ .
+          displayName: 'Python build'
+        
+        - script: |
+              curl -fL https://install-cli.jfrog.io | sh
+              jf config add jfrog-bot \
+              --url="$(JFROG_URL)" \
+              --access-token="$JFROG_ACCESS_TOKEN" \
+              --interactive=false
+          env:
+            JFROG_URL: $(jfrog_url)
+            JFROG_ACCESS_TOKEN: $(jfrog-bot-token)
+          displayName: Install and configure JFrog CLI
 
-#       - task: SnykSecurityScan@1
-#         inputs:
-#           serviceConnectionEndpoint: 'GDI-SNYK'
-#           testType: 'app'
-#           monitorWhen: 'always'
-#         displayName : 'Scan app'
+        - script: |
+            jf scan dist/ --format='json' > xray.json
+            jf scan dist/ --format='sarif' > xray.sarif
+          displayName: 'Xray Scan'
+
+        - task: PublishPipelineArtifact@1
+          inputs:
+            targetPath: xray.sarif
+            artifactName: CodeAnalysisLogs
+          env:
+            BUILD_NAME: $(Build.DefinitionName)
+            BUILD_NUMBER: $(Build.BuildNumber)
+          displayName: 'Publish SARIF artifact'
+
+        - script: |
+            python - <<'EOF'
+            import json
+            import sys
+            sarif_file = "xray.json"
+            with open(sarif_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            scanned_components = [
+                item["component_id"]
+                for item in data
+                if "components"
+                if "component_id" in item.keys()
+            ]
+            
+         
+            if "vulnerabilities" not in data[-1].keys():
+              print("No vulnerabilities detected")
+              sys.exit(0)
+            elif  "vulnerabilities" in data[-1].keys(): 
+              num_vulnerabilities = len(data[-1]["vulnerabilities"])
+              if num_vulnerabilities > 0:
+                  print(f"{num_vulnerabilities} High or Critical vulnerabilities detected")
+                  sys.exit(1)
+
+
+          displayName: 'Parse Vulnerabilities in xray Report'
 
 - stage: Build
   displayName: 'Build and Publish'
