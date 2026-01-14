@@ -34,8 +34,14 @@ stages:
             addToPath: true
             architecture: 'x64'
 
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: '.[tests] pytest-azurepipelines'
+            targetResolveRepo: 'gswa-pypi-virtual'
+
         - script: |
-            python -m pip install .[tests] pytest-azurepipelines
             python -m pytest --cov-report xml:tests/cov.xml --cov tests/
           displayName: 'Test .[tests]'
         
@@ -59,8 +65,14 @@ stages:
             addToPath: true
             architecture: 'x64'
 
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: 'twine'
+            targetResolveRepo: 'gswa-pypi-virtual'
+
         - script: |
-            python -m pip install twine
             python -m pip wheel -w dist/ .
           displayName: 'Python build'
         
@@ -133,8 +145,14 @@ stages:
             addToPath: true
             architecture: 'x64'
         
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: 'twine'
+            targetResolveRepo: 'gswa-pypi-virtual'
+
         - script: |
-            python -m pip install twine
             python -m pip wheel --no-deps -w dist/ .
           displayName: 'Python build'
 
