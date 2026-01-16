@@ -69,11 +69,11 @@ stages:
           inputs:
             artifactoryConnection: 'service-ado-jfrog-geodigital'
             command: 'install'
-            arguments: 'twine'
+            arguments: 'twine build .[tests,dev]'
             targetResolveRepo: 'gswa-pypi-virtual'
 
         - script: |
-            python -m pip wheel -w dist/ .
+            python -m build .
           displayName: 'Python build'
         
         - script: |
@@ -149,11 +149,11 @@ stages:
           inputs:
             artifactoryConnection: 'service-ado-jfrog-geodigital'
             command: 'install'
-            arguments: 'twine'
+            arguments: 'twine build .[tests,dev]'
             targetResolveRepo: 'gswa-pypi-virtual'
 
         - script: |
-            python -m pip wheel --no-deps -w dist/ .
+            python -m build .
           displayName: 'Python build'
 
         - script: |
