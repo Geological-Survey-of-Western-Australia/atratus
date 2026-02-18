@@ -153,6 +153,7 @@ stages:
             targetResolveRepo: 'gswa-pypi-virtual'
 
         - script: |
+            python -m pip install build
             python -m build .
           displayName: 'Python build'
 
