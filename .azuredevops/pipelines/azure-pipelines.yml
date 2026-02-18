@@ -180,8 +180,7 @@ stages:
     succeeded('Test'), 
     succeeded('Xray'), 
     succeeded('DevBuild'),
-    or(eq(variables.isMain, true), eq(variables.isCICD, true)),
-    startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+    or(eq(variables.isMain, true), eq(variables.isCICD, true))
     )
   jobs:
     - job: BuildDependencies
@@ -220,7 +219,12 @@ stages:
     - Xray
     - DevBuild
     - Test_Release
-  condition: and( succeeded('Test'), succeeded('Xray'), succeeded('Build'), eq(variables.isMain, true))
+  condition: and( 
+    succeeded('Test'), 
+    succeeded('Xray'), 
+    succeeded('Build'), 
+    succeeded('Test_Release'),
+    eq(variables.isMain, true))
   jobs:
     - job: BuildDependencies
       displayName: 'Install, build, and scan'
