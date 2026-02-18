@@ -9,7 +9,7 @@ variables:
   - group: gswa-jfrog
   - group: github_tokens
   # used to name repo
-  - name: project_name
+  - name: github_repo_name
     value: "atratus"
   # for releases
   - name: isMain
@@ -266,8 +266,7 @@ stages:
     succeeded('Test'), 
     succeeded('Xray'), 
     succeeded('Build'),  
-    or(eq(variables.isMain, true), eq(variables.isCICD, true)),
-    eq(variables.isTAGGED, true)
+    or(eq(variables.isMain, true), eq(variables.isCICD, true))
     )
   jobs:
     - job: Mirror
@@ -280,35 +279,14 @@ stages:
         fetchDepth: 0   # REQUIRED for full history & tags
 
       - script: |
-          echo "Checking if GitHub repo exists..."
+          echo "Configuring GitHub remote..."
 
-          curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: token $(atratus_ado_bot)" \
-            https://api.github.com/repos/$(github_org)/$(github_repo_name) > status.txt
-
-          STATUS=$(cat status.txt)
-
-          if [ "$STATUS" = "404" ]; then
-            echo "Repo does not exist. Creating..."
-            curl -X POST \
-              -H "Authorization: token $(github_pat)" \
-              https://api.github.com/orgs/$(github_org)/repos \
-              -d '{
-                "name": "$(github_repo_name)",
-                "private": false
-              }'
-          else
-            echo "Repo already exists."
-          fi
-        displayName: 'Ensure GitHub Repo Exists'
-
-      - script: |
-          echo "Adding GitHub remote..."
-
+          # Remove existing remote if present
           git remote remove github 2>/dev/null || true
 
-          git remote add github https://$(github_pat)@github.com/$(github_org)/$(github_repo_name).git
+          # Add GitHub remote using PAT from ADO Library
+          git remote add github https://$(atratus_ado_bot)@github.com/$(github_org)/$(github_repo_name).git
 
-          echo "Pushing full mirror..."
+          echo "Pushing full mirror to GitHub..."
           git push --mirror github
-        displayName: 'Mirror Repository to GitHub'
+        displayName: 'Push Mirror to GitHub'
