@@ -259,7 +259,7 @@ stages:
             REMOTE_NAME="public"
             REMOTE_URL="https://github.com/Geological-Survey-of-Western-Australia/$(project_name).git"
             
-            HTTP_STATUS=$(curl -s -l -o /dev/null -w "%{http_code}" $REMOTE_URL)
+            HTTP_STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" $REMOTE_URL)
 
             if [ "$HTTP_STATUS" -eq 200 ]; then
               echo "Repo status: $HTTP_STATUS"
