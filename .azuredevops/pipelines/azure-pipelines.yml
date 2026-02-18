@@ -265,7 +265,7 @@ stages:
   condition: and( 
     succeeded('Test'), 
     succeeded('Xray'), 
-    succeeded('Build'),  
+    succeeded('DevBuild'),  
     or(eq(variables.isMain, true), eq(variables.isCICD, true))
     )
   jobs:
