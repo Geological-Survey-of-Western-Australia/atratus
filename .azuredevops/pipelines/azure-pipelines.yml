@@ -258,13 +258,17 @@ stages:
         - script: |
             REMOTE_NAME="public"
             REMOTE_URL="https://github.com/Geological-Survey-of-Western-Australia/$(project_name).git"
-            echo "Computed REMOTE_URL: $REMOTE_URL"
-            if git remote get-url $REMOTE_URL > /dev/null 2>&1; then
-                echo "Remote '$REMOTE_NAME' already exists."
+            
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $REMOTE_URL)
+
+            if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "Repo exists: $REMOTE_URL"
             else
-                echo "Remote '$REMOTE_NAME' does not exist. Creating it."
-                # git remote add $REMOTE_NAME $REMOTE_URL
+              echo "Repo does NOT exist: $REMOTE_URL"
+              # this will need to create the associated repo
             fi
+            
+            git remote add $REMOTE_NAME $REMOTE_URL
 
             git remote -v
           displayName: "Check and Create Git Remote"
