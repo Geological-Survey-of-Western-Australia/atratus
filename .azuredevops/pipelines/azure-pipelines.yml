@@ -243,6 +243,7 @@ stages:
             TWINE_PASSWORD: $(pypi_token_global)
           displayName: 'Upload to TestPyPI'
 
+# see if requires tag
 - stage: Github
   displayName: 'Publish to GitHub'
   dependsOn: 
