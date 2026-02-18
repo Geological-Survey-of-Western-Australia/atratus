@@ -16,6 +16,9 @@ variables:
   # for modifying/reviewing pipeline
   - name: isCICD 
     value: $[contains(variables['Build.SourceBranch'], 'cicd')]
+  # these will need to be updated for each repo
+  - name: project_name
+    value: "atratus"
 
 pool:
   vmImage: ubuntu-latest
@@ -213,23 +216,55 @@ stages:
   condition: and( succeeded('Test'), succeeded('Xray'), succeeded('Build'), eq(variables.isMain, true))
   jobs:
     - job: BuildDependencies
-      displayName: 'Install and build'
-      steps:                
+      displayName: 'Install, build, and scan'
+      steps:
         - task: UsePythonVersion@0
           inputs:
             versionSpec: '3.12'
             addToPath: true
             architecture: 'x64'
 
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: 'twine build .[tests,dev]'
+            targetResolveRepo: 'gswa-pypi-virtual'
+
         - script: |
-            python -m pip install twine
-            python -m pip wheel --no-deps -w dist/ .
+            python -m build .
           displayName: 'Python build'
   
         - script: |
             ls -lah dist
-            twine upload --repository-url https://upload.pypi.org/legacy/ dist/*.whl dist/*.tar.gz
+            twine upload dist/* --verbose
           env:
-            TWINE_USERNAME: $(pypi_user_global)
+            TWINE_USERNAME: __token__
             TWINE_PASSWORD: $(pypi_token_global)
-          displayName: Upload to PyPI
+          displayName: 'Upload to TestPyPI'
+
+- stage: Github
+  displayName: 'Publish to GitHub'
+  dependsOn: 
+    - Test
+    - Xray
+    - Build
+    - Test_Release
+  condition: and( succeeded('Test'), succeeded('Xray'), succeeded('Build'),  or(eq(variables.isMain, true), eq(variables.isCICD, true)))
+  jobs:
+    - job: Github_Release
+      displayName: 'Install, build, and scan'
+      steps:
+        - script: |
+            REMOTE_NAME="public"
+            REMOTE_URL="https://github.com/Geological-Survey-of-Western-Australia/$(project_name).git"
+
+            if git remote get-url $REMOTE_NAME > /dev/null 2>&1; then
+                echo "Remote '$REMOTE_NAME' already exists."
+            else
+                echo "Remote '$REMOTE_NAME' does not exist. Creating it."
+                # git remote add $REMOTE_NAME $REMOTE_URL
+            fi
+
+            git remote -v
+          displayName: "Check and Create Git Remote"
