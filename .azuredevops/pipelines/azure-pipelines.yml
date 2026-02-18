@@ -196,7 +196,7 @@ stages:
   
         - script: |
             ls -lah dist
-            twine upload --repository testpypi dist/*
+            twine upload --repository testpypi dist/* --verbose
           env:
             TWINE_USERNAME: __token__
             TWINE_PASSWORD: $(test_pypi_token_global)
