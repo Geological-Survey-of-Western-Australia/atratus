@@ -165,7 +165,7 @@ stages:
             TWINE_PASSWORD: $(jfrog-bot-token)
           displayName: Upload to JFrog Artifactory
 
-
+# builds and releases to pypi-test
 - stage: Test_Release
   displayName: 'Publish to Test - PyPi'
   dependsOn: 
