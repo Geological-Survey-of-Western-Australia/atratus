@@ -7,6 +7,10 @@ trigger:
 variables:
   - group: gswa-pypi
   - group: gswa-jfrog
+  - group: github_tokens
+  # used to name repo
+  - name: project_name
+    value: "atratus"
   # for releases
   - name: isMain
     value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
@@ -17,8 +21,9 @@ variables:
   - name: isCICD 
     value: $[contains(variables['Build.SourceBranch'], 'cicd')]
   # these will need to be updated for each repo
-  - name: project_name
-    value: "atratus"
+  - name: isTAGGED
+    value: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/v')]
+
 
 pool:
   vmImage: ubuntu-latest
@@ -132,7 +137,7 @@ stages:
 
           displayName: 'Parse Vulnerabilities in xray Report'
 
-- stage: Build
+- stage: DevBuild
   displayName: 'JFrog Build and Publish'
   condition: and( succeeded('Test'), succeeded('Xray'), or(eq(variables.isMain, true), eq(variables.isRC, true), eq(variables.isCICD, true)) )
   dependsOn: 
@@ -174,8 +179,14 @@ stages:
   dependsOn: 
     - Test
     - Xray
-    - Build
-  condition: and( succeeded('Test'), succeeded('Xray'), succeeded('Build'),  or(eq(variables.isMain, true), eq(variables.isCICD, true)))
+    - DevBuild
+  condition: and( 
+    succeeded('Test'), 
+    succeeded('Xray'), 
+    succeeded('DevBuild'),
+    or(eq(variables.isMain, true), eq(variables.isCICD, true)),
+    eq(variables.isTAGGED, true)
+    )
   jobs:
     - job: BuildDependencies
       displayName: 'Install, build, and scan'
@@ -211,7 +222,7 @@ stages:
   dependsOn: 
     - Test
     - Xray
-    - Build
+    - DevBuild
     - Test_Release
   condition: and( succeeded('Test'), succeeded('Xray'), succeeded('Build'), eq(variables.isMain, true))
   jobs:
@@ -249,21 +260,55 @@ stages:
   dependsOn: 
     - Test
     - Xray
-    - Build
+    - DevBuild
     - Test_Release
-  condition: and( succeeded('Test'), succeeded('Xray'), succeeded('Build'),  or(eq(variables.isMain, true), eq(variables.isCICD, true)))
+  condition: and( 
+    succeeded('Test'), 
+    succeeded('Xray'), 
+    succeeded('Build'),  
+    or(eq(variables.isMain, true), eq(variables.isCICD, true)),
+    eq(variables.isTAGGED, true)
+    )
   jobs:
-    - job: CreateGitHubRelease
-      displayName: 'Create GitHub Release'
+    - job: Mirror
+      displayName: 'Mirror to GitHub'
+      pool:
+        vmImage: 'ubuntu-latest'
+
       steps:
-        - task: GitHubRelease@1
-          displayName: 'Publish Draft Release'
-          inputs:
-            gitHubConnection: 'github.com_gswa-gdi-dev-bot'
-            repositoryName: '$(project_name)'
-            action: 'create'
-            target: '$(Build.SourceVersion)'
-            tagSource: 'gitTag'
-            isDraft: true
-            changeLogCompareToRelease: 'lastFullRelease'
-            changeLogType: 'commitBased'
+      - checkout: self
+        fetchDepth: 0   # REQUIRED for full history & tags
+
+      - script: |
+          echo "Checking if GitHub repo exists..."
+
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token $(atratus_ado_bot)" \
+            https://api.github.com/repos/$(github_org)/$(github_repo_name) > status.txt
+
+          STATUS=$(cat status.txt)
+
+          if [ "$STATUS" = "404" ]; then
+            echo "Repo does not exist. Creating..."
+            curl -X POST \
+              -H "Authorization: token $(github_pat)" \
+              https://api.github.com/orgs/$(github_org)/repos \
+              -d '{
+                "name": "$(github_repo_name)",
+                "private": false
+              }'
+          else
+            echo "Repo already exists."
+          fi
+        displayName: 'Ensure GitHub Repo Exists'
+
+      - script: |
+          echo "Adding GitHub remote..."
+
+          git remote remove github 2>/dev/null || true
+
+          git remote add github https://$(github_pat)@github.com/$(github_org)/$(github_repo_name).git
+
+          echo "Pushing full mirror..."
+          git push --mirror github
+        displayName: 'Mirror Repository to GitHub'
