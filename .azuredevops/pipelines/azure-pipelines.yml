@@ -262,6 +262,7 @@ stages:
             HTTP_STATUS=$(curl -s -l -o /dev/null -w "%{http_code}" $REMOTE_URL)
 
             if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "Repo status: $HTTP_STATUS"
               echo "Repo exists: $REMOTE_URL"
             else
               echo "Repo status: $HTTP_STATUS"
