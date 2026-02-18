@@ -175,16 +175,22 @@ stages:
   condition: and( succeeded('Test'), succeeded('Xray'), succeeded('Build'),  or(eq(variables.isMain, true), eq(variables.isCICD, true)))
   jobs:
     - job: BuildDependencies
-      displayName: 'Install and build'
-      steps:                
+      displayName: 'Install, build, and scan'
+      steps:
         - task: UsePythonVersion@0
           inputs:
             versionSpec: '3.12'
             addToPath: true
             architecture: 'x64'
 
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: 'twine build .[tests,dev]'
+            targetResolveRepo: 'gswa-pypi-virtual'
+
         - script: |
-            python -m pip install twine
             python -m build .
           displayName: 'Python build'
   
