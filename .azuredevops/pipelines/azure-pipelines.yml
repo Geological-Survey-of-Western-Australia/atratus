@@ -264,6 +264,7 @@ stages:
             if [ "$HTTP_STATUS" -eq 200 ]; then
               echo "Repo exists: $REMOTE_URL"
             else
+              echo "Repo status: $HTTP_STATUS"
               echo "Repo does NOT exist: $REMOTE_URL"
               # this will need to create the associated repo
             fi
