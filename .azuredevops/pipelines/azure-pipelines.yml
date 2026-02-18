@@ -20,10 +20,6 @@ variables:
   # for modifying/reviewing pipeline
   - name: isCICD 
     value: $[contains(variables['Build.SourceBranch'], 'cicd')]
-  # these will need to be updated for each repo
-  - name: isTAGGED
-    value: $[startsWith(variables['Build.SourceBranch'], 'refs/tags/v')]
-
 
 pool:
   vmImage: ubuntu-latest
@@ -185,7 +181,7 @@ stages:
     succeeded('Xray'), 
     succeeded('DevBuild'),
     or(eq(variables.isMain, true), eq(variables.isCICD, true)),
-    eq(variables.isTAGGED, true)
+    startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
     )
   jobs:
     - job: BuildDependencies
