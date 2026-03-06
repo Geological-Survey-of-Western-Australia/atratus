@@ -178,7 +178,7 @@ stages:
           displayName: Upload to JFrog Artifactory
 
 # builds and releases to pypi-test
-- stage: Test_Release
+- stage: TestRelease
   displayName: 'Publish to Test - PyPi'
   dependsOn: 
     - Test
@@ -226,12 +226,12 @@ stages:
     - Test
     - Xray
     - DevBuild
-    - Test_Release
+    - TestRelease
   condition: and( 
     succeeded('Test'), 
     succeeded('Xray'), 
-    succeeded('Build'), 
-    succeeded('Test_Release'),
+    succeeded('DevBuild'), 
+    succeeded('TestRelease'),
     eq(variables.isMain, true))
   jobs:
     - job: BuildDependencies
@@ -269,12 +269,12 @@ stages:
     - Test
     - Xray
     - DevBuild
-    - Test_Release
+    - TestRelease
   condition: and( 
     succeeded('Test'), 
     succeeded('Xray'), 
     succeeded('DevBuild'),  
-    succeeded('Test_Release'),
+    succeeded('TestRelease'),
     eq(variables.isMain, true)
     )
   jobs:
