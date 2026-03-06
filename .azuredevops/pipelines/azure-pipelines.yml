@@ -296,5 +296,5 @@ stages:
           # Add GitHub remote using PAT from ADO Library
           git remote add github https://$(atratus_ado_bot)@github.com/$(github_org)/$(github_repo_name).git
           echo "Pushing current branch to GitHub..."
-          git push github HEAD:refs/heads/"$BUILD_SOURCEBRANCHNAME"
+          git push github HEAD:refs/heads/"$BUILD_SOURCEBRANCHNAME" --follow-tags
         displayName: 'Push Mirror to GitHub'
