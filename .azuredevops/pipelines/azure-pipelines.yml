@@ -5,15 +5,28 @@ trigger:
     - '*'
 
 variables:
-  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isRC: $[contains(variables['Build.SourceBranch'], 'releases/')]
+  - group: gswa-pypi
+  - group: gswa-jfrog
+  - group: github_tokens
+  # used to name repo
+  - name: github_repo_name
+    value: "atratus"
+  # for releases
+  - name: isMain
+    value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  # for integration testing
+  - name: isRC
+    value: $[contains(variables['Build.SourceBranch'], 'releases/')]
+  # for modifying/reviewing pipeline
+  - name: isCICD 
+    value: $[contains(variables['Build.SourceBranch'], 'cicd')]
 
 pool:
   vmImage: ubuntu-latest
 
 stages:
 - stage: Test
-  displayName: 'Run Tests'
+  displayName: 'Unit Tests'
   condition: always()
   jobs:
     - job: TestCoverage
@@ -25,8 +38,14 @@ stages:
             addToPath: true
             architecture: 'x64'
 
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: '.[tests] pytest-azurepipelines'
+            targetResolveRepo: 'gswa-pypi-virtual'
+
         - script: |
-            python -m pip install .[tests] pytest-azurepipelines
             python -m pytest --cov-report xml:tests/cov.xml --cov tests/
           displayName: 'Test .[tests]'
         
@@ -36,39 +55,93 @@ stages:
             pathToSources: '$(System.DefaultWorkingDirectory)/src/'
             failIfCoverageEmpty: true
 
-# - stage: SecurityCheck
-#   displayName: 'Check Security'
-#   trigger: manual
-#   isSkippable: true
-#   jobs:
-#   - job: SnykSecurityScan
-#     displayName: Scan app with snyk
-#     steps:
-#       - task: UsePythonVersion@0
-#         inputs:
-#           versionSpec: '3.11'
-#           addToPath: true
-#           architecture: 'x64'
+- stage: Xray
+  displayName: 'Xray Scan'
+  trigger: manual
+  isSkippable: false
+  jobs:
+    - job: BuildDependencies
+      displayName: 'Install, build, and scan'
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.12'
+            addToPath: true
+            architecture: 'x64'
 
-#       # Snyk does not support PEP621 - so we need a requirements.txt
-#       - script: |
-#           python -m pip install .
-#           python -m pip freeze > requirements.txt
-#         displayName: 'Freeze dependencies'
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: 'twine build .[tests,dev]'
+            targetResolveRepo: 'gswa-pypi-virtual'
 
-#       - task: SnykSecurityScan@1
-#         inputs:
-#           serviceConnectionEndpoint: 'GDI-SNYK'
-#           testType: 'app'
-#           monitorWhen: 'always'
-#         displayName : 'Scan app'
+        - script: pip list
+          displayName: List Installs.
 
-- stage: Build
-  displayName: 'Build and Publish'
+        - script: |
+            python -m build .
+          displayName: 'Python build'
+        
+        - script: |
+              curl -fL https://install-cli.jfrog.io | sh
+              jf config add jfrog-bot \
+              --url="$(JFROG_URL)" \
+              --access-token="$JFROG_ACCESS_TOKEN" \
+              --interactive=false
+          env:
+            JFROG_URL: $(jfrog_url)
+            JFROG_ACCESS_TOKEN: $(jfrog-bot-token)
+          displayName: Install and configure JFrog CLI
+
+        - script: |
+            jf scan dist/ --format='json' > xray.json
+            jf scan dist/ --format='sarif' > xray.sarif
+          displayName: 'Xray Scan'
+
+        - task: PublishPipelineArtifact@1
+          inputs:
+            targetPath: xray.sarif
+            artifactName: CodeAnalysisLogs
+          env:
+            BUILD_NAME: $(Build.DefinitionName)
+            BUILD_NUMBER: $(Build.BuildNumber)
+          displayName: 'Publish SARIF artifact'
+
+        - script: |
+            python - <<'EOF'
+            import json
+            import sys
+            sarif_file = "xray.json"
+            with open(sarif_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            scanned_components = [
+                item["component_id"]
+                for item in data
+                if "components"
+                if "component_id" in item.keys()
+            ]
+            
+         
+            if "vulnerabilities" not in data[-1].keys():
+              print("No vulnerabilities detected")
+              sys.exit(0)
+            elif  "vulnerabilities" in data[-1].keys(): 
+              num_vulnerabilities = len(data[-1]["vulnerabilities"])
+              if num_vulnerabilities > 0:
+                  print(f"{num_vulnerabilities} High or Critical vulnerabilities detected")
+                  sys.exit(1)
+
+
+          displayName: 'Parse Vulnerabilities in xray Report'
+
+- stage: DevBuild
+  displayName: 'JFrog Build and Publish'
+  condition: and( succeeded('Test'), succeeded('Xray'), or(eq(variables.isMain, true), eq(variables.isRC, true), eq(variables.isCICD, true)) )
   dependsOn: 
     - Test
-    # - SecurityCheck
-  condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
+    - Xray
   jobs:
     - job: BuildDependencies
       displayName: 'Install and build'
@@ -79,82 +152,149 @@ stages:
             addToPath: true
             architecture: 'x64'
         
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: 'twine build .[tests,dev]'
+            targetResolveRepo: 'gswa-pypi-virtual'
+
+        - script: pip list
+          displayName: List Installs.
+
         - script: |
-            python -m pip install twine
-            python -m pip wheel --no-deps -w dist/ .
+            python -m build .
           displayName: 'Python build'
 
-        - task: TwineAuthenticate@1
-          inputs:
-            artifactFeed: GSRSD/gdi_packages
-          displayName: 'Twine authenticate'
+        - script: pip list
+          displayName: List Installs.
 
         - script: |
-            jf xr scan dist/ --format=sarif > xray.json
-          displayName: Scan package + dependencies
+            ls -lah dist/ 
+            twine upload --repository-url $(artifactory_pypi_url) dist/*
+          env:
+            TWINE_USERNAME: $(jfrog_bot_username)
+            TWINE_PASSWORD: $(jfrog-bot-token)
+          displayName: Upload to JFrog Artifactory
 
-        - task: PublishPipelineArtifact@1
+# builds and releases to pypi-test
+- stage: Test_Release
+  displayName: 'Publish to Test - PyPi'
+  dependsOn: 
+    - Test
+    - Xray
+    - DevBuild
+  condition: and( 
+    succeeded('Test'), 
+    succeeded('Xray'), 
+    succeeded('DevBuild'),
+    or(eq(variables.isMain, true), eq(variables.isCICD, true))
+    )
+  jobs:
+    - job: BuildDependencies
+      displayName: 'Install, build, and scan'
+      steps:
+        - task: UsePythonVersion@0
           inputs:
-            targetPath: xray.json
-            artifactName: Sarif File
-          displayName: Publish Pipeline Artifact - SARIF
+            versionSpec: '3.12'
+            addToPath: true
+            architecture: 'x64'
 
-        - task: PublishBuildArtifacts@1
+        - task: JFrogPip@1
           inputs:
-            targetPath: $(System.DefaultWorkingDirectory)/xray.json
-            artifactName: CodeAnalysisLogs
-          displayName: Publish Build Artifact - SARIF
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: 'twine build .[tests,dev]'
+            targetResolveRepo: 'gswa-pypi-virtual'
 
         - script: |
-            python -m twine upload -r gdi_packages --config-file $(PYPIRC_PATH) dist/*.whl
-          displayName: 'Upload to feed'
-
-# - stage: BuildWithJFrog
-#   displayName: 'Build and Publish using JFrog'
-#   trigger: manual
-#   isSkippable: true
-#   condition: and( succeeded('Test'), or(eq(variables.isMain, true), eq(variables.isRC, true)) )
-#   jobs:
-#     - job: Build
-#       displayName: 'Install and build'
-#       steps:                
-#         - task: UsePythonVersion@0
-#           inputs:
-#             versionSpec: '3.11'
-#             addToPath: true
-#             architecture: 'x64'
-
-#         - script: |
-#             python -m pip wheel --no-deps -w dist/ .
-#           displayName: 'Python build'
+            python -m build .
+          displayName: 'Python build'
   
-#     - job: JFrogScan
-#       displayName: Jfrog publish and Xray scan
-#       steps:
-#         - task: JFrogPublishBuildInfo@1
-#           inputs:
-#             artifactoryConnection: 'Artifactory V2 service connection'
-#             buildName: '$(Build.DefinitionName)'
-#             buildNumber: '$(Build.BuildNumber)'
-#           displayName : 'Publish build info'
-            
-#         - task: JFrogBuildPromotion@1
-#           inputs:
-#             artifactoryConnection: 'Artifactory V2 service connection'
-#             buildName: '$(Build.DefinitionName)'
-#             buildNumber: '$(Build.BuildNumber)'
-#             targetRepo: 'gsrsd-gdi-pypi-dev-local'
-#             status: 'Released'
-#             includeDependencies: true
-#             copy: false
-#             dryRun: false
-#           displayName : 'Promote build'
+        - script: |
+            ls -lah dist
+            twine upload --repository testpypi dist/* --verbose
+          env:
+            TWINE_USERNAME: __token__
+            TWINE_PASSWORD: $(test_pypi_token_global)
+          displayName: 'Upload to TestPyPI'
 
-#         - task: JFrogBuildScan@1
-#           inputs:
-#             xrayConnection: 'JFrog Xray V2 service connection'
-#             buildName: '$(Build.DefinitionName)'
-#             buildNumber: '$(Build.BuildNumber)'
-#             allowFailBuild: true
-#             vuln: true
-#           displayName : 'Scan build with JFrog'
+
+- stage: Release
+  displayName: 'Publish to PyPi'
+  dependsOn: 
+    - Test
+    - Xray
+    - DevBuild
+    - Test_Release
+  condition: and( 
+    succeeded('Test'), 
+    succeeded('Xray'), 
+    succeeded('Build'), 
+    succeeded('Test_Release'),
+    eq(variables.isMain, true))
+  jobs:
+    - job: BuildDependencies
+      displayName: 'Install, build, and scan'
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.12'
+            addToPath: true
+            architecture: 'x64'
+
+        - task: JFrogPip@1
+          inputs:
+            artifactoryConnection: 'service-ado-jfrog-geodigital'
+            command: 'install'
+            arguments: 'twine build .[tests,dev]'
+            targetResolveRepo: 'gswa-pypi-virtual'
+
+        - script: |
+            python -m build .
+          displayName: 'Python build'
+  
+        - script: |
+            ls -lah dist
+            twine upload dist/* --verbose
+          env:
+            TWINE_USERNAME: __token__
+            TWINE_PASSWORD: $(pypi_token_global)
+          displayName: 'Upload to TestPyPI'
+
+# see if requires tag
+- stage: Github
+  displayName: 'Publish to GitHub'
+  dependsOn: 
+    - Test
+    - Xray
+    - DevBuild
+    - Test_Release
+  condition: and( 
+    succeeded('Test'), 
+    succeeded('Xray'), 
+    succeeded('DevBuild'),  
+    succeeded('Test_Release'),
+    eq(variables.isMain, true)
+    )
+  jobs:
+    - job: Mirror
+      displayName: 'Mirror to GitHub'
+      pool:
+        vmImage: 'ubuntu-latest'
+
+      steps:
+      - checkout: self
+        fetchDepth: 0   # REQUIRED for full history & tags
+
+      - script: |
+          echo "Configuring GitHub remote..."
+
+          # Remove existing remote if present
+          git remote remove github 2>/dev/null || true
+
+          # Add GitHub remote using PAT from ADO Library
+          git remote add github https://$(atratus_ado_bot)@github.com/$(github_org)/$(github_repo_name).git
+          echo "Pushing current branch to GitHub..."
+          git push github HEAD:refs/heads/"$BUILD_SOURCEBRANCHNAME"
+        displayName: 'Push Mirror to GitHub'

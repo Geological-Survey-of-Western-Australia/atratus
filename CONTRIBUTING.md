@@ -14,6 +14,7 @@ Atratus is a tool to faciltate geoscience data processing pipelines and harmonis
 As it stands, Atratus is stable enough to use to facilitate the basics. That being said, some great contributions to the Atratus project would include:
 - Improved logging reporting including dashboards and more effective collation.
 - Support of Array and geometry type data fields in databases.
+- Simplification of configuration files.
 
 ## Code of Conduct
 
